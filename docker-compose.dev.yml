@@ -1,0 +1,44 @@
+version: "3.8"
+services:
+  server:
+    build: ./server
+    depends_on:
+      - rabbitmq
+      - db
+    ports:
+      - "8000:8000"
+    environment:
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+      CELERY_TIMEZONE: ${CELERY_TIMEZONE}
+      DATABASE_URL: ${DATABASE_URL}
+    volumes:
+      - ./server:/app
+    command: /bin/sh -c "pip install watchdog && pip install -r requirements.txt && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A main:app worker --loglevel=info"
+  agent:
+    build: ./agent
+    depends_on:
+      - server
+    environment:
+      TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+      CELERY_TIMEZONE: ${CELERY_TIMEZONE}
+    volumes:
+      - ./agent:/app
+    command: /bin/sh -c "pip install watchdog && pip install -r requirements.txt && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- python main.py"
+  rabbitmq:
+    image: rabbitmq:3.13.0-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+  db:
+    image: postgres:16.2
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+volumes:
+  postgres_data:
