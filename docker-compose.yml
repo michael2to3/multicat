@@ -1,0 +1,27 @@
+version: "3.8"
+services:
+  server:
+    build: ./server
+    depends_on:
+      - rabbitmq
+    ports:
+      - "8000:8000"
+  agent:
+    build: ./agent
+    depends_on:
+      - rabbitmq
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  db:
+    image: postgres:16.2
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: dbname
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+volumes:
+  postgres_data:
