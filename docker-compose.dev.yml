@@ -40,5 +40,14 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+  flower:
+    image: mher/flower
+    command: celery flower --broker=${CELERY_BROKER_URL} --port=5555
+    environment:
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+    ports:
+      - "5555:5555"
+    depends_on:
+      - rabbitmq
 volumes:
   postgres_data:
