@@ -1,7 +1,5 @@
-import subprocess
 import logging
 from celery import Celery
-import psutil
 import celeryconfig
 from client import Client
 from time import sleep

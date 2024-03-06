@@ -1,8 +1,6 @@
 import subprocess
 import logging
-from celery import Celery
 import psutil
-import celeryconfig
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
