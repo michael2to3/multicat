@@ -1,10 +1,6 @@
 from celery import Celery
+import celeryconfig
 
 app = Celery("server")
-app.config_from_object("celeryconfig")
-
-
-@app.task
-def process_hashes(hashes):
-    print(f"Processing hashes: {hashes}")
-    return "Hashes processed"
+app.config_from_object(celeryconfig)
+app.autodiscover_tasks(["tasks"], force=True)

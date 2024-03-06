@@ -4,23 +4,33 @@ services:
     build: ./server
     depends_on:
       - rabbitmq
+      - db
     ports:
       - "8000:8000"
+    environment:
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+      CELERY_TIMEZONE: ${CELERY_TIMEZONE}
   agent:
     build: ./agent
     depends_on:
-      - rabbitmq
+      - server
+    environment:
+      TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+      CELERY_TIMEZONE: ${CELERY_TIMEZONE}
   rabbitmq:
     image: rabbitmq:3.13.0-management-alpine
-    ports:
-      - "5672:5672"
-      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
   db:
     image: postgres:16.2
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: dbname
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
 volumes:

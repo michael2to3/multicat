@@ -1,3 +1,3 @@
 import os
 
-TELEGRAM_API_TOKEN = os.environ.get("TELEGRAM_API_TOKEN")
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
