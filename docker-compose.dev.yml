@@ -15,6 +15,27 @@ services:
     volumes:
       - ./server:/app
     command: /bin/sh -c "pip install watchdog && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A main:app worker --loglevel=info"
+  celerybeat:
+    build: ./server
+    depends_on:
+      - rabbitmq
+      - db
+    command: /bin/sh -c "pip install watchdog && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A main:app beat --loglevel=info"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+      CELERY_TIMEZONE: ${CELERY_TIMEZONE}
+  client:
+    build: ./client
+    depends_on:
+      - server
+    command: /bin/sh -c "pip install watchdog && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A main:app worker --loglevel=info"
+    environment:
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+      CELERY_TIMEZONE: ${CELERY_TIMEZONE}
+      DATABASE_URL: ${DATABASE_URL}
   agent:
     build: ./agent
     depends_on:
@@ -49,16 +70,5 @@ services:
       - "5555:5555"
     depends_on:
       - rabbitmq
-  celerybeat:
-    build: ./server
-    depends_on:
-      - rabbitmq
-      - db
-    command: /bin/sh -c "pip install watchdog && pip install -r requirements.txt && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A main:app beat -l info"
-    environment:
-      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
-      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
-      CELERY_TIMEZONE: ${CELERY_TIMEZONE}
-      DATABASE_URL: ${DATABASE_URL}
 volumes:
   postgres_data:

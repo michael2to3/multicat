@@ -73,9 +73,7 @@ class DatabaseOperations:
 
     def cleanup_inactive_clients(self):
         with self.session_scope() as session:
-            inactive_threshold = datetime.now() - timedelta(
-                minutes=5
-            )
+            inactive_threshold = datetime.now() - timedelta(minutes=5)
             session.query(ConnectedClient).filter(
                 ConnectedClient.last_heartbeat < inactive_threshold
             ).delete()
