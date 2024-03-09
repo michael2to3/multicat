@@ -28,3 +28,13 @@ class FileManager:
     def add_wordlist_file(self, file_name: str, content: str):
         file_path = self.wordlists_dir / file_name
         file_path.write_text(content)
+
+    def get_wordlist(self, filename: str) -> str:
+        if not self.exist_wordlist(filename):
+            raise FileNotFoundError(f"Wordlist file not found: {filename}")
+        return str(self.wordlists_dir / filename)
+
+    def get_rule(self, filename: str) -> str:
+        if not self.exist_rules(filename):
+            raise FileNotFoundError(f"Rules file not found: {filename}")
+        return str(self.rules_dir / filename)
