@@ -30,7 +30,7 @@ services:
     build: ./client
     depends_on:
       - server
-    command: /bin/sh -c "pip install watchdog && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A main:app worker -Q client --loglevel=info"
+    command: /bin/sh -c "pip install watchdog && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A main:app worker -Q client -c 1 --loglevel=info"
     environment:
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
