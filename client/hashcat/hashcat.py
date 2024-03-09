@@ -1,3 +1,4 @@
+import os
 import asyncio
 from typing import Optional, Union
 from model import HashcatOption
@@ -9,6 +10,8 @@ class HashcatException(Exception):
 
 
 class HashcatManager:
+    lock_file = "/tmp/hashcat_manager.lock"
+
     def __init__(self, hashcat_path: str, file_manager: FileManager):
         self.hashcat_path = hashcat_path
         self.cmd = [self.hashcat_path]
@@ -36,11 +39,20 @@ class HashcatManager:
                 raise FileNotFoundError(f"Wordlist file not found: {value}")
 
     async def run(self):
-        process = await asyncio.create_subprocess_exec(
-            *self.cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-        )
-        stdout, stderr = await process.communicate()
-        if process.returncode != 0:
-            raise HashcatException(f"Hashcat error: {stderr.decode().strip()}")
+        if os.path.exists(self.lock_file):
+            raise HashcatException(f"Hashcat is already running: {self.lock_file}")
+        try:
+            open(self.lock_file, "w").close()
 
-        return stdout.decode().strip()
+            process = await asyncio.create_subprocess_exec(
+                *self.cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            stdout, stderr = await process.communicate()
+            if process.returncode != 0:
+                raise HashcatException(f"Hashcat error: {stderr.decode().strip()}")
+            return stdout.decode().strip()
+        finally:
+            if os.path.exists(self.lock_file):
+                os.remove(self.lock_file)
