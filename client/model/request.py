@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, ConfigDict
 from typing import List, Optional
 from enum import Enum
 
@@ -33,5 +33,5 @@ class Request(BaseModel):
             raise ValueError(f"{mode.name} mode requires 'masks' to be specified")
         return mode
 
-    class Config:
+    class Config(ConfigDict):
         use_enum_values = True
