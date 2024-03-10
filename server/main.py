@@ -1,16 +1,18 @@
-from celery import Celery
-import celeryconfig
-from celery.schedules import crontab
-from datetime import datetime, timedelta
 import logging
+from config import CeleryApp
 
-app = Celery("server")
-app.config_from_object(celeryconfig)
-app.autodiscover_tasks(["tasks"], force=True)
+app = CeleryApp("server").get_app()
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
 @app.task
-def send_to_client():
-    pass
+def get_wordlists():
+    result = app.send_task("main.get_wordlists", queue="client")
+    return result
+
+
+@app.task
+def get_rules():
+    result = app.send_task("main.get_rules", queue="client")
+    return result
