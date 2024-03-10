@@ -9,7 +9,7 @@ services:
     environment:
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
-      CELERY_TIMEZONE: ${CELERY_TIMEZONE}
+      TIMEZONE: ${TIMEZONE}
       DATABASE_URL: ${DATABASE_URL}
   celerybeat:
     build: ./server
@@ -21,7 +21,7 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
-      CELERY_TIMEZONE: ${CELERY_TIMEZONE}
+      TIMEZONE: ${TIMEZONE}
   client:
     build: ./client
     depends_on:
@@ -30,8 +30,10 @@ services:
     environment:
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
-      CELERY_TIMEZONE: ${CELERY_TIMEZONE}
+      TIMEZONE: ${TIMEZONE}
       DATABASE_URL: ${DATABASE_URL}
+      RULES_DIR: ${RULES_DIR}
+      WORDLISTS_DIR: ${WORDLISTS_DIR}
   agent:
     build: ./agent
     depends_on:
@@ -41,7 +43,7 @@ services:
       TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
-      CELERY_TIMEZONE: ${CELERY_TIMEZONE}
+      TIMEZONE: ${TIMEZONE}
   rabbitmq:
     image: rabbitmq:3.13.0-management-alpine
     environment:

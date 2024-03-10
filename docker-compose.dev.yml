@@ -10,7 +10,7 @@ services:
     environment:
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
-      CELERY_TIMEZONE: ${CELERY_TIMEZONE}
+      TIMEZONE: ${TIMEZONE}
       DATABASE_URL: ${DATABASE_URL}
     volumes:
       - ./server:/app
@@ -25,7 +25,7 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
-      CELERY_TIMEZONE: ${CELERY_TIMEZONE}
+      TIMEZONE: ${TIMEZONE}
   client:
     build: ./client
     depends_on:
@@ -34,8 +34,10 @@ services:
     environment:
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
-      CELERY_TIMEZONE: ${CELERY_TIMEZONE}
+      TIMEZONE: ${TIMEZONE}
       DATABASE_URL: ${DATABASE_URL}
+      RULES_DIR: ${RULES_DIR}
+      WORDLISTS_DIR: ${WORDLISTS_DIR}
   agent:
     build: ./agent
     depends_on:
@@ -44,7 +46,7 @@ services:
       TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
-      CELERY_TIMEZONE: ${CELERY_TIMEZONE}
+      TIMEZONE: ${TIMEZONE}
     volumes:
       - ./agent:/app
     command: /bin/sh -c "pip install watchdog && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- python main.py"
