@@ -1,14 +1,23 @@
-import os
 import logging
 import asyncio
-from .model import Request, HashcatOption
-from .hashcat import HashcatManager, HashcatException, FileManager
-from .config import CeleryApp, Config
+from model import Request, HashcatOption
+from hashcat import HashcatManager, HashcatException, FileManager
+from config import CeleryApp, Config
 
 app = CeleryApp("client").get_app()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 file_manager = FileManager(Config.get("RULES_DIR"), Config.get("WORDLISTS_DIR"))
+
+
+@app.task
+def get_wordlists():
+    return file_manager.get_wordlists_files()
+
+
+@app.task
+def get_rules():
+    return file_manager.get_rules_files()
 
 
 @app.task(bind=True)
@@ -24,11 +33,13 @@ def run_hashcat(self, request: dict):
 
     if request_model.masks is not None:
         for mask in request_model.masks:
-            manager.add_option(mask)
+            manager.add_option(HashcatOption.MASK, mask)
 
     if request_model.rules_files is not None:
         for rules_file in request_model.rules_files:
-            manager.add_option(HashcatOption.RULES_FILE, file_manager.get_rule(rules_file))
+            manager.add_option(
+                HashcatOption.RULES_FILE, file_manager.get_rule(rules_file)
+            )
 
     loop = asyncio.get_event_loop()
     try:
