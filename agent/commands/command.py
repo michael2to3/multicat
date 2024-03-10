@@ -1,10 +1,10 @@
+from abc import ABC, abstractmethod
 from typing import Dict
 from celery import Celery
 from aiogram import Bot
 from aiogram.filters import Command
 from aiogram.types import Message
 from aiogram.dispatcher.router import Router
-from abc import ABC, abstractmethod, abstractproperty
 
 
 class BaseCommand(ABC):
@@ -17,16 +17,18 @@ class BaseCommand(ABC):
         BaseCommand.commands_info[self.command] = self.description
         self.register_command_handler()
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def description(self):
         pass
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def command(self):
         pass
 
     @abstractmethod
-    def handle(self, message: Message):
+    async def handle(self, message: Message):
         pass
 
     def register_command_handler(self):
