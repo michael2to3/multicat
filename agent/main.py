@@ -20,7 +20,7 @@ async def main() -> None:
         command_cls(bot, router, app)
 
     dispatcher.include_router(router)
-    await dispatcher.start_polling(bot)
+    await dispatcher.start_polling(bot, skip_updates=True)
 
 
 if __name__ == "__main__":
