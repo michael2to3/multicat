@@ -13,6 +13,6 @@ class Wordlists(BaseCommand):
         return "Get wordlists from each client"
 
     async def handle(self, message: Message):
-        result = self.app.send_task("main.get_wordlists", queue="server")
+        result = self.app.send_task("main.collect_wordlists", queue="server")
         processing_result = result.get(timeout=10)
         await message.answer(f"{processing_result}")
