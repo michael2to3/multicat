@@ -3,16 +3,20 @@ import asyncio
 from model import Request, HashcatOption
 from hashcat import HashcatManager, HashcatException, FileManager
 from config import CeleryApp, Config
+from kombu import Connection, Exchange, Producer
 
 app = CeleryApp("client").get_app()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 file_manager = FileManager(Config.get("RULES_DIR"), Config.get("WORDLISTS_DIR"))
+results_exchange = Exchange("wordlists_results", type="fanout")
 
 
-@app.task
-def get_wordlists():
-    return file_manager.get_wordlists_files()
+@app.task(name="b.get_wordlists", bind=True, ignore_result=True)
+def get_wordlists(*args, **kwargs):
+    worker_id = get_wordlists.request.hostname
+    wordlists = file_manager.get_wordlists_files()
+    print({worker_id: wordlists})
 
 
 @app.task

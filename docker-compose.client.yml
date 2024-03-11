@@ -1,0 +1,12 @@
+version: "3.8"
+services:
+  client-2:
+    build: ./client
+    command: celery -A main:app worker -Q client,broadcast -c 1 --loglevel=info
+    environment:
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+      TIMEZONE: ${TIMEZONE}
+      DATABASE_URL: ${DATABASE_URL}
+      RULES_DIR: ${RULES_DIR}
+      WORDLISTS_DIR: ${WORDLISTS_DIR}
