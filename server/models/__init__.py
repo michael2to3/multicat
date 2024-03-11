@@ -1,5 +1,5 @@
-from .request import Request
+from .asset import HashcatAsset
 
 __all__ = [
-    "Request",
+    "HashcatAsset",
 ]
