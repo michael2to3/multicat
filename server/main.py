@@ -1,41 +1,54 @@
 import logging
 import uuid
-from config import CeleryApp
-from config import CeleryApp
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
+from celery import chord
+from celery.signals import worker_process_init
 from sqlalchemy.future import select
 from models import HashcatAsset
-from config import Config
+from schemas import HashcatAssetSchema
+from config import CeleryApp, Config, Database
+from sqlalchemy import func
+from datetime import timedelta
 
 app = CeleryApp("server").get_app()
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-engine = create_async_engine(Config.get("DATABASE_URL"), echo=True)
-SessionLocal = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
+db = None
 
 
-async def fetch_assets_by_uuid(task_uuid):
-    async with SessionLocal() as session:
-        async with session.begin():
-            result = await session.execute(
-                select(HashcatAsset).where(HashcatAsset.task_uuid == task_uuid)
-            )
-            return result.scalars().all()
+@worker_process_init.connect
+def setup_database(*args, **kwargs):
+    global db
+    db = Database(Config.get("DATABASE_URL"))
+    logger.info("Database initialized.")
+
+
+def fetch_assets_by_uuid(task_uuid):
+    with db.session() as session:
+        result = (
+            session.query(HashcatAsset)
+            .filter(HashcatAsset.task_uuid == task_uuid)
+            .filter(HashcatAsset.timestamp >= (func.now() - timedelta(minutes=2)))
+            .all()
+        )
+        assets_data = [HashcatAssetSchema.from_orm(asset).dict() for asset in result]
+        return assets_data
 
 
 @app.task()
-def collect_wordlists():
-    task_uuid = uuid.uuid4()
+def collect_wordlists(uid: str):
+    task_uuid = uuid.uuid5(uuid.NAMESPACE_DNS, uid)
+    data = fetch_assets_by_uuid(task_uuid)
+    if data and len(data) != 0:
+        return data
+
     task = app.send_task(
         "b.get_wordlists",
         args=(str(task_uuid),),
-        queue="broadcast",
+        exchange="broadcast_exchange",
+        routing_key="broadcast",
     )
-    task.get()
-    assets = asyncio.run(fetch_assets_by_uuid(task_uuid))
-    return [asset.to_dict() for asset in assets]
+    return data
 
 
 @app.task

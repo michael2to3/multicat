@@ -1,22 +1,34 @@
 import logging
 import asyncio
-from model import Request, HashcatOption
+from celery import current_task
+from models import HashcatAsset
+from schemas import Request, HashcatOption
 from hashcat import HashcatManager, HashcatException, FileManager
-from config import CeleryApp, Config
-from kombu import Connection, Exchange, Producer
+from config import CeleryApp, Config, Database
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
 
 app = CeleryApp("client").get_app()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 file_manager = FileManager(Config.get("RULES_DIR"), Config.get("WORDLISTS_DIR"))
-results_exchange = Exchange("wordlists_results", type="fanout")
+
+db = Database(Config.get("DATABASE_URL"))
 
 
 @app.task(name="b.get_wordlists", bind=True, ignore_result=True)
-def get_wordlists(*args, **kwargs):
-    worker_id = get_wordlists.request.hostname
+def get_wordlists(self, task_uuid):
+    worker_id = current_task.request.hostname
     wordlists = file_manager.get_wordlists_files()
-    print({worker_id: wordlists})
+
+    with db.session() as session:
+        hashcat_asset = HashcatAsset(
+            task_uuid=task_uuid, worker_id=worker_id, wordlists=wordlists, rules=[]
+        )
+        session.add(hashcat_asset)
+
+    logger.info(f"Wordlists for worker {worker_id} saved to DB.")
 
 
 @app.task

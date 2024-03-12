@@ -72,5 +72,15 @@ services:
       - "5555:5555"
     depends_on:
       - rabbitmq
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5556:80"
+    depends_on:
+      - db
+
 volumes:
   postgres_data:

@@ -20,7 +20,6 @@ class CeleryApp:
 
         self.app.conf.task_default_queue = "client"
         self.app.conf.task_default_exchange = "default"
-        self.app.conf.task_default_routing_key = "main.#"
         self.app.conf.task_routes = {
             "b.*": {"queue": "broadcast"},
             "*": {"queue": "client"},

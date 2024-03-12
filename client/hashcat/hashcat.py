@@ -1,7 +1,7 @@
 import os
 import asyncio
 from typing import Optional, Union
-from model import HashcatOption
+from schemas import HashcatOption
 from .filemanager import FileManager
 
 

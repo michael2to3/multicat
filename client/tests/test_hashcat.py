@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock
 
-from model import HashcatOption
+from schemas import HashcatOption
 from hashcat import HashcatException, HashcatManager, FileManager
 
 

@@ -4,6 +4,7 @@ import sys
 from aiogram import Bot, Dispatcher, Router
 from commands import command_registry
 from config import CeleryApp, Config
+from schemas import HashcatAssetSchema
 
 logging.basicConfig(level=logging.INFO)
 
