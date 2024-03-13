@@ -34,6 +34,8 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       RULES_DIR: ${RULES_DIR}
       WORDLISTS_DIR: ${WORDLISTS_DIR}
+    devices:
+      - "/dev/dri:/dev/dri"
   agent:
     build: ./agent
     depends_on:
