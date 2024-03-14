@@ -4,7 +4,7 @@ from pydantic import BaseModel, UUID5, Field
 
 
 class HashcatAssetSchema(BaseModel):
-    task_uuid: Optional[UUID5]
+    task_uuid: UUID5
     worker_id: str = Field(min_length=3)
     wordlists: List[str]
     rules: List[str]
