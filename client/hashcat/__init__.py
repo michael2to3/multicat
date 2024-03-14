@@ -1,8 +1,9 @@
 from .filemanager import FileManager
-from .hashcat import HashcatManager, HashcatException
+from .hashcat import Hashcat
+from .hashcat_interface import HashcatInterface
 
 __all__ = [
-    "HashcatManager",
-    "HashcatException",
     "FileManager",
+    "Hashcat",
+    "HashcatInterface",
 ]

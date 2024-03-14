@@ -1,8 +1,5 @@
-import os
 import pytest
 from hashcat import FileManager
-from pathlib import Path
-import shutil
 
 
 @pytest.fixture

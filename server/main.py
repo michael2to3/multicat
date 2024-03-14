@@ -36,22 +36,20 @@ def fetch_assets_by_uuid(task_uuid):
 
 
 @app.task()
-def collect_wordlists(uid: str):
+def collect_assets(uid: str):
     task_uuid = uuid.uuid5(uuid.NAMESPACE_DNS, uid)
     data = fetch_assets_by_uuid(task_uuid)
     if data and len(data) != 0:
         return data
 
     task = app.send_task(
-        "b.get_wordlists",
+        "b.get_assets",
         args=(str(task_uuid),),
         exchange="broadcast_exchange",
         routing_key="broadcast",
     )
     return data
 
-
-@app.task
-def get_rules():
-    result = app.send_task("main.get_rules", queue="client")
-    return result
+@app.task()
+def run_hashcat():
+    pass

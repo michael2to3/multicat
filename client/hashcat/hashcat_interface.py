@@ -1,1384 +1,1725 @@
-from .hashcat_interface import HashcatInterface
-from pyhashcat import Hashcat as Cat
+from abc import ABC, abstractmethod
 
 
-class Hashcat(HashcatInterface):
-    def __init__(self, instance = Cat()):
-        self._instance = instance
-
+class HashcatInterface(ABC):
     @property
+    @abstractmethod
     def attack_mode(self):
-        return self._instance.attack_mode
+        pass
 
     @attack_mode.setter
+    @abstractmethod
     def attack_mode(self, value):
-        self._instance.attack_mode = value
+        pass
 
     @property
+    @abstractmethod
     def backend_devices(self):
-        return self._instance.backend_devices
+        pass
 
     @backend_devices.setter
+    @abstractmethod
     def backend_devices(self, value):
-        self._instance.backend_devices = value
+        pass
 
     @property
+    @abstractmethod
     def backend_info(self):
-        return self._instance.backend_info
+        pass
 
     @backend_info.setter
+    @abstractmethod
     def backend_info(self, value):
-        self._instance.backend_info = value
+        pass
 
     @property
+    @abstractmethod
     def backend_vector_width(self):
-        return self._instance.backend_vector_width
+        pass
 
     @backend_vector_width.setter
+    @abstractmethod
     def backend_vector_width(self, value):
-        self._instance.backend_vector_width = value
+        pass
 
     @property
+    @abstractmethod
     def benchmark(self):
-        return self._instance.benchmark
+        pass
 
     @benchmark.setter
+    @abstractmethod
     def benchmark(self, value):
-        self._instance.benchmark = value
+        pass
 
     @property
+    @abstractmethod
     def benchmark_all(self):
-        return self._instance.benchmark_all
+        pass
 
     @benchmark_all.setter
+    @abstractmethod
     def benchmark_all(self, value):
-        self._instance.benchmark_all = value
+        pass
 
     @property
+    @abstractmethod
     def bitmap_max(self):
-        return self._instance.bitmap_max
+        pass
 
     @bitmap_max.setter
+    @abstractmethod
     def bitmap_max(self, value):
-        self._instance.bitmap_max = value
+        pass
 
     @property
+    @abstractmethod
     def bitmap_min(self):
-        return self._instance.bitmap_min
+        pass
 
     @bitmap_min.setter
+    @abstractmethod
     def bitmap_min(self, value):
-        self._instance.bitmap_min = value
+        pass
 
     @property
+    @abstractmethod
     def brain_client(self):
-        return self._instance.brain_client
+        pass
 
     @brain_client.setter
+    @abstractmethod
     def brain_client(self, value):
-        self._instance.brain_client = value
+        pass
 
     @property
+    @abstractmethod
     def brain_client_features(self):
-        return self._instance.brain_client_features
+        pass
 
     @brain_client_features.setter
+    @abstractmethod
     def brain_client_features(self, value):
-        self._instance.brain_client_features = value
+        pass
 
     @property
+    @abstractmethod
     def brain_host(self):
-        return self._instance.brain_host
+        pass
 
     @brain_host.setter
+    @abstractmethod
     def brain_host(self, value):
-        self._instance.brain_host = value
+        pass
 
     @property
+    @abstractmethod
     def brain_password(self):
-        return self._instance.brain_password
+        pass
 
     @brain_password.setter
+    @abstractmethod
     def brain_password(self, value):
-        self._instance.brain_password = value
+        pass
 
     @property
+    @abstractmethod
     def brain_port(self):
-        return self._instance.brain_port
+        pass
 
     @brain_port.setter
+    @abstractmethod
     def brain_port(self, value):
-        self._instance.brain_port = value
+        pass
 
     @property
+    @abstractmethod
     def brain_server(self):
-        return self._instance.brain_server
+        pass
 
     @brain_server.setter
+    @abstractmethod
     def brain_server(self, value):
-        self._instance.brain_server = value
+        pass
 
     @property
+    @abstractmethod
     def brain_session(self):
-        return self._instance.brain_session
+        pass
 
     @brain_session.setter
+    @abstractmethod
     def brain_session(self, value):
-        self._instance.brain_session = value
+        pass
 
     @property
+    @abstractmethod
     def brain_session_whitelist(self):
-        return self._instance.brain_session_whitelist
+        pass
 
     @brain_session_whitelist.setter
+    @abstractmethod
     def brain_session_whitelist(self, value):
-        self._instance.brain_session_whitelist = value
+        pass
 
     @property
+    @abstractmethod
     def cpu_affinity(self):
-        return self._instance.cpu_affinity
+        pass
 
     @cpu_affinity.setter
+    @abstractmethod
     def cpu_affinity(self, value):
-        self._instance.cpu_affinity = value
+        pass
 
     @property
+    @abstractmethod
     def custom_charset_1(self):
-        return self._instance.custom_charset_1
+        pass
 
     @custom_charset_1.setter
+    @abstractmethod
     def custom_charset_1(self, value):
-        self._instance.custom_charset_1 = value
+        pass
 
     @property
+    @abstractmethod
     def custom_charset_2(self):
-        return self._instance.custom_charset_2
+        pass
 
     @custom_charset_2.setter
+    @abstractmethod
     def custom_charset_2(self, value):
-        self._instance.custom_charset_2 = value
+        pass
 
     @property
+    @abstractmethod
     def custom_charset_3(self):
-        return self._instance.custom_charset_3
+        pass
 
     @custom_charset_3.setter
+    @abstractmethod
     def custom_charset_3(self, value):
-        self._instance.custom_charset_3 = value
+        pass
 
     @property
+    @abstractmethod
     def custom_charset_4(self):
-        return self._instance.custom_charset_4
+        pass
 
     @custom_charset_4.setter
+    @abstractmethod
     def custom_charset_4(self, value):
-        self._instance.custom_charset_4 = value
+        pass
 
     @property
+    @abstractmethod
     def debug_file(self):
-        return self._instance.debug_file
+        pass
 
     @debug_file.setter
+    @abstractmethod
     def debug_file(self, value):
-        self._instance.debug_file = value
+        pass
 
     @property
+    @abstractmethod
     def debug_mode(self):
-        return self._instance.debug_mode
+        pass
 
     @debug_mode.setter
+    @abstractmethod
     def debug_mode(self, value):
-        self._instance.debug_mode = value
+        pass
 
     @property
+    @abstractmethod
     def dict1(self):
-        return self._instance.dict1
+        pass
 
     @dict1.setter
+    @abstractmethod
     def dict1(self, value):
-        self._instance.dict1 = value
+        pass
 
     @property
+    @abstractmethod
     def dict2(self):
-        return self._instance.dict2
+        pass
 
     @dict2.setter
+    @abstractmethod
     def dict2(self, value):
-        self._instance.dict2 = value
+        pass
 
+    @abstractmethod
     def event_connect(self, callback, signal):
         pass
 
     @property
+    @abstractmethod
     def event_types(self):
-        return self._instance.event_types
+        pass
 
     @event_types.setter
+    @abstractmethod
     def event_types(self, value):
-        self._instance.event_types = value
+        pass
 
     @property
+    @abstractmethod
     def force(self):
-        return self._instance.force
+        pass
 
     @force.setter
+    @abstractmethod
     def force(self, value):
-        self._instance.force = value
+        pass
 
     @property
+    @abstractmethod
     def hash(self):
-        return self._instance.hash
+        pass
 
     @hash.setter
+    @abstractmethod
     def hash(self, value):
-        self._instance.hash = value
+        pass
 
     @property
+    @abstractmethod
     def hash_mode(self):
-        return self._instance.hash_mode
+        pass
 
     @hash_mode.setter
+    @abstractmethod
     def hash_mode(self, value):
-        self._instance.hash_mode = value
+        pass
 
     @property
+    @abstractmethod
     def hashcat_list_hashmodes(self):
-        return self._instance.hashcat_list_hashmodes
+        pass
 
     @hashcat_list_hashmodes.setter
+    @abstractmethod
     def hashcat_list_hashmodes(self, value):
-        self._instance.hashcat_list_hashmodes = value
+        pass
 
     @property
+    @abstractmethod
     def hashcat_session_bypass(self):
-        return self._instance.hashcat_session_bypass
+        pass
 
     @hashcat_session_bypass.setter
+    @abstractmethod
     def hashcat_session_bypass(self, value):
-        self._instance.hashcat_session_bypass = value
+        pass
 
     @property
+    @abstractmethod
     def hashcat_session_checkpoint(self):
-        return self._instance.hashcat_session_checkpoint
+        pass
 
     @hashcat_session_checkpoint.setter
+    @abstractmethod
     def hashcat_session_checkpoint(self, value):
-        self._instance.hashcat_session_checkpoint = value
+        pass
 
+    @abstractmethod
     def hashcat_session_execute(self):
         pass
 
     @property
+    @abstractmethod
     def hashcat_session_pause(self):
-        return self._instance.hashcat_session_pause
+        pass
 
     @hashcat_session_pause.setter
+    @abstractmethod
     def hashcat_session_pause(self, value):
-        self._instance.hashcat_session_pause = value
+        pass
 
     @property
+    @abstractmethod
     def hashcat_session_quit(self):
-        return self._instance.hashcat_session_quit
+        pass
 
     @hashcat_session_quit.setter
+    @abstractmethod
     def hashcat_session_quit(self, value):
-        self._instance.hashcat_session_quit = value
+        pass
 
     @property
+    @abstractmethod
     def hashcat_session_resume(self):
-        return self._instance.hashcat_session_resume
+        pass
 
     @hashcat_session_resume.setter
+    @abstractmethod
     def hashcat_session_resume(self, value):
-        self._instance.hashcat_session_resume = value
+        pass
 
     @property
+    @abstractmethod
     def hashcat_status_get_log(self):
-        return self._instance.hashcat_status_get_log
+        pass
 
     @hashcat_status_get_log.setter
+    @abstractmethod
     def hashcat_status_get_log(self, value):
-        self._instance.hashcat_status_get_log = value
+        pass
 
     @property
+    @abstractmethod
     def hashcat_status_get_status(self):
-        return self._instance.hashcat_status_get_status
+        pass
 
     @hashcat_status_get_status.setter
+    @abstractmethod
     def hashcat_status_get_status(self, value):
-        self._instance.hashcat_status_get_status = value
+        pass
 
     @property
+    @abstractmethod
     def hex_charset(self):
-        return self._instance.hex_charset
+        pass
 
     @hex_charset.setter
+    @abstractmethod
     def hex_charset(self, value):
-        self._instance.hex_charset = value
+        pass
 
     @property
+    @abstractmethod
     def hex_salt(self):
-        return self._instance.hex_salt
+        pass
 
     @hex_salt.setter
+    @abstractmethod
     def hex_salt(self, value):
-        self._instance.hex_salt = value
+        pass
 
     @property
+    @abstractmethod
     def hex_wordlist(self):
-        return self._instance.hex_wordlist
+        pass
 
     @hex_wordlist.setter
+    @abstractmethod
     def hex_wordlist(self, value):
-        self._instance.hex_wordlist = value
+        pass
 
     @property
+    @abstractmethod
     def hwmon_disable(self):
-        return self._instance.hwmon_disable
+        pass
 
     @hwmon_disable.setter
+    @abstractmethod
     def hwmon_disable(self, value):
-        self._instance.hwmon_disable = value
+        pass
 
     @property
+    @abstractmethod
     def hwmon_temp_abort(self):
-        return self._instance.hwmon_temp_abort
+        pass
 
     @hwmon_temp_abort.setter
+    @abstractmethod
     def hwmon_temp_abort(self, value):
-        self._instance.hwmon_temp_abort = value
+        pass
 
     @property
+    @abstractmethod
     def increment(self):
-        return self._instance.increment
+        pass
 
     @increment.setter
+    @abstractmethod
     def increment(self, value):
-        self._instance.increment = value
+        pass
 
     @property
+    @abstractmethod
     def increment_max(self):
-        return self._instance.increment_max
+        pass
 
     @increment_max.setter
+    @abstractmethod
     def increment_max(self, value):
-        self._instance.increment_max = value
+        pass
 
     @property
+    @abstractmethod
     def increment_min(self):
-        return self._instance.increment_min
+        pass
 
     @increment_min.setter
+    @abstractmethod
     def increment_min(self, value):
-        self._instance.increment_min = value
+        pass
 
     @property
+    @abstractmethod
     def induction_dir(self):
-        return self._instance.induction_dir
+        pass
 
     @induction_dir.setter
+    @abstractmethod
     def induction_dir(self, value):
-        self._instance.induction_dir = value
+        pass
 
     @property
+    @abstractmethod
     def keep_guessing(self):
-        return self._instance.keep_guessing
+        pass
 
     @keep_guessing.setter
+    @abstractmethod
     def keep_guessing(self, value):
-        self._instance.keep_guessing = value
+        pass
 
     @property
+    @abstractmethod
     def kernel_accel(self):
-        return self._instance.kernel_accel
+        pass
 
     @kernel_accel.setter
+    @abstractmethod
     def kernel_accel(self, value):
-        self._instance.kernel_accel = value
+        pass
 
     @property
+    @abstractmethod
     def kernel_loops(self):
-        return self._instance.kernel_loops
+        pass
 
     @kernel_loops.setter
+    @abstractmethod
     def kernel_loops(self, value):
-        self._instance.kernel_loops = value
+        pass
 
     @property
+    @abstractmethod
     def keyspace(self):
-        return self._instance.keyspace
+        pass
 
     @keyspace.setter
+    @abstractmethod
     def keyspace(self, value):
-        self._instance.keyspace = value
+        pass
 
     @property
+    @abstractmethod
     def left(self):
-        return self._instance.left
+        pass
 
     @left.setter
+    @abstractmethod
     def left(self, value):
-        self._instance.left = value
+        pass
 
     @property
+    @abstractmethod
     def limit(self):
-        return self._instance.limit
+        pass
 
     @limit.setter
+    @abstractmethod
     def limit(self, value):
-        self._instance.limit = value
+        pass
 
     @property
+    @abstractmethod
     def logfile_disable(self):
-        return self._instance.logfile_disable
+        pass
 
     @logfile_disable.setter
+    @abstractmethod
     def logfile_disable(self, value):
-        self._instance.logfile_disable = value
+        pass
 
     @property
+    @abstractmethod
     def loopback(self):
-        return self._instance.loopback
+        pass
 
     @loopback.setter
+    @abstractmethod
     def loopback(self, value):
-        self._instance.loopback = value
+        pass
 
     @property
+    @abstractmethod
     def machine_readable(self):
-        return self._instance.machine_readable
+        pass
 
     @machine_readable.setter
+    @abstractmethod
     def machine_readable(self, value):
-        self._instance.machine_readable = value
+        pass
 
     @property
+    @abstractmethod
     def markov_classic(self):
-        return self._instance.markov_classic
+        pass
 
     @markov_classic.setter
+    @abstractmethod
     def markov_classic(self, value):
-        self._instance.markov_classic = value
+        pass
 
     @property
+    @abstractmethod
     def markov_disable(self):
-        return self._instance.markov_disable
+        pass
 
     @markov_disable.setter
+    @abstractmethod
     def markov_disable(self, value):
-        self._instance.markov_disable = value
+        pass
 
     @property
+    @abstractmethod
     def markov_hcstat2(self):
-        return self._instance.markov_hcstat2
+        pass
 
     @markov_hcstat2.setter
+    @abstractmethod
     def markov_hcstat2(self, value):
-        self._instance.markov_hcstat2 = value
+        pass
 
     @property
+    @abstractmethod
     def markov_threshold(self):
-        return self._instance.markov_threshold
+        pass
 
     @markov_threshold.setter
+    @abstractmethod
     def markov_threshold(self, value):
-        self._instance.markov_threshold = value
+        pass
 
     @property
+    @abstractmethod
     def mask(self):
-        return self._instance.mask
+        pass
 
     @mask.setter
+    @abstractmethod
     def mask(self, value):
-        self._instance.mask = value
+        pass
 
     @property
+    @abstractmethod
     def opencl_device_types(self):
-        return self._instance.opencl_device_types
+        pass
 
     @opencl_device_types.setter
+    @abstractmethod
     def opencl_device_types(self, value):
-        self._instance.opencl_device_types = value
+        pass
 
     @property
+    @abstractmethod
     def optimized_kernel_enable(self):
-        return self._instance.optimized_kernel_enable
+        pass
 
     @optimized_kernel_enable.setter
+    @abstractmethod
     def optimized_kernel_enable(self, value):
-        self._instance.optimized_kernel_enable = value
+        pass
 
     @property
+    @abstractmethod
     def outfile(self):
-        return self._instance.outfile
+        pass
 
     @outfile.setter
+    @abstractmethod
     def outfile(self, value):
-        self._instance.outfile = value
+        pass
 
     @property
+    @abstractmethod
     def outfile_autohex(self):
-        return self._instance.outfile_autohex
+        pass
 
     @outfile_autohex.setter
+    @abstractmethod
     def outfile_autohex(self, value):
-        self._instance.outfile_autohex = value
+        pass
 
     @property
+    @abstractmethod
     def outfile_check_dir(self):
-        return self._instance.outfile_check_dir
+        pass
 
     @outfile_check_dir.setter
+    @abstractmethod
     def outfile_check_dir(self, value):
-        self._instance.outfile_check_dir = value
+        pass
 
     @property
+    @abstractmethod
     def outfile_check_timer(self):
-        return self._instance.outfile_check_timer
+        pass
 
     @outfile_check_timer.setter
+    @abstractmethod
     def outfile_check_timer(self, value):
-        self._instance.outfile_check_timer = value
+        pass
 
     @property
+    @abstractmethod
     def outfile_format(self):
-        return self._instance.outfile_format
+        pass
 
     @outfile_format.setter
+    @abstractmethod
     def outfile_format(self, value):
-        self._instance.outfile_format = value
+        pass
 
     @property
+    @abstractmethod
     def potfile_disable(self):
-        return self._instance.potfile_disable
+        pass
 
     @potfile_disable.setter
+    @abstractmethod
     def potfile_disable(self, value):
-        self._instance.potfile_disable = value
+        pass
 
     @property
+    @abstractmethod
     def potfile_path(self):
-        return self._instance.potfile_path
+        pass
 
     @potfile_path.setter
+    @abstractmethod
     def potfile_path(self, value):
-        self._instance.potfile_path = value
+        pass
 
     @property
+    @abstractmethod
     def progress_only(self):
-        return self._instance.progress_only
+        pass
 
     @progress_only.setter
+    @abstractmethod
     def progress_only(self, value):
-        self._instance.progress_only = value
+        pass
 
     @property
+    @abstractmethod
     def quiet(self):
-        return self._instance.quiet
+        pass
 
     @quiet.setter
+    @abstractmethod
     def quiet(self, value):
-        self._instance.quiet = value
+        pass
 
     @property
+    @abstractmethod
     def remove(self):
-        return self._instance.remove
+        pass
 
     @remove.setter
+    @abstractmethod
     def remove(self, value):
-        self._instance.remove = value
+        pass
 
     @property
+    @abstractmethod
     def remove_timer(self):
-        return self._instance.remove_timer
+        pass
 
     @remove_timer.setter
+    @abstractmethod
     def remove_timer(self, value):
-        self._instance.remove_timer = value
+        pass
 
     @property
+    @abstractmethod
     def reset(self):
-        return self._instance.reset
+        pass
 
     @reset.setter
+    @abstractmethod
     def reset(self, value):
-        self._instance.reset = value
+        pass
 
     @property
+    @abstractmethod
     def restore(self):
-        return self._instance.restore
+        pass
 
     @restore.setter
+    @abstractmethod
     def restore(self, value):
-        self._instance.restore = value
+        pass
 
     @property
+    @abstractmethod
     def restore_disable(self):
-        return self._instance.restore_disable
+        pass
 
     @restore_disable.setter
+    @abstractmethod
     def restore_disable(self, value):
-        self._instance.restore_disable = value
+        pass
 
     @property
+    @abstractmethod
     def restore_file_path(self):
-        return self._instance.restore_file_path
+        pass
 
     @restore_file_path.setter
+    @abstractmethod
     def restore_file_path(self, value):
-        self._instance.restore_file_path = value
+        pass
 
     @property
+    @abstractmethod
     def restore_timer(self):
-        return self._instance.restore_timer
+        pass
 
     @restore_timer.setter
+    @abstractmethod
     def restore_timer(self, value):
-        self._instance.restore_timer = value
+        pass
 
     @property
+    @abstractmethod
     def rp_files_cnt(self):
-        return self._instance.rp_files_cnt
+        pass
 
     @rp_files_cnt.setter
+    @abstractmethod
     def rp_files_cnt(self, value):
-        self._instance.rp_files_cnt = value
+        pass
 
     @property
+    @abstractmethod
     def rp_gen(self):
-        return self._instance.rp_gen
+        pass
 
     @rp_gen.setter
+    @abstractmethod
     def rp_gen(self, value):
-        self._instance.rp_gen = value
+        pass
 
     @property
+    @abstractmethod
     def rp_gen_func_max(self):
-        return self._instance.rp_gen_func_max
+        pass
 
     @rp_gen_func_max.setter
+    @abstractmethod
     def rp_gen_func_max(self, value):
-        self._instance.rp_gen_func_max = value
+        pass
 
     @property
+    @abstractmethod
     def rp_gen_func_min(self):
-        return self._instance.rp_gen_func_min
+        pass
 
     @rp_gen_func_min.setter
+    @abstractmethod
     def rp_gen_func_min(self, value):
-        self._instance.rp_gen_func_min = value
+        pass
 
     @property
+    @abstractmethod
     def rp_gen_seed(self):
-        return self._instance.rp_gen_seed
+        pass
 
     @rp_gen_seed.setter
+    @abstractmethod
     def rp_gen_seed(self, value):
-        self._instance.rp_gen_seed = value
+        pass
 
     @property
+    @abstractmethod
     def rule_buf_l(self):
-        return self._instance.rule_buf_l
+        pass
 
     @rule_buf_l.setter
+    @abstractmethod
     def rule_buf_l(self, value):
-        self._instance.rule_buf_l = value
+        pass
 
     @property
+    @abstractmethod
     def rule_buf_r(self):
-        return self._instance.rule_buf_r
+        pass
 
     @rule_buf_r.setter
+    @abstractmethod
     def rule_buf_r(self, value):
-        self._instance.rule_buf_r = value
+        pass
 
     @property
+    @abstractmethod
     def rules(self):
-        return self._instance.rules
+        pass
 
     @rules.setter
+    @abstractmethod
     def rules(self, value):
-        self._instance.rules = value
+        pass
 
     @property
+    @abstractmethod
     def runtime(self):
-        return self._instance.runtime
+        pass
 
     @runtime.setter
+    @abstractmethod
     def runtime(self, value):
-        self._instance.runtime = value
+        pass
 
     @property
+    @abstractmethod
     def scrypt_tmto(self):
-        return self._instance.scrypt_tmto
+        pass
 
     @scrypt_tmto.setter
+    @abstractmethod
     def scrypt_tmto(self, value):
-        self._instance.scrypt_tmto = value
+        pass
 
     @property
+    @abstractmethod
     def segment_size(self):
-        return self._instance.segment_size
+        pass
 
     @segment_size.setter
+    @abstractmethod
     def segment_size(self, value):
-        self._instance.segment_size = value
+        pass
 
     @property
+    @abstractmethod
     def separator(self):
-        return self._instance.separator
+        pass
 
     @separator.setter
+    @abstractmethod
     def separator(self, value):
-        self._instance.separator = value
+        pass
 
     @property
+    @abstractmethod
     def session(self):
-        return self._instance.session
+        pass
 
     @session.setter
+    @abstractmethod
     def session(self, value):
-        self._instance.session = value
+        pass
 
     @property
+    @abstractmethod
     def show(self):
-        return self._instance.show
+        pass
 
     @show.setter
+    @abstractmethod
     def show(self, value):
-        self._instance.show = value
+        pass
 
     @property
+    @abstractmethod
     def skip(self):
-        return self._instance.skip
+        pass
 
     @skip.setter
+    @abstractmethod
     def skip(self, value):
-        self._instance.skip = value
+        pass
 
     @property
+    @abstractmethod
     def soft_reset(self):
-        return self._instance.soft_reset
+        pass
 
     @soft_reset.setter
+    @abstractmethod
     def soft_reset(self, value):
-        self._instance.soft_reset = value
+        pass
 
     @property
+    @abstractmethod
     def speed_only(self):
-        return self._instance.speed_only
+        pass
 
     @speed_only.setter
+    @abstractmethod
     def speed_only(self, value):
-        self._instance.speed_only = value
+        pass
 
     @property
+    @abstractmethod
     def spin_damp(self):
-        return self._instance.spin_damp
+        pass
 
     @spin_damp.setter
+    @abstractmethod
     def spin_damp(self, value):
-        self._instance.spin_damp = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_brain_rx_all(self):
-        return self._instance.status_get_brain_rx_all
+        pass
 
     @status_get_brain_rx_all.setter
+    @abstractmethod
     def status_get_brain_rx_all(self, value):
-        self._instance.status_get_brain_rx_all = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_corespeed_dev(self):
-        return self._instance.status_get_corespeed_dev
+        pass
 
     @status_get_corespeed_dev.setter
+    @abstractmethod
     def status_get_corespeed_dev(self, value):
-        self._instance.status_get_corespeed_dev = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_cpt(self):
-        return self._instance.status_get_cpt
+        pass
 
     @status_get_cpt.setter
+    @abstractmethod
     def status_get_cpt(self, value):
-        self._instance.status_get_cpt = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_cpt_avg_day(self):
-        return self._instance.status_get_cpt_avg_day
+        pass
 
     @status_get_cpt_avg_day.setter
+    @abstractmethod
     def status_get_cpt_avg_day(self, value):
-        self._instance.status_get_cpt_avg_day = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_cpt_avg_hour(self):
-        return self._instance.status_get_cpt_avg_hour
+        pass
 
     @status_get_cpt_avg_hour.setter
+    @abstractmethod
     def status_get_cpt_avg_hour(self, value):
-        self._instance.status_get_cpt_avg_hour = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_cpt_avg_min(self):
-        return self._instance.status_get_cpt_avg_min
+        pass
 
     @status_get_cpt_avg_min.setter
+    @abstractmethod
     def status_get_cpt_avg_min(self, value):
-        self._instance.status_get_cpt_avg_min = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_cpt_cur_day(self):
-        return self._instance.status_get_cpt_cur_day
+        pass
 
     @status_get_cpt_cur_day.setter
+    @abstractmethod
     def status_get_cpt_cur_day(self, value):
-        self._instance.status_get_cpt_cur_day = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_cpt_cur_hour(self):
-        return self._instance.status_get_cpt_cur_hour
+        pass
 
     @status_get_cpt_cur_hour.setter
+    @abstractmethod
     def status_get_cpt_cur_hour(self, value):
-        self._instance.status_get_cpt_cur_hour = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_cpt_cur_min(self):
-        return self._instance.status_get_cpt_cur_min
+        pass
 
     @status_get_cpt_cur_min.setter
+    @abstractmethod
     def status_get_cpt_cur_min(self, value):
-        self._instance.status_get_cpt_cur_min = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_device_info_active(self):
-        return self._instance.status_get_device_info_active
+        pass
 
     @status_get_device_info_active.setter
+    @abstractmethod
     def status_get_device_info_active(self, value):
-        self._instance.status_get_device_info_active = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_device_info_cnt(self):
-        return self._instance.status_get_device_info_cnt
+        pass
 
     @status_get_device_info_cnt.setter
+    @abstractmethod
     def status_get_device_info_cnt(self, value):
-        self._instance.status_get_device_info_cnt = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_digests_cnt(self):
-        return self._instance.status_get_digests_cnt
+        pass
 
     @status_get_digests_cnt.setter
+    @abstractmethod
     def status_get_digests_cnt(self, value):
-        self._instance.status_get_digests_cnt = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_digests_done(self):
-        return self._instance.status_get_digests_done
+        pass
 
     @status_get_digests_done.setter
+    @abstractmethod
     def status_get_digests_done(self, value):
-        self._instance.status_get_digests_done = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_digests_percent(self):
-        return self._instance.status_get_digests_percent
+        pass
 
     @status_get_digests_percent.setter
+    @abstractmethod
     def status_get_digests_percent(self, value):
-        self._instance.status_get_digests_percent = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_exec_msec_all(self):
-        return self._instance.status_get_exec_msec_all
+        pass
 
     @status_get_exec_msec_all.setter
+    @abstractmethod
     def status_get_exec_msec_all(self, value):
-        self._instance.status_get_exec_msec_all = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_exec_msec_dev(self):
-        return self._instance.status_get_exec_msec_dev
+        pass
 
     @status_get_exec_msec_dev.setter
+    @abstractmethod
     def status_get_exec_msec_dev(self, value):
-        self._instance.status_get_exec_msec_dev = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_guess_base(self):
-        return self._instance.status_get_guess_base
+        pass
 
     @status_get_guess_base.setter
+    @abstractmethod
     def status_get_guess_base(self, value):
-        self._instance.status_get_guess_base = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_guess_base_count(self):
-        return self._instance.status_get_guess_base_count
+        pass
 
     @status_get_guess_base_count.setter
+    @abstractmethod
     def status_get_guess_base_count(self, value):
-        self._instance.status_get_guess_base_count = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_guess_base_offset(self):
-        return self._instance.status_get_guess_base_offset
+        pass
 
     @status_get_guess_base_offset.setter
+    @abstractmethod
     def status_get_guess_base_offset(self, value):
-        self._instance.status_get_guess_base_offset = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_guess_base_percent(self):
-        return self._instance.status_get_guess_base_percent
+        pass
 
     @status_get_guess_base_percent.setter
+    @abstractmethod
     def status_get_guess_base_percent(self, value):
-        self._instance.status_get_guess_base_percent = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_guess_candidates_dev(self):
-        return self._instance.status_get_guess_candidates_dev
+        pass
 
     @status_get_guess_candidates_dev.setter
+    @abstractmethod
     def status_get_guess_candidates_dev(self, value):
-        self._instance.status_get_guess_candidates_dev = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_guess_charset(self):
-        return self._instance.status_get_guess_charset
+        pass
 
     @status_get_guess_charset.setter
+    @abstractmethod
     def status_get_guess_charset(self, value):
-        self._instance.status_get_guess_charset = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_guess_mask_length(self):
-        return self._instance.status_get_guess_mask_length
+        pass
 
     @status_get_guess_mask_length.setter
+    @abstractmethod
     def status_get_guess_mask_length(self, value):
-        self._instance.status_get_guess_mask_length = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_guess_mod(self):
-        return self._instance.status_get_guess_mod
+        pass
 
     @status_get_guess_mod.setter
+    @abstractmethod
     def status_get_guess_mod(self, value):
-        self._instance.status_get_guess_mod = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_guess_mod_count(self):
-        return self._instance.status_get_guess_mod_count
+        pass
 
     @status_get_guess_mod_count.setter
+    @abstractmethod
     def status_get_guess_mod_count(self, value):
-        self._instance.status_get_guess_mod_count = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_guess_mod_offset(self):
-        return self._instance.status_get_guess_mod_offset
+        pass
 
     @status_get_guess_mod_offset.setter
+    @abstractmethod
     def status_get_guess_mod_offset(self, value):
-        self._instance.status_get_guess_mod_offset = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_guess_mod_percent(self):
-        return self._instance.status_get_guess_mod_percent
+        pass
 
     @status_get_guess_mod_percent.setter
+    @abstractmethod
     def status_get_guess_mod_percent(self, value):
-        self._instance.status_get_guess_mod_percent = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_guess_mode(self):
-        return self._instance.status_get_guess_mode
+        pass
 
     @status_get_guess_mode.setter
+    @abstractmethod
     def status_get_guess_mode(self, value):
-        self._instance.status_get_guess_mode = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_hash_name(self):
-        return self._instance.status_get_hash_name
+        pass
 
     @status_get_hash_name.setter
+    @abstractmethod
     def status_get_hash_name(self, value):
-        self._instance.status_get_hash_name = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_hash_target(self):
-        return self._instance.status_get_hash_target
+        pass
 
     @status_get_hash_target.setter
+    @abstractmethod
     def status_get_hash_target(self, value):
-        self._instance.status_get_hash_target = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_hashes_msec_all(self):
-        return self._instance.status_get_hashes_msec_all
+        pass
 
     @status_get_hashes_msec_all.setter
+    @abstractmethod
     def status_get_hashes_msec_all(self, value):
-        self._instance.status_get_hashes_msec_all = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_hashes_msec_dev(self):
-        return self._instance.status_get_hashes_msec_dev
+        pass
 
     @status_get_hashes_msec_dev.setter
+    @abstractmethod
     def status_get_hashes_msec_dev(self, value):
-        self._instance.status_get_hashes_msec_dev = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_hashes_msec_dev_benchmark(self):
-        return self._instance.status_get_hashes_msec_dev_benchmark
+        pass
 
     @status_get_hashes_msec_dev_benchmark.setter
+    @abstractmethod
     def status_get_hashes_msec_dev_benchmark(self, value):
-        self._instance.status_get_hashes_msec_dev_benchmark = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_hwmon_dev(self):
-        return self._instance.status_get_hwmon_dev
+        pass
 
     @status_get_hwmon_dev.setter
+    @abstractmethod
     def status_get_hwmon_dev(self, value):
-        self._instance.status_get_hwmon_dev = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_memoryspeed_dev(self):
-        return self._instance.status_get_memoryspeed_dev
+        pass
 
     @status_get_memoryspeed_dev.setter
+    @abstractmethod
     def status_get_memoryspeed_dev(self, value):
-        self._instance.status_get_memoryspeed_dev = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_msec_paused(self):
-        return self._instance.status_get_msec_paused
+        pass
 
     @status_get_msec_paused.setter
+    @abstractmethod
     def status_get_msec_paused(self, value):
-        self._instance.status_get_msec_paused = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_msec_real(self):
-        return self._instance.status_get_msec_real
+        pass
 
     @status_get_msec_real.setter
+    @abstractmethod
     def status_get_msec_real(self, value):
-        self._instance.status_get_msec_real = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_msec_running(self):
-        return self._instance.status_get_msec_running
+        pass
 
     @status_get_msec_running.setter
+    @abstractmethod
     def status_get_msec_running(self, value):
-        self._instance.status_get_msec_running = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_progress_cur(self):
-        return self._instance.status_get_progress_cur
+        pass
 
     @status_get_progress_cur.setter
+    @abstractmethod
     def status_get_progress_cur(self, value):
-        self._instance.status_get_progress_cur = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_progress_cur_relative_skip(self):
-        return self._instance.status_get_progress_cur_relative_skip
+        pass
 
     @status_get_progress_cur_relative_skip.setter
+    @abstractmethod
     def status_get_progress_cur_relative_skip(self, value):
-        self._instance.status_get_progress_cur_relative_skip = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_progress_dev(self):
-        return self._instance.status_get_progress_dev
+        pass
 
     @status_get_progress_dev.setter
+    @abstractmethod
     def status_get_progress_dev(self, value):
-        self._instance.status_get_progress_dev = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_progress_done(self):
-        return self._instance.status_get_progress_done
+        pass
 
     @status_get_progress_done.setter
+    @abstractmethod
     def status_get_progress_done(self, value):
-        self._instance.status_get_progress_done = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_progress_end(self):
-        return self._instance.status_get_progress_end
+        pass
 
     @status_get_progress_end.setter
+    @abstractmethod
     def status_get_progress_end(self, value):
-        self._instance.status_get_progress_end = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_progress_end_relative_skip(self):
-        return self._instance.status_get_progress_end_relative_skip
+        pass
 
     @status_get_progress_end_relative_skip.setter
+    @abstractmethod
     def status_get_progress_end_relative_skip(self, value):
-        self._instance.status_get_progress_end_relative_skip = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_progress_finished_percent(self):
-        return self._instance.status_get_progress_finished_percent
+        pass
 
     @status_get_progress_finished_percent.setter
+    @abstractmethod
     def status_get_progress_finished_percent(self, value):
-        self._instance.status_get_progress_finished_percent = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_progress_ignore(self):
-        return self._instance.status_get_progress_ignore
+        pass
 
     @status_get_progress_ignore.setter
+    @abstractmethod
     def status_get_progress_ignore(self, value):
-        self._instance.status_get_progress_ignore = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_progress_mode(self):
-        return self._instance.status_get_progress_mode
+        pass
 
     @status_get_progress_mode.setter
+    @abstractmethod
     def status_get_progress_mode(self, value):
-        self._instance.status_get_progress_mode = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_progress_rejected(self):
-        return self._instance.status_get_progress_rejected
+        pass
 
     @status_get_progress_rejected.setter
+    @abstractmethod
     def status_get_progress_rejected(self, value):
-        self._instance.status_get_progress_rejected = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_progress_rejected_percent(self):
-        return self._instance.status_get_progress_rejected_percent
+        pass
 
     @status_get_progress_rejected_percent.setter
+    @abstractmethod
     def status_get_progress_rejected_percent(self, value):
-        self._instance.status_get_progress_rejected_percent = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_progress_restored(self):
-        return self._instance.status_get_progress_restored
+        pass
 
     @status_get_progress_restored.setter
+    @abstractmethod
     def status_get_progress_restored(self, value):
-        self._instance.status_get_progress_restored = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_progress_skip(self):
-        return self._instance.status_get_progress_skip
+        pass
 
     @status_get_progress_skip.setter
+    @abstractmethod
     def status_get_progress_skip(self, value):
-        self._instance.status_get_progress_skip = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_restore_percent(self):
-        return self._instance.status_get_restore_percent
+        pass
 
     @status_get_restore_percent.setter
+    @abstractmethod
     def status_get_restore_percent(self, value):
-        self._instance.status_get_restore_percent = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_restore_point(self):
-        return self._instance.status_get_restore_point
+        pass
 
     @status_get_restore_point.setter
+    @abstractmethod
     def status_get_restore_point(self, value):
-        self._instance.status_get_restore_point = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_restore_total(self):
-        return self._instance.status_get_restore_total
+        pass
 
     @status_get_restore_total.setter
+    @abstractmethod
     def status_get_restore_total(self, value):
-        self._instance.status_get_restore_total = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_runtime_msec_dev(self):
-        return self._instance.status_get_runtime_msec_dev
+        pass
 
     @status_get_runtime_msec_dev.setter
+    @abstractmethod
     def status_get_runtime_msec_dev(self, value):
-        self._instance.status_get_runtime_msec_dev = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_salts_cnt(self):
-        return self._instance.status_get_salts_cnt
+        pass
 
     @status_get_salts_cnt.setter
+    @abstractmethod
     def status_get_salts_cnt(self, value):
-        self._instance.status_get_salts_cnt = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_salts_done(self):
-        return self._instance.status_get_salts_done
+        pass
 
     @status_get_salts_done.setter
+    @abstractmethod
     def status_get_salts_done(self, value):
-        self._instance.status_get_salts_done = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_salts_percent(self):
-        return self._instance.status_get_salts_percent
+        pass
 
     @status_get_salts_percent.setter
+    @abstractmethod
     def status_get_salts_percent(self, value):
-        self._instance.status_get_salts_percent = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_session(self):
-        return self._instance.status_get_session
+        pass
 
     @status_get_session.setter
+    @abstractmethod
     def status_get_session(self, value):
-        self._instance.status_get_session = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_skipped_dev(self):
-        return self._instance.status_get_skipped_dev
+        pass
 
     @status_get_skipped_dev.setter
+    @abstractmethod
     def status_get_skipped_dev(self, value):
-        self._instance.status_get_skipped_dev = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_speed_sec_all(self):
-        return self._instance.status_get_speed_sec_all
+        pass
 
     @status_get_speed_sec_all.setter
+    @abstractmethod
     def status_get_speed_sec_all(self, value):
-        self._instance.status_get_speed_sec_all = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_speed_sec_dev(self):
-        return self._instance.status_get_speed_sec_dev
+        pass
 
     @status_get_speed_sec_dev.setter
+    @abstractmethod
     def status_get_speed_sec_dev(self, value):
-        self._instance.status_get_speed_sec_dev = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_status_number(self):
-        return self._instance.status_get_status_number
+        pass
 
     @status_get_status_number.setter
+    @abstractmethod
     def status_get_status_number(self, value):
-        self._instance.status_get_status_number = value
+        pass
 
+    @abstractmethod
     def status_get_status_string(self):
         pass
 
     @property
+    @abstractmethod
     def status_get_time_estimated_absolute(self):
-        return self._instance.status_get_time_estimated_absolute
+        pass
 
     @status_get_time_estimated_absolute.setter
+    @abstractmethod
     def status_get_time_estimated_absolute(self, value):
-        self._instance.status_get_time_estimated_absolute = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_time_estimated_relative(self):
-        return self._instance.status_get_time_estimated_relative
+        pass
 
     @status_get_time_estimated_relative.setter
+    @abstractmethod
     def status_get_time_estimated_relative(self, value):
-        self._instance.status_get_time_estimated_relative = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_time_started_absolute(self):
-        return self._instance.status_get_time_started_absolute
+        pass
 
     @status_get_time_started_absolute.setter
+    @abstractmethod
     def status_get_time_started_absolute(self, value):
-        self._instance.status_get_time_started_absolute = value
+        pass
 
     @property
+    @abstractmethod
     def status_get_time_started_relative(self):
-        return self._instance.status_get_time_started_relative
+        pass
 
     @status_get_time_started_relative.setter
+    @abstractmethod
     def status_get_time_started_relative(self, value):
-        self._instance.status_get_time_started_relative = value
+        pass
 
     @property
+    @abstractmethod
     def status_reset(self):
-        return self._instance.status_reset
+        pass
 
     @status_reset.setter
+    @abstractmethod
     def status_reset(self, value):
-        self._instance.status_reset = value
+        pass
 
     @property
+    @abstractmethod
     def truecrypt_keyfiles(self):
-        return self._instance.truecrypt_keyfiles
+        pass
 
     @truecrypt_keyfiles.setter
+    @abstractmethod
     def truecrypt_keyfiles(self, value):
-        self._instance.truecrypt_keyfiles = value
+        pass
 
     @property
+    @abstractmethod
     def usage(self):
-        return self._instance.usage
+        pass
 
     @usage.setter
+    @abstractmethod
     def usage(self, value):
-        self._instance.usage = value
+        pass
 
     @property
+    @abstractmethod
     def username(self):
-        return self._instance.username
+        pass
 
     @username.setter
+    @abstractmethod
     def username(self, value):
-        self._instance.username = value
+        pass
 
     @property
+    @abstractmethod
     def veracrypt_keyfiles(self):
-        return self._instance.veracrypt_keyfiles
+        pass
 
     @veracrypt_keyfiles.setter
+    @abstractmethod
     def veracrypt_keyfiles(self, value):
-        self._instance.veracrypt_keyfiles = value
+        pass
 
     @property
+    @abstractmethod
     def veracrypt_pim_start(self):
-        return self._instance.veracrypt_pim_start
+        pass
 
     @veracrypt_pim_start.setter
+    @abstractmethod
     def veracrypt_pim_start(self, value):
-        self._instance.veracrypt_pim_start = value
+        pass
 
     @property
+    @abstractmethod
     def veracrypt_pim_stop(self):
-        return self._instance.veracrypt_pim_stop
+        pass
 
     @veracrypt_pim_stop.setter
+    @abstractmethod
     def veracrypt_pim_stop(self, value):
-        self._instance.veracrypt_pim_stop = value
+        pass
 
     @property
+    @abstractmethod
     def workload_profile(self):
-        return self._instance.workload_profile
+        pass
 
     @workload_profile.setter
+    @abstractmethod
     def workload_profile(self, value):
-        self._instance.workload_profile = value
+        pass
