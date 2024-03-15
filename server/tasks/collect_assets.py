@@ -9,6 +9,8 @@ from config import CeleryApp, Config, Database
 from sqlalchemy import func
 from datetime import timedelta
 
+db = Database(Config.get("DATABASE_URL"))
+
 def fetch_assets_by_uuid(task_uuid):
     with db.session() as session:
         result = (
