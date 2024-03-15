@@ -11,6 +11,8 @@ services:
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
       TIMEZONE: ${TIMEZONE}
       DATABASE_URL: ${DATABASE_URL}
+    volumes:
+      - server_data:/app/gnupg
   celerybeat:
     build: ./server
     depends_on:
@@ -61,3 +63,4 @@ services:
       - postgres_data:/var/lib/postgresql/data
 volumes:
   postgres_data:
+  server_data:

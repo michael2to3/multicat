@@ -13,6 +13,7 @@ services:
       TIMEZONE: ${TIMEZONE}
       DATABASE_URL: ${DATABASE_URL}
     volumes:
+      - server_data:/app/gnupg
       - ./server:/app
     command: /bin/sh -c "pip install watchdog && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A main:app worker -Q server --loglevel=info"
   celerybeat:
@@ -86,3 +87,4 @@ services:
 
 volumes:
   postgres_data:
+  server_data:

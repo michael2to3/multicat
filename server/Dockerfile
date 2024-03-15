@@ -10,7 +10,11 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* && \
     pip install --no-cache-dir -r requirements.txt
 
-RUN echo "Key-Type: RSA\n\
+ENV GNUPGHOME=/app/gnupg
+
+RUN mkdir $GNUPGHOME && \
+    chmod 700 $GNUPGHOME && \
+    echo "Key-Type: RSA\n\
 Key-Length: 2048\n\
 Subkey-Type: RSA\n\
 Subkey-Length: 2048\n\
@@ -20,6 +24,5 @@ Name-Email: muclicat@deiteriy.com\n\
 Expire-Date: 0\n\
 Passphrase: secretpassphrase\n\
 %no-protection\n\
-%commit" > /root/gen-key-script
-
-RUN gpg --batch --generate-key /root/gen-key-script
+%commit" > /root/gen-key-script && \
+    gpg --batch --generate-key /root/gen-key-script
