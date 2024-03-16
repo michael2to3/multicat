@@ -42,17 +42,14 @@ class Hashcat(BaseCommand):
                 queue="server",
             )
 
-            try:
-                resp = CeleryResponse(**result.get(timeout=10))
+            resp = CeleryResponse(**result.get(timeout=10))
 
-                message_response = "" if resp.value is None else resp.value
-                if resp.error:
-                    message_response += f"\nError: {resp.error}"
-                if resp.warning:
-                    message_response += f"\nWarning: {resp.warning}"
+            message_response = "" if resp.value is None else resp.value
+            if resp.error:
+                message_response += f"\nError: {resp.error}"
+            if resp.warning:
+                message_response += f"\nWarning: {resp.warning}"
 
-                await message.answer(message_response)
-            except Exception as e:
-                await message.answer(f"An error occurred: {str(e)}")
+            await message.answer(message_response)
         else:
             await message.answer("Please send a GPG-encrypted YAML file.")

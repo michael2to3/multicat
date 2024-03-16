@@ -2,8 +2,8 @@ import logging
 from aiogram.types import Message
 from aiogram.types.input_file import BufferedInputFile
 from commands import BaseCommand
-from .register_command import register_command
 from schemas import CeleryResponse
+from .register_command import register_command
 
 logger = logging.getLogger(__name__)
 
@@ -25,26 +25,22 @@ class GetSteps(BaseCommand):
             await message.answer("Please enter step name")
             return
 
-        try:
-            result = self.app.send_task(
-                "main.getsteps", args=(userid, text_message), queue="server"
-            )
-            processing_result_raw = result.get(timeout=10)
-            resp = CeleryResponse(**processing_result_raw)
+        result = self.app.send_task(
+            "main.getsteps", args=(userid, text_message), queue="server"
+        )
+        processing_result_raw = result.get(timeout=10)
+        resp = CeleryResponse(**processing_result_raw)
 
-            if resp.error:
-                await message.answer(f"Error: {resp.error}")
-                return
-            message_response = resp.warning if resp.warning else ""
-            if resp.value:
-                document = BufferedInputFile(
-                    bytes(resp.value, encoding="UTF-8"), filename=text_message
-                )
-                await message.answer_document(
-                    document=document, caption=message_response
-                )
-            else:
-                await message.answer(message_response)
-        except Exception as e:
-            logger.error("Failed to process getsteps: %s", e)
-            await message.answer("Failed to process your request.")
+        if resp.error:
+            await message.answer(f"Error: {resp.error}")
+            return
+        message_response = resp.warning if resp.warning else ""
+        if resp.value:
+            document = BufferedInputFile(
+                bytes(resp.value, encoding="UTF-8"), filename=text_message
+            )
+            await message.answer_document(
+                document=document, caption=message_response
+            )
+        else:
+            await message.answer(message_response)

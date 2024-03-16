@@ -19,22 +19,18 @@ class PubKey(BaseCommand):
         return "Get my public GPG key"
 
     async def handle(self, message: Message):
-        try:
-            result = self.app.send_task("main.get_pubkey", queue="server")
-            processing_result = CeleryResponse(**result.get(timeout=60))
+        result = self.app.send_task("main.get_pubkey", queue="server")
+        processing_result = CeleryResponse(**result.get(timeout=60))
 
-            if processing_result.error:
-                await message.answer(f"Error: {processing_result.error}")
+        if processing_result.error:
+            await message.answer(f"Error: {processing_result.error}")
+        else:
+            if processing_result.warning:
+                await message.answer(f"Warning: {processing_result.warning}")
+            if processing_result.value:
+                document = BufferedInputFile(
+                    processing_result.value, filename="public_key.asc"
+                )
+                await message.answer_document(document=document)
             else:
-                if processing_result.warning:
-                    await message.answer(f"Warning: {processing_result.warning}")
-                if processing_result.value:
-                    document = BufferedInputFile(
-                        processing_result.value, filename="public_key.asc"
-                    )
-                    await message.answer_document(document=document)
-                else:
-                    await message.answer("Couldn't find my public GPG key.")
-        except Exception as e:
-            logger.error("Failed to get public GPG key: %s", e)
-            await message.answer("Failed to process your request.")
+                await message.answer("Couldn't find my public GPG key.")

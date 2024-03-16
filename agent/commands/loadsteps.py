@@ -30,26 +30,22 @@ class LoadSteps(BaseCommand):
         file_bytes = await self.bot.download_file(file_path)
         content = file_bytes.read()
 
-        try:
-            result = self.app.send_task(
-                "main.loadsteps",
-                args=(userid, file_name, content.decode("UTF-8")),
-                queue="server",
-            )
-            processing_result = CeleryResponse(**result.get(timeout=10))
+        result = self.app.send_task(
+            "main.loadsteps",
+            args=(userid, file_name, content.decode("UTF-8")),
+            queue="server",
+        )
+        processing_result = CeleryResponse(**result.get(timeout=10))
 
-            response_message = ""
-            if processing_result.error:
-                response_message = f"Error: {processing_result.error}"
-            else:
-                if processing_result.warning:
-                    response_message += f"Warning: {processing_result.warning}\n"
-                if processing_result.value:
-                    response_message += str(processing_result.value)
+        response_message = ""
+        if processing_result.error:
+            response_message = f"Error: {processing_result.error}"
+        else:
+            if processing_result.warning:
+                response_message += f"Warning: {processing_result.warning}\n"
+            if processing_result.value:
+                response_message += str(processing_result.value)
 
-            await message.answer(
-                response_message if response_message else "Step loaded successfully."
-            )
-        except Exception as e:
-            logger.error("Failed to load steps: %s", e)
-            await message.answer("Failed to process your request.")
+        await message.answer(
+            response_message if response_message else "Step loaded successfully."
+        )
