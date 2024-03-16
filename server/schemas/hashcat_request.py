@@ -1,13 +1,13 @@
-from typing import List, Optional
+from typing import List
 from enum import Enum
-from pydantic import BaseModel, Field, validator, field_validator, parse_obj_as
+from pydantic import BaseModel, Field, validator, field_validator
 
 
-class AttackMode(str, Enum):
-    DICTIONARY = "0"
-    MASK = "3"
-    HYBRID_WORDLIST_MASK = "6"
-    HYBRID_MASK_WORDLIST = "7"
+class AttackMode(int, Enum):
+    DICTIONARY = 0
+    MASK = 3
+    HYBRID_WORDLIST_MASK = 6
+    HYBRID_MASK_WORDLIST = 7
 
 
 class CustomCharset(BaseModel):
@@ -21,16 +21,13 @@ class CustomCharset(BaseModel):
             raise ValueError("charset_id must be between 1 and 4")
         return v
 
-    def to_hashcat_format(self):
-        return f"-{self.charset_id}", self.charset
-
 
 class HashcatOptions(BaseModel):
     optimization: bool = Field(default=False, alias="O")
     work_mode: int = Field(default=4, alias="w")
     increment: bool = Field(default=False, alias="increment")
     custom_charsets: List[CustomCharset] = Field(default_factory=list)
-    attack_mode: Optional[AttackMode] = Field(default=None, alias="a")
+    attack_mode: AttackMode = Field(default=None, alias="a")
     dry_run: bool = Field(default=False)
 
     @validator("attack_mode", pre=True, always=True)
@@ -45,20 +42,12 @@ class HashcatOptions(BaseModel):
         return AttackMode.MASK
 
 
-class BaseStep(BaseModel):
-    options: Optional[HashcatOptions] = None
-
-
-class HashcatStep(BaseStep):
-    wordlists: Optional[List[str]] = None
-    rules: Optional[List[str]] = None
-    masks: Optional[List[str]] = None
+class HashcatStep(BaseModel):
+    options: HashcatOptions = Field(default_factory=HashcatOptions)
+    wordlists: List[str] = Field(default_factory=list)
+    rules: List[str] = Field(default_factory=list)
+    masks: List[str] = Field(default_factory=list)
 
 
 class Steps(BaseModel):
-    steps: List[BaseStep] = Field(default_factory=list)
-
-
-def hashcat_step_constructor(loader, node):
-    value = loader.construct_mapping(node, deep=True)
-    return parse_obj_as(HashcatStep, value)
+    steps: List[HashcatStep] = Field(default_factory=list)

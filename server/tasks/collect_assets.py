@@ -1,11 +1,10 @@
 import logging
-import uuid
 from celery import chord, shared_task, current_app
 from celery.signals import worker_process_init
 from sqlalchemy.future import select
 from models import HashcatAsset
 from schemas import HashcatAssetSchema
-from config import CeleryApp, Config, Database
+from config import CeleryApp, Config, Database, UUIDGenerator
 from sqlalchemy import func
 from datetime import timedelta
 
@@ -24,8 +23,8 @@ def fetch_assets_by_uuid(task_uuid):
 
 
 @shared_task(name="main.collect_assets")
-def collect_assets(uid: str):
-    task_uuid = uuid.uuid5(uuid.NAMESPACE_DNS, uid)
+def collect_assets(owner_id: str):
+    task_uuid = UUIDGenerator.generate(owner_id)
     data = fetch_assets_by_uuid(task_uuid)
     if data and len(data) != 0:
         return data
@@ -37,7 +36,3 @@ def collect_assets(uid: str):
         routing_key="broadcast",
     )
     return data
-
-@shared_task
-def run_hashcat():
-    pass

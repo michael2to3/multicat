@@ -27,7 +27,9 @@ python-gnupg==0.5.2
 PyYAML==6.0.1
 six==1.16.0
 SQLAlchemy==2.0.28
+sqlmodel==0.0.16
 tomlkit==0.12.4
+types-PyYAML==6.0.12.20240311
 typing_extensions==4.10.0
 tzdata==2024.1
 vine==5.1.0

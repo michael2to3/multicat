@@ -15,14 +15,16 @@ class LoadSteps(BaseCommand):
 
     async def handle(self, message: Message):
         if message.content_type == ContentType.DOCUMENT:
+            userid = str(message.from_user.id)
             document_id = message.document.file_id
+            file_name = message.document.file_name
             file_info = await self.bot.get_file(document_id)
             file_path = file_info.file_path
             file = await self.bot.download_file(file_path)
             content = file.read()
 
             result = self.app.send_task(
-                "main.loadsteps", args=(content.decode("UTF-8"),), queue="server"
+                "main.loadsteps", args=(userid, file_name, content.decode("UTF-8"),), queue="server"
             )
             processing_result = result.get(timeout=10)
             await message.answer(f"{processing_result}")

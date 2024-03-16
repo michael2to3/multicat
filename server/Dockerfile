@@ -12,8 +12,10 @@ RUN apt-get update && \
 
 ENV GNUPGHOME=/app/gnupg
 
-RUN mkdir $GNUPGHOME && \
-    chmod 700 $GNUPGHOME && \
+RUN mkdir -p $GNUPGHOME && \
+    chmod 700 $GNUPGHOME
+
+RUN if ! gpg --list-keys muclicat@deiteriy.com > /dev/null 2>&1; then \
     echo "Key-Type: RSA\n\
 Key-Length: 2048\n\
 Subkey-Type: RSA\n\
@@ -24,5 +26,6 @@ Name-Email: muclicat@deiteriy.com\n\
 Expire-Date: 0\n\
 Passphrase: secretpassphrase\n\
 %no-protection\n\
-%commit" > /root/gen-key-script && \
-    gpg --batch --generate-key /root/gen-key-script
+%commit" > $GNUPGHOME/gen-key-script && \
+    gpg --batch --generate-key $GNUPGHOME/gen-key-script; \
+    fi
