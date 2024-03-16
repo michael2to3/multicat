@@ -24,9 +24,7 @@ class Assets(BaseCommand):
             return
 
         userid = str(message.from_user.id)
-        task = self.app.send_task(
-            "main.collect_assets", args=(userid,), queue="server"
-        )
+        task = self.app.send_task("main.collect_assets", args=(userid,), queue="server")
         resp = CeleryResponse(**task.get(timeout=10))
 
         if resp.error:

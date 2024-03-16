@@ -36,6 +36,4 @@ class DelSteps(BaseCommand):
         elif celery_response.value:
             await message.answer(f"{celery_response.value}")
         else:
-            await message.answer(
-                "Operation completed with no additional information."
-            )
+            await message.answer("Operation completed with no additional information.")

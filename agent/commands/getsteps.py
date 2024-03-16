@@ -39,8 +39,6 @@ class GetSteps(BaseCommand):
             document = BufferedInputFile(
                 bytes(resp.value, encoding="UTF-8"), filename=text_message
             )
-            await message.answer_document(
-                document=document, caption=message_response
-            )
+            await message.answer_document(document=document, caption=message_response)
         else:
             await message.answer(message_response)
