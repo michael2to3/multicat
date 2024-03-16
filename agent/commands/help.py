@@ -1,7 +1,8 @@
 from commands import BaseCommand
 from aiogram.types import Message
+from .register_command import register_command
 
-
+@register_command
 class Help(BaseCommand):
     @property
     def command(self):

@@ -2,28 +2,26 @@ import asyncio
 import logging
 import sys
 from aiogram import Bot, Dispatcher, Router
-from celery import Celery
-import config
-import celeryconfig
-from commands import Hash, Start, Help
+from commands import command_registry
+from config import CeleryApp, Config
+from schemas import HashcatAssetSchema
 
 logging.basicConfig(level=logging.INFO)
 
 
-bot = Bot(config.TELEGRAM_TOKEN)
-
-app = Celery("agent")
-app.config_from_object(celeryconfig)
+bot = Bot(Config.get("TELEGRAM_TOKEN"))
+app = CeleryApp("agent").get_app()
 
 
 async def main() -> None:
     dispatcher = Dispatcher()
     router = Router()
-    Start(bot, router, app)
-    Hash(bot, router, app)
-    Help(bot, router, app)
+
+    for command_cls in command_registry.list_commands():
+        command_cls(bot, router, app)
+
     dispatcher.include_router(router)
-    await dispatcher.start_polling(bot)
+    await dispatcher.start_polling(bot, skip_updates=True)
 
 
 if __name__ == "__main__":

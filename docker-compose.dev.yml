@@ -10,9 +10,10 @@ services:
     environment:
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
-      CELERY_TIMEZONE: ${CELERY_TIMEZONE}
+      TIMEZONE: ${TIMEZONE}
       DATABASE_URL: ${DATABASE_URL}
     volumes:
+      - server_data:/app/gnupg
       - ./server:/app
     command: /bin/sh -c "pip install watchdog && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A main:app worker -Q server --loglevel=info"
   celerybeat:
@@ -25,17 +26,21 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
-      CELERY_TIMEZONE: ${CELERY_TIMEZONE}
+      TIMEZONE: ${TIMEZONE}
   client:
     build: ./client
     depends_on:
       - server
-    command: /bin/sh -c "pip install watchdog && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A main:app worker -Q client --loglevel=info"
+    command: /bin/sh -c "pip install watchdog && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A main:app worker -Q client,broadcast -c 1 --loglevel=info"
     environment:
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
-      CELERY_TIMEZONE: ${CELERY_TIMEZONE}
+      TIMEZONE: ${TIMEZONE}
       DATABASE_URL: ${DATABASE_URL}
+      RULES_DIR: ${RULES_DIR}
+      WORDLISTS_DIR: ${WORDLISTS_DIR}
+    devices:
+      - "/dev/dri:/dev/dri"
   agent:
     build: ./agent
     depends_on:
@@ -44,7 +49,7 @@ services:
       TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
-      CELERY_TIMEZONE: ${CELERY_TIMEZONE}
+      TIMEZONE: ${TIMEZONE}
     volumes:
       - ./agent:/app
     command: /bin/sh -c "pip install watchdog && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- python main.py"
@@ -70,5 +75,16 @@ services:
       - "5555:5555"
     depends_on:
       - rabbitmq
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5556:80"
+    depends_on:
+      - db
+
 volumes:
   postgres_data:
+  server_data:
