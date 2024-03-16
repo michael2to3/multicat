@@ -1,5 +1,6 @@
 import os
 
+
 class Config:
     @staticmethod
     def get(key: str):
