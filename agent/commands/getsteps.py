@@ -32,13 +32,14 @@ class GetSteps(BaseCommand):
             processing_result_raw = result.get(timeout=10)
             resp = CeleryResponse(**processing_result_raw)
 
-            message_response = "" if resp.value is None else resp.value
             if resp.error:
-                message_response += f"\nError: {resp.error}"
-            if resp.warning:
-                message_response += f"\nWarning: {resp.warning}"
+                await message.answer(f"Error: {resp.error}")
+                return
+            message_response = resp.warning if resp.warning else ""
             if resp.value:
-                document = BufferedInputFile(resp.value, filename=text_message)
+                document = BufferedInputFile(
+                    bytes(resp.value, encoding="UTF-8"), filename=text_message
+                )
                 await message.answer_document(
                     document=document, caption=message_response
                 )
