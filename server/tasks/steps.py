@@ -4,7 +4,7 @@ import json
 from pydantic import BaseModel, Field, ValidationError, parse_obj_as
 from celery import shared_task
 from sqlalchemy.exc import SQLAlchemyError
-from models import StepsModel
+from models import StepsModel, get_unique_name_hashcatrules
 from config import Database, UUIDGenerator
 from schemas import Steps, hashcat_step_loader, CeleryResponse
 
@@ -103,7 +103,7 @@ def loadsteps(owner_id: str, namerule: str, rule: str):
     with db.session() as session:
         new_step = StepsModel(
             owner_id=UUIDGenerator.generate(owner_id),
-            name=namerule,
+            name=get_unique_name_hashcatrules(session, namerule),
             steps=json.loads(steps_json),
         )
         session.add(new_step)
