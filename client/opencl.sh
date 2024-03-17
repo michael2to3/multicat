@@ -8,7 +8,6 @@ apt install -y lshw pciutils util-linux
 install_amd() {
   echo "Installing OpenCL for AMD GPU."
   echo 'deb [arch=amd64] http://repo.radeon.com/rocm/apt/debian/ xenial main' | tee /etc/apt/sources.list.d/rocm.list
-  apt update
   apt install -y rocm-opencl rocm-dkms rocm-libs
 }
 
