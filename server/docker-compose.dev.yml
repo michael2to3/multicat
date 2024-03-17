@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   server:
-    build: ./server
+    build: .
     depends_on:
       - rabbitmq
       - db
@@ -14,10 +14,12 @@ services:
       DATABASE_URL: ${DATABASE_URL}
     volumes:
       - server_data:/app/gnupg
-      - ./server:/app
+      - .:/app
     command: /bin/sh -c "pip install watchdog && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A main:app worker -Q server --loglevel=info"
+    networks:
+      - multicat
   celerybeat:
-    build: ./server
+    build: .
     depends_on:
       - rabbitmq
       - db
@@ -27,45 +29,8 @@ services:
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
       TIMEZONE: ${TIMEZONE}
-  client:
-    build: ./client
-    depends_on:
-      - server
-    command: /bin/sh -c "pip install watchdog && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A main:app worker -Q client,broadcast -c 1 --loglevel=info"
-    environment:
-      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
-      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
-      TIMEZONE: ${TIMEZONE}
-      DATABASE_URL: ${DATABASE_URL}
-      RULES_DIR: ${RULES_DIR}
-      WORDLISTS_DIR: ${WORDLISTS_DIR}
-    devices:
-      - "/dev/dri:/dev/dri"
-  agent:
-    build: ./agent
-    depends_on:
-      - server
-    environment:
-      TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
-      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
-      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
-      TIMEZONE: ${TIMEZONE}
-    volumes:
-      - ./agent:/app
-    command: /bin/sh -c "pip install watchdog && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- python main.py"
-  rabbitmq:
-    image: rabbitmq:3.13.0-management-alpine
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
-  db:
-    image: postgres:16.2
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - multicat
   flower:
     image: mher/flower
     command: celery flower --broker=${CELERY_BROKER_URL} --port=5555
@@ -75,6 +40,25 @@ services:
       - "5555:5555"
     depends_on:
       - rabbitmq
+    networks:
+      - multicat
+  rabbitmq:
+    image: rabbitmq:3.13.0-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    networks:
+      - multicat
+  db:
+    image: postgres:16.2
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - multicat
   pgadmin:
     image: dpage/pgadmin4:latest
     environment:
@@ -84,7 +68,11 @@ services:
       - "5556:80"
     depends_on:
       - db
-
+    networks:
+      - multicat
 volumes:
   postgres_data:
   server_data:
+networks:
+  multicat:
+    external: true
