@@ -1,10 +1,11 @@
-import asyncio
-from typing import List
-from celery.result import AsyncResult
+import logging
+from typing import List, Dict
+from schemas import CeleryResponse, HashcatAssetSchema
 from aiogram.types import Message
 from .command import BaseCommand
 from .register_command import register_command
-from schemas import HashcatAssetSchema
+
+logger = logging.getLogger(__name__)
 
 
 @register_command
@@ -15,17 +16,27 @@ class Assets(BaseCommand):
 
     @property
     def description(self):
-        return "Get a list of wordlists/rules"
+        return "Get assets for hashcat"
 
     async def handle(self, message: Message):
+        if message.from_user is None:
+            await message.answer("Please use this command in private")
+            return
+
         userid = str(message.from_user.id)
         task = self.app.send_task("main.collect_assets", args=(userid,), queue="server")
-        assets = task.get(timeout=10)
-        assets_schemas: List[HashcatAssetSchema] = [
-            HashcatAssetSchema(**asset) for asset in assets
-        ]
+        resp = CeleryResponse(**task.get(timeout=10))
 
-        assets_by_worker = {}
+        if resp.error:
+            await message.answer(f"Error: {resp.error}")
+            return
+        if resp.warning:
+            await message.answer(f"Warning: {resp.warning}")
+
+        assets_schemas: List[HashcatAssetSchema] = [
+            HashcatAssetSchema(**asset) for asset in resp.value
+        ]
+        assets_by_worker: Dict[str, Dict[str, List[str]]] = {}
         for asset in assets_schemas:
             if asset.worker_id not in assets_by_worker:
                 assets_by_worker[asset.worker_id] = {"wordlists": [], "rules": []}
@@ -47,4 +58,6 @@ class Assets(BaseCommand):
             )
             message_text += worker_assets_text + "\n\n"
 
-        await message.answer(message_text.strip() if message_text else "Wait...")
+        await message.answer(
+            message_text.strip() if message_text else "No assets found."
+        )

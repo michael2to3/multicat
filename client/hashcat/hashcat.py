@@ -3,7 +3,7 @@ from pyhashcat import Hashcat as Cat
 
 
 class Hashcat(HashcatInterface):
-    def __init__(self, instance = Cat()):
+    def __init__(self, instance=Cat()):
         self._instance = instance
 
     @property

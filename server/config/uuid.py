@@ -1,5 +1,6 @@
 import uuid
 
+
 class UUIDGenerator:
     _namespace = uuid.NAMESPACE_DNS
 

@@ -1,12 +1,14 @@
-from io import BytesIO
-from aiogram.types import Message, ContentType
-from aiogram.types.input_file import BufferedInputFile
+import logging
+from aiogram.types import Message
 from commands import BaseCommand
+from schemas import CeleryResponse
 from .register_command import register_command
+
+logger = logging.getLogger(__name__)
 
 
 @register_command
-class GetSteps(BaseCommand):
+class DelSteps(BaseCommand):
     @property
     def command(self):
         return "delsteps"
@@ -25,6 +27,13 @@ class GetSteps(BaseCommand):
         result = self.app.send_task(
             "main.delsteps", args=(userid, text_message), queue="server"
         )
-        processing_result = result.get(timeout=10)
+        celery_response = CeleryResponse(**result.get(timeout=10))
 
-        await message.answer(f"{processing_result}")
+        if celery_response.error:
+            await message.answer(f"Error: {celery_response.error}")
+        elif celery_response.warning:
+            await message.answer(f"Warning: {celery_response.warning}")
+        elif celery_response.value:
+            await message.answer(f"{celery_response.value}")
+        else:
+            await message.answer("Operation completed with no additional information.")

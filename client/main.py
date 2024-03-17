@@ -31,6 +31,7 @@ def get_assets(self, task_uuid):
 
     logger.info(f"Asset added to database: {hashcat_asset}")
 
+
 @app.task(bind=True)
 def run_hashcat(self, request: dict):
     request_model = Request(**request)
