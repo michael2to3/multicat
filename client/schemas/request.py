@@ -1,6 +1,7 @@
-from typing import List, Optional
 from enum import Enum
-from pydantic import BaseModel, field_validator, ConfigDict
+from typing import List, Optional
+
+from pydantic import BaseModel, ConfigDict, field_validator
 
 
 class HashcatMode(Enum):

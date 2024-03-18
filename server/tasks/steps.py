@@ -1,12 +1,13 @@
-import logging
-import yaml
 import json
-from pydantic import BaseModel, Field, ValidationError, parse_obj_as
+import logging
+
+import yaml
 from celery import shared_task
-from sqlalchemy.exc import SQLAlchemyError
-from models import StepsModel, get_unique_name_hashcatrules
 from config import Database, UUIDGenerator
-from schemas import Steps, hashcat_step_loader, CeleryResponse
+from models import StepsModel, get_unique_name_hashcatrules
+from pydantic import BaseModel, Field, ValidationError, parse_obj_as
+from schemas import CeleryResponse, Steps, hashcat_step_loader
+from sqlalchemy.exc import SQLAlchemyError
 
 logger = logging.getLogger(__name__)
 

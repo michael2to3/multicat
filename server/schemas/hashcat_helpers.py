@@ -1,5 +1,6 @@
 import yaml
 from pydantic import parse_obj_as
+
 from .hashcat_request import HashcatStep
 
 

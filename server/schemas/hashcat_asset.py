@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import List
-from pydantic import BaseModel, UUID5, Field
+
+from pydantic import UUID5, BaseModel, Field
 
 
 class HashcatAssetSchema(BaseModel):

@@ -1,5 +1,5 @@
-from gnupg import GPG
 from celery import shared_task
+from gnupg import GPG
 from schemas import CeleryResponse
 
 

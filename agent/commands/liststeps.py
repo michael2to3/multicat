@@ -1,7 +1,9 @@
 import logging
+
 from aiogram.types import Message
 from commands import BaseCommand
 from schemas import CeleryResponse
+
 from .register_command import register_command
 
 logger = logging.getLogger(__name__)

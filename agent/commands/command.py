@@ -1,11 +1,12 @@
 import logging
 from abc import ABC, abstractmethod
 from typing import Dict
-from celery import Celery
+
 from aiogram import Bot
+from aiogram.dispatcher.router import Router
 from aiogram.filters import Command
 from aiogram.types import Message
-from aiogram.dispatcher.router import Router
+from celery import Celery
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

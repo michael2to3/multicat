@@ -1,7 +1,8 @@
 from celery import Celery
-from .config import Config
-from kombu import Queue, Exchange
+from kombu import Exchange, Queue
 from kombu.common import Broadcast
+
+from .config import Config
 
 
 class CeleryApp:

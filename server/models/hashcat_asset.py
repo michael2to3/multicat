@@ -1,9 +1,10 @@
-from typing import List
-from datetime import datetime
-from sqlalchemy import Column, String, create_engine, DateTime, Integer
-from sqlalchemy.dialects.postgresql import UUID, ARRAY
 import uuid
+from datetime import datetime
+from typing import List
+
 from config import Base
+from sqlalchemy import Column, DateTime, Integer, String, create_engine
+from sqlalchemy.dialects.postgresql import ARRAY, UUID
 
 
 class HashcatAsset(Base):

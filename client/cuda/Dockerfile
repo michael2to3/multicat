@@ -42,12 +42,14 @@ ENV HCXKEYS_VERSION        master
 
 # Update & install packages for installing hashcat
 RUN apt-get update && \
-    apt-get install -y wget make clinfo build-essential git libcurl4-openssl-dev libssl-dev zlib1g-dev libcurl4-openssl-dev libssl-dev pkg-config pciutils
+    apt-get install -y wget make clinfo build-essential git libcurl4-openssl-dev libssl-dev zlib1g-dev libcurl4-openssl-dev libssl-dev pkg-config pciutils python3.11 && \
+    wget https://bootstrap.pypa.io/get-pip.py && \
+    python3.11 get-pip.py
 
 # Fetch PCI IDs list to display proper GPU names
 RUN update-pciids
 
-WORKDIR /root
+WORKDIR /app
 
 RUN git clone https://github.com/hashcat/hashcat.git && cd hashcat && git checkout ${HASHCAT_VERSION} && make install_library && make install -j4
 
@@ -68,10 +70,10 @@ ENV LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH}
 
 COPY . /app/
 
-RUN pip3 install setuptools && \
+RUN pip3.11 install setuptools && \
     git clone https://github.com/michael2to3/pyhashcat.git && \
     cd pyhashcat/ && \
-    python3 setup.py build_ext -I /usr/include/lzma/ && \
-    python3 setup.py install
+    python3.11 setup.py build_ext -I /usr/include/lzma/ && \
+    python3.11 setup.py install
 
-RUN pip3 install --no-cache-dir -r /app/requirements.txt
+RUN pip3.11 install --no-cache-dir -r /app/requirements.txt

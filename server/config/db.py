@@ -1,10 +1,10 @@
+import logging
 from contextlib import contextmanager
+
 from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker, scoped_session
-from config import Config
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.ext.declarative import declarative_base
-import logging
+from sqlalchemy.orm import scoped_session, sessionmaker
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)

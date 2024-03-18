@@ -1,10 +1,11 @@
 import io
-import gnupg
-from pydantic import BaseModel, Field, ValidationError, parse_obj_as
 from typing import List, Union
+
+import gnupg
 import yaml
 from celery import current_app, shared_task
-from schemas import hashcat_step_constructor, Steps, CeleryResponse
+from pydantic import BaseModel, Field, ValidationError, parse_obj_as
+from schemas import CeleryResponse, Steps, hashcat_step_constructor
 
 
 @shared_task(name="main.hashcat_run")

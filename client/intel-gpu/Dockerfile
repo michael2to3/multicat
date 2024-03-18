@@ -11,9 +11,6 @@ RUN wget https://github.com/intel/compute-runtime/releases/download/22.49.25018.
 RUN wget https://github.com/intel/compute-runtime/releases/download/22.49.25018.24/libigdgmm12_22.3.0_amd64.deb
 RUN dpkg -i *.deb && rm *.deb
 
-LABEL maintainer="Danylo Ulianych"
-
-
 ENV HASHCAT_VERSION        v6.2.6
 ENV HASHCAT_UTILS_VERSION  v1.9
 ENV HCXTOOLS_VERSION       6.2.7
@@ -22,13 +19,15 @@ ENV HCXKEYS_VERSION        master
 
 # Update & install packages for installing hashcat
 RUN apt-get update && \
-    apt-get install -y wget make clinfo build-essential git libcurl4-openssl-dev libssl-dev zlib1g-dev libcurl4-openssl-dev libssl-dev pkg-config pciutils python3.11
+    apt-get install -y wget make clinfo build-essential git libcurl4-openssl-dev libssl-dev zlib1g-dev libcurl4-openssl-dev libssl-dev pkg-config pciutils python3.11 \
+    wget https://bootstrap.pypa.io/get-pip.py && \
+    python3.11 get-pip.py
 RUN apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
 
 # Fetch PCI IDs list to display proper GPU names
 RUN update-pciids
 
-WORKDIR /root
+WORKDIR /app
 
 RUN git clone https://github.com/hashcat/hashcat.git && cd hashcat && git checkout ${HASHCAT_VERSION} && make install_library && make install -j4
 
@@ -49,10 +48,10 @@ ENV LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH}
 
 COPY . /app/
 
-RUN pip3 install setuptools && \
+RUN pip3.11 install setuptools && \
     git clone https://github.com/michael2to3/pyhashcat.git && \
     cd pyhashcat/ && \
-    python3 setup.py build_ext -I /usr/include/lzma/ && \
-    python3 setup.py install
+    python3.11 setup.py build_ext -I /usr/include/lzma/ && \
+    python3.11 setup.py install
 
-RUN pip3 install --no-cache-dir -r /app/requirements.txt
+RUN pip3.11 install --no-cache-dir -r /app/requirements.txt

@@ -1,6 +1,7 @@
-from aiogram.types import Message, ContentType
+from aiogram.types import ContentType, Message
 from commands import BaseCommand
 from schemas import CeleryResponse
+
 from .register_command import register_command
 
 

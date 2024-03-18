@@ -1,5 +1,6 @@
-from commands import BaseCommand
 from aiogram.types import Message
+from commands import BaseCommand
+
 from .register_command import register_command
 
 

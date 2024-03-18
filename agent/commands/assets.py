@@ -1,7 +1,9 @@
 import logging
-from typing import List, Dict
-from schemas import CeleryResponse, HashcatAssetSchema
+from typing import Dict, List
+
 from aiogram.types import Message
+from schemas import CeleryResponse, HashcatAssetSchema
+
 from .command import BaseCommand
 from .register_command import register_command
 
@@ -25,16 +27,17 @@ class Assets(BaseCommand):
 
         userid = str(message.from_user.id)
         task = self.app.send_task("main.collect_assets", args=(userid,), queue="server")
-        resp = CeleryResponse(**task.get(timeout=10))
+        resp = CeleryResponse(**task.get(timeout=60))
 
         if resp.error:
             await message.answer(f"Error: {resp.error}")
             return
         if resp.warning:
             await message.answer(f"Warning: {resp.warning}")
+            return
 
         assets_schemas: List[HashcatAssetSchema] = [
-            HashcatAssetSchema(**asset) for asset in resp.value
+            HashcatAssetSchema(**asset) for asset in resp.value if asset
         ]
         assets_by_worker: Dict[str, Dict[str, List[str]]] = {}
         for asset in assets_schemas:
