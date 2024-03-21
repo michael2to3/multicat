@@ -10,8 +10,8 @@ db = Database(Config.get("DATABASE_URL"))
 file_manager = FileManager(Config.get("RULES_DIR"), Config.get("WORDLISTS_DIR"))
 
 
-@shared_task(name="main.hashcat_run", ignore_result=True)
-def hashcat_run(self, task_uuid):
+@shared_task(name="main.run_hashcat", ignore_result=True)
+def run_hashcat(self, task_uuid):
     worker_id = current_task.request.hostname
     wordlists = file_manager.get_wordlists_files()
     rules = file_manager.get_rules_files()

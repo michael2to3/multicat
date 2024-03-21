@@ -1,4 +1,7 @@
+import base64
+
 from aiogram.types import ContentType, Message
+
 from commands import BaseCommand
 from schemas import CeleryResponse
 
@@ -35,11 +38,11 @@ class Hashcat(BaseCommand):
             file_info = await self.bot.get_file(document_id)
             file_path = file_info.file_path
             file = await self.bot.download_file(file_path)
-            content = file.read()
+            content = base64.b64encode(file.read()).decode("utf-8")
 
             result = self.app.send_task(
-                "main.hashcat_run",
-                args=(hashtype, namerule, content.decode("UTF-8")),
+                "main.run_hashcat",
+                args=(hashtype, namerule, content),
                 queue="server",
             )
 

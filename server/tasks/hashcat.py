@@ -1,44 +1,37 @@
+import base64
 import io
+from typing import List
 
-import yaml
 from celery import current_app, shared_task
-from pydantic import ValidationError, parse_obj_as
 
 import gnupg
-from schemas import CeleryResponse, Steps, hashcat_step_constructor
+from config import Database
+from schemas import CeleryResponse, HashcatStep
+
+db = Database()
 
 
-def generate_discrete_task(rule, hashes):
-    pass
+def generate_discrete_task(namerule: str, hashtype: str, hashes: List[str]):
+    steps: List[HashcatStep]
 
 
-@shared_task(name="main.hashcat_run")
-def hashcat_run(hashtype, namerule, hashes):
+@shared_task(name="main.run_hashcat")
+def run_hashcat(hashtype, namerule, base64_encrypt_hashes):
     gpg = gnupg.GPG()
 
-    hashes_in_memory = io.BytesIO(hashes)
+    encrypt_hashes = base64.b64decode(base64_encrypt_hashes)
+    hashes_in_memory = io.BytesIO(encrypt_hashes)
 
     decrypted_data = gpg.decrypt_file(hashes_in_memory)
 
     if not decrypted_data.ok:
         return CeleryResponse(error="Failed to decrypt the file").dict()
 
-    try:
-        yaml.SafeLoader.add_constructor("!hashcatstep", hashcat_step_constructor)
-        data = yaml.safe_load(decrypted_data.data)
-        model = parse_obj_as(Steps, {"steps": data})
-    except yaml.YAMLError as ye:
-        return CeleryResponse(error=f"Failed to load YAML content: {str(ye)}").dict()
-    except ValidationError as ve:
-        return CeleryResponse(
-            error=f"Validation error for the provided data: {str(ve)}"
-        ).dict()
+    hashes = decrypted_data.data
 
-    task_data = model.json()
+    result = current_app.send_task("main.run_hashcat", args=(hashes,), queue="server")
+    job_id = result.get(timeout=60)
 
-    result = current_app.send_task(
-        "main.run_hashcat", args=(task_data,), queue="server"
-    )
-    result.forget()
+    message = f"Your task has been queued and will start as soon as a server becomes available. You can check the progress of your task using the command /status {job_id}. Thank you for your patience."
 
-    return CeleryResponse(value="Started...").dict()
+    return CeleryResponse(value=message).dict()
