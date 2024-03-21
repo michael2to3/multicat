@@ -1,6 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict
+from typing import Dict, Optional
 
 from aiogram import Bot
 from aiogram.dispatcher.router import Router

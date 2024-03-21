@@ -27,7 +27,7 @@ class DelSteps(BaseCommand):
             return
 
         result = self.app.send_task(
-            "main.delsteps", args=(userid, text_message), queue="server"
+            "main.delete_steps", args=(userid, text_message), queue="server"
         )
         celery_response = CeleryResponse(**result.get(timeout=10))
 

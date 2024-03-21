@@ -1,6 +1,7 @@
 import logging
 
 from celery import current_task, shared_task
+
 from config import Config, Database
 from hashcat import FileManager
 from models import HashcatAsset
@@ -11,7 +12,7 @@ file_manager = FileManager(Config.get("RULES_DIR"), Config.get("WORDLISTS_DIR"))
 
 
 @shared_task(name="b.get_assets", ignore_result=True)
-def get_assets(task_uuid):
+def get_assets(task_uuid: str):
     worker_id = current_task.request.hostname
     wordlists = file_manager.get_wordlists_files()
     rules = file_manager.get_rules_files()

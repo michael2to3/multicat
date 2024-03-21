@@ -33,7 +33,7 @@ class LoadSteps(BaseCommand):
         content = file_bytes.read()
 
         result = self.app.send_task(
-            "main.loadsteps",
+            "main.load_steps",
             args=(userid, file_name, content.decode("UTF-8")),
             queue="server",
         )

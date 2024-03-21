@@ -3,11 +3,12 @@ import logging
 
 import yaml
 from celery import shared_task
-from config import Database, UUIDGenerator
-from models import StepsModel, get_unique_name_hashcatrules
-from pydantic import BaseModel, Field, ValidationError, parse_obj_as
-from schemas import CeleryResponse, Steps, hashcat_step_loader
+from pydantic import ValidationError, parse_obj_as
 from sqlalchemy.exc import SQLAlchemyError
+
+from config import Database, UUIDGenerator
+from models import HashcatStep, Step, User, UserRole
+from schemas import CeleryResponse, Steps, hashcat_step_loader
 
 logger = logging.getLogger(__name__)
 
@@ -15,105 +16,98 @@ logger = logging.getLogger(__name__)
 db = Database()
 
 
-@shared_task(name="main.delsteps")
-def delsteps(owner_id: str, namerule: str):
-    try:
-        uid = UUIDGenerator.generate(owner_id)
-    except ValueError as ve:
-        logger.error(f"Invalid UUID format: {str(ve)}")
-        return CeleryResponse(error=f"Invalid UUID format: {str(ve)}").dict()
+def get_user(session, user_id: str):
+    user = session.query(User).filter(User.id == user_id).first()
+    if not user:
+        user = User(id=user_id, role=UserRole.USER.value)
+        session.add(user)
+        session.commit()
+    return user
 
+
+@shared_task(name="main.delete_steps")
+def delete_steps(user_id: str, namerule: int):
+    user_id = UUIDGenerator.generate(user_id)
     with db.session() as session:
-        query = session.query(StepsModel).filter(
-            StepsModel.owner_id == uid, StepsModel.name == namerule
+        user = get_user(session, user_id)
+        step = (
+            session.query(Step)
+            .filter(Step.name == namerule, Step.user_id == user.id)
+            .first()
         )
-        steps = query.first()
-        if steps:
-            session.delete(steps)
-            try:
-                session.commit()
-                logger.info("StepsModel deleted successfully")
-                return CeleryResponse(value="StepsModel deleted successfully").dict()
-            except SQLAlchemyError as e:
-                logger.error(f"Database delete operation failed: {str(e)}")
-                return CeleryResponse(
-                    error=f"Database delete operation failed: {str(e)}"
-                ).dict()
+        if step:
+            session.delete(step)
+            session.commit()
+            return CeleryResponse(value="Step deleted successfully").dict()
         else:
-            return CeleryResponse(error="Rule not found.").dict()
+            return CeleryResponse(error="Step not found.").dict()
 
 
-@shared_task(name="main.getsteps")
-def getsteps(owner_id: str, namerule: str):
-    try:
-        uid = UUIDGenerator.generate(owner_id)
-    except ValueError as ve:
-        logger.error(f"Invalid UUID format: {str(ve)}")
-        return CeleryResponse(error=f"Invalid UUID format: {str(ve)}").dict()
-
+@shared_task(name="main.get_steps")
+def get_steps(user_id: str, step_name: str):
+    user_id = UUIDGenerator.generate(user_id)
     with db.session() as session:
-        query = session.query(StepsModel.steps).filter(
-            StepsModel.owner_id == uid, StepsModel.name == namerule
+        user = get_user(session, user_id)
+
+        step = (
+            session.query(Step)
+            .filter(Step.user_id == user_id, Step.name == step_name)
+            .first()
         )
-        steps_data = query.first()
-        if steps_data:
-            steps_dict = dict(steps_data.steps) if steps_data.steps else {}
-            yaml_dump = yaml.dump(
-                steps_dict, default_flow_style=False, allow_unicode=True
-            )
-            return CeleryResponse(value=yaml_dump).dict()
-        else:
-            return CeleryResponse(error="Rule not found.").dict()
+        if not step:
+            return CeleryResponse(error="Step not found.").dict()
+
+        hashcat_steps = [json.loads(s.value) for s in step.hashcat_steps]
+
+        yaml_dump = yaml.dump(
+            hashcat_steps, default_flow_style=False, allow_unicode=True
+        )
+        return CeleryResponse(value=yaml_dump).dict()
 
 
-@shared_task(name="main.liststeps")
-def liststeps(owner_id: str):
-    try:
-        uid = UUIDGenerator.generate(owner_id)
-    except ValueError as ve:
-        logger.error(f"Invalid UUID format: {str(ve)}")
-        return CeleryResponse(error=f"Invalid UUID format: {str(ve)}").dict()
-
+@shared_task(name="main.list_steps")
+def list_steps(user_id: str):
+    user_id = UUIDGenerator.generate(user_id)
     with db.session() as session:
-        query = (
-            session.query(StepsModel.name).filter(StepsModel.owner_id == uid).distinct()
-        )
-        steps_names = [rule_name for (rule_name,) in query]
-        if steps_names:
-            return CeleryResponse(value=steps_names).dict()
+        user = get_user(session, user_id)
+
+        steps = session.query(Step.name).filter(Step.user_id == user_id).all()
+        steps_name = [step.name for step in steps]
+
+        if steps_name:
+            return CeleryResponse(value=steps_name).dict()
         else:
             return CeleryResponse(error="No steps found.").dict()
 
 
-@shared_task(name="main.loadsteps")
-def loadsteps(owner_id: str, namerule: str, rule: str):
-    try:
-        data = yaml.load(rule, Loader=hashcat_step_loader())
-        model = parse_obj_as(Steps, data)
-    except yaml.YAMLError as ye:
-        logger.error(f"Failed to load YAML content: {str(ye)}")
-        return CeleryResponse(error=f"Failed to load YAML content: {str(ye)}").dict()
-    except ValidationError as ve:
-        logger.error(f"Validation error for the provided data: {str(ve)}")
-        return CeleryResponse(
-            error=f"Validation error for the provided data: {str(ve)}"
-        ).dict()
-
-    steps_json = model.json()
-
+@shared_task(name="main.load_steps")
+def load_steps(user_id: str, steps_name: str, yaml_content: str):
+    user_id = UUIDGenerator.generate(user_id)
     with db.session() as session:
-        new_step = StepsModel(
-            owner_id=UUIDGenerator.generate(owner_id),
-            name=get_unique_name_hashcatrules(session, namerule),
-            steps=json.loads(steps_json),
-        )
-        session.add(new_step)
+        user = get_user(session, user_id)
+
         try:
-            session.commit()
-            logger.info("StepsModel saved successfully")
-            return CeleryResponse(value="StepsModel saved successfully").dict()
-        except SQLAlchemyError as e:
-            logger.error(f"Database save operation failed: {str(e)}")
+            data = yaml.load(yaml_content, Loader=hashcat_step_loader())
+            model = parse_obj_as(Steps, data)
+        except yaml.YAMLError as e:
+            logger.error(f"Failed to load YAML content: {str(e)}")
+            return CeleryResponse(error=f"Failed to load YAML content: {str(e)}").dict()
+        except ValidationError as e:
+            logger.error(f"Validation error for the provided data: {str(e)}")
             return CeleryResponse(
-                error=f"Database save operation failed: {str(e)}"
+                error=f"Validation error for the provided data: {str(e)}"
             ).dict()
+
+        try:
+            step = Step(name=steps_name, user_id=user.id)
+            for hashcat_steps_model in model.steps:
+                hashcat_steps = HashcatStep(value=hashcat_steps_model.json())
+                step.hashcat_steps.append(hashcat_steps)
+            session.add(step)
+            session.commit()
+
+            return CeleryResponse(value=f"{steps_name} saved successfully").dict()
+        except SQLAlchemyError as e:
+            session.rollback()
+            logger.error(f"Database error while saving steps: {str(e)}")
+            return CeleryResponse(error=f"Database error: {str(e)}").dict()

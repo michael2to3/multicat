@@ -1,14 +1,13 @@
 import logging
 from datetime import timedelta
 
-from celery import chord, current_app, shared_task
-from celery.signals import worker_process_init
-from config import CeleryApp, Config, Database, UUIDGenerator
-from models import HashcatAsset
-from schemas import CeleryResponse, HashcatAssetSchema
+from celery import current_app, shared_task
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.future import select
+
+from config import Config, Database, UUIDGenerator
+from models import HashcatAsset
+from schemas import CeleryResponse, HashcatAssetSchema
 
 db = Database(Config.get("DATABASE_URL"))
 
@@ -46,6 +45,7 @@ def collect_assets(owner_id: str):
         exchange="broadcast_exchange",
         routing_key="broadcast",
     )
+    task.forget()
     return CeleryResponse(
         warning="No assets found within the time limit, initiated broadcast task"
     ).dict()
