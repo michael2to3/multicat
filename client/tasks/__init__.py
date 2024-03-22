@@ -1,4 +1,4 @@
 from .assets import get_assets
-from .hashcat import hashcat_run
+from .hashcat import run_hashcat
 
-__all__ = ["hashcat_run", "get_assets"]
+__all__ = ["run_hashcat", "get_assets"]

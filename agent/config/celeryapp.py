@@ -17,6 +17,9 @@ class CeleryApp:
             accept_content=["json"],
             timezone=Config.get("TIMEZONE"),
             enable_utc=True,
+            task_routes={
+                "server.*": {"queue": "server"},
+            },
         )
 
     def get_app(self):

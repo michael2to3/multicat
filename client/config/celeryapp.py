@@ -15,7 +15,7 @@ class CeleryApp:
         default_exchange = Exchange("default", type="direct")
 
         self.app.conf.task_queues = (
-            Queue("client", exchange=default_exchange, routing_key="main.#"),
+            Queue("client", exchange=default_exchange, routing_key="client.#"),
             Broadcast("broadcast", exchange=broadcast_exchange),
         )
 
@@ -23,7 +23,7 @@ class CeleryApp:
         self.app.conf.task_default_exchange = "default"
         self.app.conf.task_routes = {
             "b.*": {"queue": "broadcast"},
-            "*": {"queue": "client"},
+            "client.*": {"queue": "client"},
         }
 
         self.app.conf.update(

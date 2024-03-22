@@ -33,9 +33,8 @@ class LoadSteps(BaseCommand):
         content = file_bytes.read()
 
         result = self.app.send_task(
-            "main.load_steps",
+            "server.load_steps",
             args=(userid, file_name, content.decode("UTF-8")),
-            queue="server",
         )
         processing_result = CeleryResponse(**result.get(timeout=10))
 

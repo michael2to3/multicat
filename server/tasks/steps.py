@@ -7,7 +7,7 @@ from pydantic import ValidationError, parse_obj_as
 from sqlalchemy.exc import SQLAlchemyError
 
 from config import Database, UUIDGenerator
-from models import HashcatStep, Step, User, UserRole
+from models import DatabaseHelper, HashcatStep, Step
 from schemas import CeleryResponse, Steps, hashcat_step_loader
 
 logger = logging.getLogger(__name__)
@@ -16,23 +16,15 @@ logger = logging.getLogger(__name__)
 db = Database()
 
 
-def get_user(session, user_id: str):
-    user = session.query(User).filter(User.id == user_id).first()
-    if not user:
-        user = User(id=user_id, role=UserRole.USER.value)
-        session.add(user)
-        session.commit()
-    return user
-
-
-@shared_task(name="main.delete_steps")
-def delete_steps(user_id: str, namerule: int):
+@shared_task(name="server.delete_steps")
+def delete_steps(user_id: str, step_name: int):
     user_id = UUIDGenerator.generate(user_id)
     with db.session() as session:
-        user = get_user(session, user_id)
+        db_helper = DatabaseHelper(session)
+        user = db_helper.get_or_create_user(user_id)
         step = (
             session.query(Step)
-            .filter(Step.name == namerule, Step.user_id == user.id)
+            .filter(Step.name == step_name, Step.user_id == user.id)
             .first()
         )
         if step:
@@ -43,11 +35,12 @@ def delete_steps(user_id: str, namerule: int):
             return CeleryResponse(error="Step not found.").dict()
 
 
-@shared_task(name="main.get_steps")
+@shared_task(name="server.get_steps")
 def get_steps(user_id: str, step_name: str):
     user_id = UUIDGenerator.generate(user_id)
     with db.session() as session:
-        user = get_user(session, user_id)
+        db_helper = DatabaseHelper(session)
+        user = db_helper.get_or_create_user(user_id)
 
         step = (
             session.query(Step)
@@ -65,11 +58,12 @@ def get_steps(user_id: str, step_name: str):
         return CeleryResponse(value=yaml_dump).dict()
 
 
-@shared_task(name="main.list_steps")
+@shared_task(name="server.list_steps")
 def list_steps(user_id: str):
     user_id = UUIDGenerator.generate(user_id)
     with db.session() as session:
-        user = get_user(session, user_id)
+        db_helper = DatabaseHelper(session)
+        user = db_helper.get_or_create_user(user_id)
 
         steps = session.query(Step.name).filter(Step.user_id == user_id).all()
         steps_name = [step.name for step in steps]
@@ -80,11 +74,12 @@ def list_steps(user_id: str):
             return CeleryResponse(error="No steps found.").dict()
 
 
-@shared_task(name="main.load_steps")
+@shared_task(name="server.load_steps")
 def load_steps(user_id: str, steps_name: str, yaml_content: str):
     user_id = UUIDGenerator.generate(user_id)
     with db.session() as session:
-        user = get_user(session, user_id)
+        db_helper = DatabaseHelper(session)
+        user = db_helper.get_or_create_user(user_id)
 
         try:
             data = yaml.load(yaml_content, Loader=hashcat_step_loader())

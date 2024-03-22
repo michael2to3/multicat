@@ -17,6 +17,14 @@ class CeleryApp:
             accept_content=["json"],
             timezone=Config.get("TIMEZONE"),
             enable_utc=True,
+            task_routes={
+                "b.*": {
+                    "queue": "broadcast",
+                    "exchange": "broadcast_exchange",
+                    "routing_key": "broadcast",
+                },
+                "client.*": {"queue": "client"},
+            },
         )
 
     def get_app(self):

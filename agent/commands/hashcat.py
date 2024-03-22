@@ -34,16 +34,16 @@ class Hashcat(BaseCommand):
                 )
                 return
 
-            hashtype, namerule = parts[1], parts[2]
+            user_id = str(message.from_user.id)
+            hash_type, step_name = parts[1], parts[2]
             file_info = await self.bot.get_file(document_id)
             file_path = file_info.file_path
             file = await self.bot.download_file(file_path)
             content = base64.b64encode(file.read()).decode("utf-8")
 
             result = self.app.send_task(
-                "main.run_hashcat",
-                args=(hashtype, namerule, content),
-                queue="server",
+                "server.run_hashcat",
+                args=(user_id, hash_type, step_name, content),
             )
 
             resp = CeleryResponse(**result.get(timeout=10))

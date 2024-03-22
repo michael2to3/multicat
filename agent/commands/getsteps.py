@@ -28,7 +28,7 @@ class GetSteps(BaseCommand):
             return
 
         result = self.app.send_task(
-            "main.get_steps", args=(userid, text_message), queue="server"
+            "server.get_steps", args=(userid, text_message)
         )
         processing_result_raw = result.get(timeout=10)
         resp = CeleryResponse(**processing_result_raw)

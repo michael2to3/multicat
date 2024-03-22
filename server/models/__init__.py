@@ -1,15 +1,15 @@
 from .hashcat_asset import HashcatAsset
-from .hashcat_helpers import get_unique_name_hashcatrules
-from .hashcat_request import Hash, HashcatStep, HashType, Job, User, UserRole, Step
+from .database_helper import DatabaseHelper
+from .hashcat_request import Hash, HashcatStep, HashType, Job, Step, User, UserRole
 
 __all__ = [
     "HashcatAsset",
-    "get_unique_name_hashcatrules",
     "UserRole",
     "User",
     "Job",
     "HashcatStep",
     "Hash",
     "HashType",
-    "Step"
+    "Step",
+    "DatabaseHelper",
 ]
