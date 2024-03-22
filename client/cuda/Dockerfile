@@ -3,11 +3,10 @@ FROM ubuntu:22.04
 LABEL com.nvidia.volumes.needed="nvidia_driver"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        ocl-icd-libopencl1 \
-        wget \
-        python3.11 \
-        clinfo pkg-config && \
-    rm -rf /var/lib/apt/lists/*
+        ocl-icd-libopencl1 wget clinfo pkg-config make clinfo build-essential git libcurl4-openssl-dev libssl-dev zlib1g-dev libcurl4-openssl-dev libssl-dev pkg-config pciutils python3.11 python3.11-dev && \
+        wget --no-check-certificate https://bootstrap.pypa.io/get-pip.py && \
+        rm -rf /var/lib/apt/lists/* && \
+        python3.11 get-pip.py
 
 RUN mkdir -p /etc/OpenCL/vendors && \
     echo "libnvidia-opencl.so.1" > /etc/OpenCL/vendors/nvidia.icd
@@ -39,12 +38,6 @@ ENV HASHCAT_UTILS_VERSION  v1.9
 ENV HCXTOOLS_VERSION       6.2.7
 ENV HCXDUMPTOOL_VERSION    6.2.7
 ENV HCXKEYS_VERSION        master
-
-# Update & install packages for installing hashcat
-RUN apt-get update && \
-    apt-get install -y wget make clinfo build-essential git libcurl4-openssl-dev libssl-dev zlib1g-dev libcurl4-openssl-dev libssl-dev pkg-config pciutils python3.11 python3.11-dev && \
-    wget https://bootstrap.pypa.io/get-pip.py && \
-    python3.11 get-pip.py
 
 # Fetch PCI IDs list to display proper GPU names
 RUN update-pciids
