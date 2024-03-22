@@ -23,13 +23,13 @@ class Steps(BaseCommand):
     async def handle(self, message: Message):
         subcommand = self._parse_command(message)
         match subcommand:
-            case "list":
+            case "list" | "l":
                 return await self._handle_list(message)
-            case "get":
+            case "get" | "g":
                 return await self._handle_get(message)
-            case "load":
+            case "load" | "lo":
                 return await self._handle_load(message)
-            case "delete":
+            case "delete" | "d":
                 return await self._handle_delete(message)
             case _:
                 return await message.answer(f"Unknown subcommand: {subcommand}")
