@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   server:
-    build: ./server
+    build: .
     depends_on:
       - rabbitmq
       - db
@@ -13,8 +13,10 @@ services:
       DATABASE_URL: ${DATABASE_URL}
     volumes:
       - server_data:/app/gnupg
+    networks:
+      - multicat
   celerybeat:
-    build: ./server
+    build: .
     depends_on:
       - rabbitmq
       - db
@@ -24,35 +26,13 @@ services:
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
       TIMEZONE: ${TIMEZONE}
-  client:
-    build: ./client
-    depends_on:
-      - server
-    command: celery -A main:app worker -Q client,broadcast -c 1 --loglevel=info
-    environment:
-      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
-      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
-      TIMEZONE: ${TIMEZONE}
-      DATABASE_URL: ${DATABASE_URL}
-      RULES_DIR: ${RULES_DIR}
-      WORDLISTS_DIR: ${WORDLISTS_DIR}
-    devices:
-      - "/dev/dri:/dev/dri"
-  agent:
-    build: ./agent
-    depends_on:
-      - server
-    command: python main.py
-    environment:
-      TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
-      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
-      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
-      TIMEZONE: ${TIMEZONE}
   rabbitmq:
     image: rabbitmq:3.13.0-management-alpine
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    networks:
+      - multicat
   db:
     image: postgres:16.2
     environment:
@@ -61,6 +41,11 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - multicat
 volumes:
   postgres_data:
   server_data:
+networks:
+  multicat:
+    external: true

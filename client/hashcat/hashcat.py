@@ -1,5 +1,6 @@
-from .hashcat_interface import HashcatInterface
 from pyhashcat import Hashcat as Cat
+
+from .hashcat_interface import HashcatInterface
 
 
 class Hashcat(HashcatInterface):

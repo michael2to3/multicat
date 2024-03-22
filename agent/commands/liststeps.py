@@ -1,7 +1,9 @@
 import logging
+
 from aiogram.types import Message
 from commands import BaseCommand
 from schemas import CeleryResponse
+
 from .register_command import register_command
 
 logger = logging.getLogger(__name__)
@@ -19,7 +21,7 @@ class ListSteps(BaseCommand):
 
     async def handle(self, message: Message):
         userid = str(message.from_user.id)
-        result = self.app.send_task("main.liststeps", args=(userid,), queue="server")
+        result = self.app.send_task("server.list_steps", args=(userid,))
         processing_result = result.get(timeout=10)
         celery_response = CeleryResponse(**processing_result)
 

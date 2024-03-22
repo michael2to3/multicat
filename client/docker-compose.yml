@@ -1,7 +1,9 @@
 version: "3.8"
 services:
-  client-2:
-    build: ./client
+  client:
+    build:
+      context: .
+      dockerfile: ${HASHCAT_TYPE_GPU:-all-gpu}/Dockerfile
     command: celery -A main:app worker -Q client,broadcast -c 1 --loglevel=info
     environment:
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
@@ -12,3 +14,8 @@ services:
       WORDLISTS_DIR: ${WORDLISTS_DIR}
     devices:
       - "/dev/dri:/dev/dri"
+    networks:
+      - multicat
+networks:
+  multicat:
+    external: true

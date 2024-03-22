@@ -1,8 +1,10 @@
 import logging
+
 from aiogram.types import Message
 from aiogram.types.input_file import BufferedInputFile
 from commands import BaseCommand
 from schemas import CeleryResponse
+
 from .register_command import register_command
 
 logger = logging.getLogger(__name__)
@@ -26,7 +28,7 @@ class GetSteps(BaseCommand):
             return
 
         result = self.app.send_task(
-            "main.getsteps", args=(userid, text_message), queue="server"
+            "server.get_steps", args=(userid, text_message)
         )
         processing_result_raw = result.get(timeout=10)
         resp = CeleryResponse(**processing_result_raw)

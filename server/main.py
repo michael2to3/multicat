@@ -1,4 +1,5 @@
 import logging
+
 from celery.signals import worker_process_init
 from config import CeleryApp, Config, Database
 

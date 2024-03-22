@@ -1,7 +1,9 @@
 import logging
-from aiogram.types import Message, ContentType
+
+from aiogram.types import ContentType, Message
 from commands import BaseCommand
 from schemas import CeleryResponse
+
 from .register_command import register_command
 
 logger = logging.getLogger(__name__)
@@ -31,9 +33,8 @@ class LoadSteps(BaseCommand):
         content = file_bytes.read()
 
         result = self.app.send_task(
-            "main.loadsteps",
+            "server.load_steps",
             args=(userid, file_name, content.decode("UTF-8")),
-            queue="server",
         )
         processing_result = CeleryResponse(**result.get(timeout=10))
 

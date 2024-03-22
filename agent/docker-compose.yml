@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  agent:
+    build: .
+    command: python main.py
+    environment:
+      TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+      TIMEZONE: ${TIMEZONE}
+    networks:
+      - multicat
+networks:
+  multicat:
+    external: true

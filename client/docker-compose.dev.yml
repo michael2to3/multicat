@@ -1,0 +1,21 @@
+version: "3.8"
+services:
+  client:
+    build:
+      context: .
+      dockerfile: ${HASHCAT_TYPE_GPU:-all-gpu}/Dockerfile
+    volumes:
+      - .:/app
+    command: /bin/sh -c "pip install watchdog && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A main:app worker -Q client,broadcast -c 1 --loglevel=info"
+    environment:
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+      TIMEZONE: ${TIMEZONE}
+      DATABASE_URL: ${DATABASE_URL}
+      RULES_DIR: ${RULES_DIR}
+      WORDLISTS_DIR: ${WORDLISTS_DIR}
+    networks:
+      - multicat
+networks:
+  multicat:
+    external: true

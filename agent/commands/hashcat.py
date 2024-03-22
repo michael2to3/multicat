@@ -1,6 +1,10 @@
-from aiogram.types import Message, ContentType
+import base64
+
+from aiogram.types import ContentType, Message
+
 from commands import BaseCommand
 from schemas import CeleryResponse
+
 from .register_command import register_command
 
 
@@ -30,16 +34,16 @@ class Hashcat(BaseCommand):
                 )
                 return
 
-            hashtype, namerule = parts[1], parts[2]
+            user_id = str(message.from_user.id)
+            hash_type, step_name = parts[1], parts[2]
             file_info = await self.bot.get_file(document_id)
             file_path = file_info.file_path
             file = await self.bot.download_file(file_path)
-            content = file.read()
+            content = base64.b64encode(file.read()).decode("utf-8")
 
             result = self.app.send_task(
-                "main.hashcat_run",
-                args=(hashtype, namerule, content.decode("UTF-8")),
-                queue="server",
+                "server.run_hashcat",
+                args=(user_id, hash_type, step_name, content),
             )
 
             resp = CeleryResponse(**result.get(timeout=10))

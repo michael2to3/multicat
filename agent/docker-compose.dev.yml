@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+  agent:
+    build: .
+    environment:
+      TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+      TIMEZONE: ${TIMEZONE}
+    volumes:
+      - .:/app
+    command: /bin/sh -c "pip install watchdog && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- python main.py"
+    networks:
+      - multicat
+networks:
+  multicat:
+    external: true
