@@ -34,7 +34,7 @@ def send_discrete_task(
                 job_id=job.id,
                 step=step,
                 hash_type=schemas.HashType(
-                    hashcat_type=hash_type.id, human_readable=hash_type.human_readable
+                    hashcat_type=hash_type.hashcat_type, human_readable=hash_type.human_readable
                 ),
                 hashes=hashes,
             )
