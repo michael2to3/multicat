@@ -2,14 +2,17 @@ import logging
 
 from typing import Optional
 from .hashcat import Hashcat
-from schemas import HashcatDiscreteTask
+from .filemanager import FileManager
+from schemas import HashcatDiscreteTask, HashcatStep
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
 class HashcatExecutor:
-    def __init__(self):
+    def __init__(self, file_manager: FileManager):
+        self.file_manager = file_manager
+
         self.hashcat = Hashcat()
         self.hashcat.potfile_disable = True
         self.busy = False
@@ -39,6 +42,27 @@ class HashcatExecutor:
         self.busy = False
         self.bound_task = None
 
+    def calc_keyspace(self, step: HashcatStep) -> Optional[int]:
+        self.hashcat.attack_mode = 0
+        keyspace = 0
+
+        if self.hashcat.attack_mode == 0:
+            for wordlist in step.wordlists:
+                self.hashcat.reset()
+                self.hashcat.keyspace = True
+                self.hashcat.no_threading = True
+                self.hashcat.quiet = True
+                self.hashcat.attack_mode = 0
+                self.hashcat.dict1 = self.file_manager.get_wordlist(wordlist)
+
+                rc = self.hashcat.hashcat_session_execute()
+                if rc < 0:
+                    return None
+
+                keyspace += self.hashcat.words_base
+
+        return keyspace
+
     def execute(self, task: HashcatDiscreteTask) -> bool:
         if self.busy:
             return False
@@ -48,7 +72,7 @@ class HashcatExecutor:
         self.hashcat.workload_profile = 1
         self.hashcat.outfile = "/tmp/cracked.txt"
         self.hashcat.username = False
-        self.hashcat.quit = False
+        self.hashcat.quiet = True
 
         # TODO: get parameters from task
         self.hashcat.mask = "?l?d?d?l"

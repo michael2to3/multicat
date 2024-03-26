@@ -7,5 +7,5 @@ __all__ = [
     "FileManager",
     "Hashcat",
     "HashcatInterface",
-    "HashcatExecutor"
+    "HashcatExecutor",
 ]

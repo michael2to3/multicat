@@ -593,13 +593,8 @@ class Hashcat(HashcatInterface):
     def remove_timer(self, value):
         self._instance.remove_timer = value
 
-    @property
     def reset(self):
-        return self._instance.reset
-
-    @reset.setter
-    def reset(self, value):
-        self._instance.reset = value
+        return self._instance.reset()
 
     @property
     def restore(self):
@@ -1374,3 +1369,15 @@ class Hashcat(HashcatInterface):
     @workload_profile.setter
     def workload_profile(self, value):
         self._instance.workload_profile = value
+
+    @property
+    def words_base(self):
+        return self._instance.words_base
+
+    @property
+    def no_threading(self) -> bool:
+        return self._instance.no_threading
+
+    @no_threading.setter
+    def no_threading(self, value: bool):
+        self._instance.no_threading = value
