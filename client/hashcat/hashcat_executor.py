@@ -15,7 +15,6 @@ class HashcatExecutor:
 
         self.hashcat = Hashcat()
         self.hashcat.potfile_disable = True
-        self.busy = False
         self.bound_task: Optional[HashcatDiscreteTask] = None
 
     def error_callback(self, hInstance):
@@ -24,7 +23,6 @@ class HashcatExecutor:
                 self.bound_task.job_id, self.hashcat.hashcat_status_get_log()
             )
         )
-        self.busy = False
         self.bound_task = None
 
     def warning_callback(self, hInstance):
@@ -39,10 +37,8 @@ class HashcatExecutor:
 
     def finished_callback(self, hInstance):
         logger.info(f"Hashcat finished job ({self.bound_task.job_id})")
-        self.busy = False
-        self.bound_task = None
 
-    def reset_keyspace(self, attack_mode: AttackMode):
+    def _reset_keyspace(self, attack_mode: AttackMode):
         self.hashcat.reset()
         self.hashcat.keyspace = True
         self.hashcat.no_threading = True
@@ -66,7 +62,7 @@ class HashcatExecutor:
         mask: Optional[str] = None,
         custom_charsets: Optional[List[CustomCharset]] = None,
     ) -> Optional[Keyspace]:
-        self.reset_keyspace(attack_mode)
+        self._reset_keyspace(attack_mode)
 
         if dict1:
             self.hashcat.dict1 = self.file_manager.get_wordlist(dict1)
@@ -180,29 +176,34 @@ class HashcatExecutor:
 
         return hashrates
 
-    def execute(self, task: HashcatDiscreteTask) -> bool:
-        if self.busy:
-            return False
-
+    def _reset_execute(self, task: HashcatDiscreteTask):
+        self.hashcat.reset()
         self.hashcat.hash = "\n".join(task.hashes)
         self.hashcat.hash_mode = task.hash_type.hashcat_type
         self.hashcat.workload_profile = 1
         self.hashcat.outfile = "/tmp/cracked.txt"
         self.hashcat.username = False
         self.hashcat.quiet = True
+        self.hashcat.no_threading = True
+
+    def execute(self, task: HashcatDiscreteTask) -> bool:
+        self._reset_execute()
 
         # TODO: get parameters from task
         self.hashcat.mask = "?l?d?d?l"
         self.hashcat.attack_mode = 3
+
+        self.bound_task = task
 
         self.hashcat.event_connect(self.error_callback, "EVENT_LOG_ERROR")
         self.hashcat.event_connect(self.warning_callback, "EVENT_LOG_WARNING")
         self.hashcat.event_connect(self.cracked_callback, "EVENT_CRACKER_HASH_CRACKED")
         self.hashcat.event_connect(self.finished_callback, "EVENT_CRACKER_FINISHED")
 
-        rc = self.hashcat.hashcat_session_execute() >= 0
-        if rc:
-            self.busy = True
-            self.bound_task = task
+        rc = self.hashcat.hashcat_session_execute()
+
+        self.bound_task = None
+        
+        # TODO: read from outfile and return result
 
         return rc
