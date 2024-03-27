@@ -1,9 +1,9 @@
 import logging
 
-from typing import Optional
+from typing import Optional, List
 from .hashcat import Hashcat
 from .filemanager import FileManager
-from schemas import HashcatDiscreteTask, HashcatStep
+from schemas import HashcatDiscreteTask, HashcatStep, AttackMode, CustomCharset
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -42,24 +42,93 @@ class HashcatExecutor:
         self.busy = False
         self.bound_task = None
 
+    def reset_keyspace(self, attack_mode: AttackMode):
+        self.hashcat.reset()
+        self.hashcat.keyspace = True
+        self.hashcat.no_threading = True
+        self.hashcat.quiet = True
+        self.hashcat.attack_mode = attack_mode.value
+
+    def check_hexec(self) -> bool:
+        rc = self.hashcat.hashcat_session_execute()
+        if rc < 0:
+            logger.error("Hashcat: ", self.hashcat.hashcat_status_get_log())
+            return False
+
+        return True
+
+    def _calc_keyspace(
+        self,
+        attack_mode: AttackMode,
+        dict1: Optional[str] = None,
+        dict2: Optional[str] = None,
+        rule: Optional[str] = None,
+        mask: Optional[str] = None,
+        custom_charsets: Optional[List[CustomCharset]] = None,
+    ) -> Optional[int]:
+        self.reset_keyspace(attack_mode)
+
+        if dict1:
+            self.hashcat.dict1 = self.file_manager.get_wordlist(dict1)
+
+        if dict2:
+            self.hashcat.dict2 = self.file_manager.get_wordlist(dict2)
+
+        if rule:
+            self.hashcat.rule = self.file_manager.get_rule(rule)
+
+        if mask:
+            self.hashcat.mask = mask
+
+        if custom_charsets and len(custom_charsets):
+            for charset in custom_charsets:
+                setattr(
+                    self.hashcat,
+                    f"custom_charset_{charset.charset_id}",
+                    charset.charset,
+                )
+
+        if not self.check_hexec():
+            return None
+
+        return self.hashcat.words_base
+
     def calc_keyspace(self, step: HashcatStep) -> Optional[int]:
-        self.hashcat.attack_mode = 0
+        attack_mode = step.options.attack_mode
         keyspace = 0
 
-        if self.hashcat.attack_mode == 0:
-            for wordlist in step.wordlists:
-                self.hashcat.reset()
-                self.hashcat.keyspace = True
-                self.hashcat.no_threading = True
-                self.hashcat.quiet = True
-                self.hashcat.attack_mode = 0
-                self.hashcat.dict1 = self.file_manager.get_wordlist(wordlist)
+        match attack_mode:
+            case AttackMode.DICTIONARY:
+                if len(step.rules) == 0:
+                    for wordlist in step.wordlists:
+                        keyspace += self._calc_keyspace(attack_mode, dict1=wordlist)
+                else:
+                    for wordlist in step.wordlists:
+                        for rule in step.rules:
+                            keyspace += self._calc_keyspace(
+                                attack_mode, dict1=wordlist, rule=rule
+                            )
 
-                rc = self.hashcat.hashcat_session_execute()
-                if rc < 0:
-                    return None
+            case AttackMode.COMBINATOR:
+                for wordlist in step.wordlists:
+                    # TODO: Implement left/right rules
+                    dict1, dict2 = wordlist.split(" ")
+                    keyspace += self._calc_keyspace(
+                        attack_mode, dict1=dict1, dict2=dict2
+                    )
 
-                keyspace += self.hashcat.words_base
+            case AttackMode.MASK:
+                for mask in step.masks:
+                    keyspace += self._calc_keyspace(
+                        attack_mode, mask=mask, custom_charsets=step.custom_charsets
+                    )
+
+            case AttackMode.HYBRID_WORDLIST_MASK | AttackMode.HYBRID_MASK_WORDLIST:
+                for wordlist in step.wordlists:
+                    for mask in step.masks:
+                        keyspace += self._calc_keyspace(
+                            attack_mode, dict1=wordlist, mask=mask
+                        )
 
         return keyspace
 

@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, field_validator, validator
 
 class AttackMode(int, Enum):
     DICTIONARY = 0
+    COMBINATOR = 1
     MASK = 3
     HYBRID_WORDLIST_MASK = 6
     HYBRID_MASK_WORDLIST = 7
