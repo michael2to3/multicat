@@ -71,12 +71,12 @@ class Keyspace(BaseModel):
 
     @property
     def name(self):
-        match attack_mode:
+        match self.attack_mode:
             case AttackMode.DICTIONARY:
                 if self.rule:
-                    return f"wr:{self.rule}"
+                    return f"wr:{self.dict1}:{self.rule}"
 
-                return f"w:{self.wordlist}"
+                return f"w:{self.dict1}"
 
             case AttackMode.COMBINATOR:
                 return f"ww:{self.dict1}:{self.dict2}"
@@ -88,4 +88,4 @@ class Keyspace(BaseModel):
                 return f"m:{self.mask}"
 
             case AttackMode.HYBRID_WORDLIST_MASK | AttackMode.HYBRID_MASK_WORDLIST:
-                return f"wm:{wordlist}:{mask}"
+                return f"wm:{self.dict1}:{self.mask}"

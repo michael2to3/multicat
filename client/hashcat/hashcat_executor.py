@@ -106,6 +106,7 @@ class HashcatExecutor:
     def calc_keyspaces(self, step: HashcatStep) -> Optional[int]:
         attack_mode = step.options.attack_mode
         keyspaces = {}
+        attack_mode = AttackMode.DICTIONARY
 
         match attack_mode:
             case AttackMode.DICTIONARY:

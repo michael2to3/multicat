@@ -19,6 +19,11 @@ def run_hashcat(discrete_task_as_dict):
     wordlists = file_manager.get_wordlists_files()
     rules = file_manager.get_rules_files()
 
+    #debug
+    print(hashcat_executor.calc_keyspaces(discrete_task.step))
+    return
+    #debug_end
+
     success = hashcat_executor.execute(discrete_task)
 
     ...
