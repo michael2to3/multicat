@@ -24,7 +24,16 @@ def run_hashcat(discrete_task_as_dict):
     ...
 
 
-@shared_task(name = "client.calc_keyspace")
-def calc_keyspace(keyspace_task):
+@shared_task(name="client.calc_keyspaces")
+def calc_keyspaces(keyspace_task):
     step = HashcatStep(**keyspace_task)
-    return hashcat_executor.calc_keyspace(step)
+    return hashcat_executor.calc_keyspaces(step)
+
+
+@shared_task(name="b.benchmark", ignore_result=True)
+def benchmark(hash_modes = None):
+    results = hashcat_executor.benchmark(hash_modes)
+
+    # TODO: write results to the backend
+
+    ...

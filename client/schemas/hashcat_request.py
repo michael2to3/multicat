@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, Field, field_validator, validator
 
@@ -58,3 +58,34 @@ class HashcatStep(BaseModel):
 
 class Steps(BaseModel):
     steps: List[HashcatStep] = Field(default_factory=list)
+
+
+class Keyspace(BaseModel):
+    dict1: Optional[str] = None
+    dict2: Optional[str] = None
+    rule: Optional[str] = None
+    mask: Optional[str] = None
+    charsets: Optional[str] = None
+    attack_mode: AttackMode
+    value: int
+
+    @property
+    def name(self):
+        match attack_mode:
+            case AttackMode.DICTIONARY:
+                if self.rule:
+                    return f"wr:{self.rule}"
+
+                return f"w:{self.wordlist}"
+
+            case AttackMode.COMBINATOR:
+                return f"ww:{self.dict1}:{self.dict2}"
+
+            case AttackMode.MASK:
+                if self.charsets:
+                    return f"mc:{self.mask}:{self.charsets}"
+
+                return f"m:{self.mask}"
+
+            case AttackMode.HYBRID_WORDLIST_MASK | AttackMode.HYBRID_MASK_WORDLIST:
+                return f"wm:{wordlist}:{mask}"
