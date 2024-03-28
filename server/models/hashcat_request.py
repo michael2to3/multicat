@@ -53,6 +53,7 @@ class Step(Base):
     name = Column(String)
     timestamp = Column(DateTime, default=datetime.utcnow)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
+    keyspace_calculated = Column(Boolean, default=False)
     hashcat_steps = relationship(
         "HashcatStep",
         secondary=step_hashcat_step_association,
@@ -86,3 +87,9 @@ class HashType(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     hashcat_type = Column(Integer)
     human_readable = Column(String)
+
+
+class Keyspace(Base):
+    __tablename__ = "keyspace"
+    name = Column(String, primary_key=True)
+    value = Column(Integer, nullable=False)

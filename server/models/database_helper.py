@@ -2,7 +2,7 @@ import json
 
 import schemas
 
-from .hashcat_request import HashType, Step, User, UserRole
+from .hashcat_request import HashType, Step, User, UserRole, Keyspace
 
 
 class DatabaseHelperNotFoundError(Exception):
@@ -75,6 +75,17 @@ class DatabaseHelper:
 
         return unique_name
 
+    def get_steps(self, user_id: str, step_name: str) -> Step:
+        step = (
+            self.session.query(Step)
+            .filter(Step.user_id == user_id, Step.name == step_name)
+            .first()
+        )
+        if not step:
+            raise ValueError("Loaded steps not found")
+
+        return step
+
     def get_hashcat_steps(self, user_id: str, step_name: str) -> schemas.Steps:
         step = (
             self.session.query(Step)
@@ -89,3 +100,6 @@ class DatabaseHelper:
     def _convert_to_schema_steps(self, step: Step) -> schemas.Steps:
         hashcat_steps = {"steps": [json.loads(s.value) for s in step.hashcat_steps]}
         return schemas.Steps(**hashcat_steps)
+
+    def keyspace_exists(self, name: str) -> bool:
+        return self.session.get(Keyspace, name) is not None

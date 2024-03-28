@@ -1,6 +1,6 @@
 from .hashcat_asset import HashcatAsset
 from .database_helper import DatabaseHelper
-from .hashcat_request import Hash, HashcatStep, HashType, Job, Step, User, UserRole
+from .hashcat_request import Hash, HashcatStep, HashType, Job, Step, User, UserRole, Keyspace
 
 __all__ = [
     "HashcatAsset",
@@ -12,4 +12,5 @@ __all__ = [
     "HashType",
     "Step",
     "DatabaseHelper",
+    "Keyspace"
 ]

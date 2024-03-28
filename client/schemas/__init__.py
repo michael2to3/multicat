@@ -1,8 +1,7 @@
 from .celery_response import CeleryResponse
 from .hashcat_asset import HashcatAssetSchema
 from .hashcat_helpers import hashcat_step_constructor, hashcat_step_loader
-from .hashcat_request import HashcatStep, Steps, AttackMode, CustomCharset, Keyspace
-from .hashcat_task import HashcatDiscreteTask
+from .hashcat_request import HashcatStep, Steps, AttackMode, CustomCharset, HashcatDiscreteTask, HashcatDiscreteStraightTask, HashcatDiscreteTaskContainer
 
 __all__ = [
     "HashcatAssetSchema",
@@ -12,7 +11,8 @@ __all__ = [
     "hashcat_step_loader",
     "CeleryResponse",
     "HashcatDiscreteTask",
+    "HashcatDiscreteStraightTask",
+    "HashcatDiscreteTaskContainer",
     "AttackMode",
     "CustomCharset",
-    "Keyspace"
 ]

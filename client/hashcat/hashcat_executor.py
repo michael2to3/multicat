@@ -1,9 +1,11 @@
 import logging
 
-from typing import Optional, List
+from pydantic import InstanceOf
+from typing import Optional, List, Tuple
+
 from .hashcat import Hashcat
 from .filemanager import FileManager
-from schemas import HashcatDiscreteTask, HashcatStep, AttackMode, CustomCharset, Keyspace
+from schemas import HashcatDiscreteTask, HashcatDiscreteStraightTask, HashcatStep, AttackMode, CustomCharset
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -61,7 +63,7 @@ class HashcatExecutor:
         rule: Optional[str] = None,
         mask: Optional[str] = None,
         custom_charsets: Optional[List[CustomCharset]] = None,
-    ) -> Optional[Keyspace]:
+    ) -> Optional[int]:
         self._reset_keyspace(attack_mode)
 
         if dict1:
@@ -76,9 +78,7 @@ class HashcatExecutor:
         if mask:
             self.hashcat.mask = mask
 
-        charsets = ""
         if custom_charsets and len(custom_charsets):
-            charsets = ":".join(charset.charset for charset in custom_charsets)
             for charset in custom_charsets:
                 setattr(
                     self.hashcat,
@@ -89,15 +89,17 @@ class HashcatExecutor:
         if not self.check_hexec():
             return None
 
-        return Keyspace(
-            dict1 = dict1,
-            dict2 = dict2,
-            rule = rule,
-            mask = mask,
-            charsets = charsets,
-            attack_mode = attack_mode,
-            value = self.hashcat.words_base
-        )
+        return self.hashcat.words_base
+
+    def calc_keyspace(self, task: InstanceOf[HashcatDiscreteTask]) -> Tuple[str, int]:
+        value = 0
+
+        if isinstance(task, HashcatDiscreteStraightTask):
+            value = self._calc_keyspace(AttackMode.DICTIONARY, dict1=task.wordlist, rule=task.rule)
+        else:
+            raise Exception("Unimplemented")
+
+        return (task.get_keyspace_name(), value)
 
     def calc_keyspaces(self, step: HashcatStep) -> Optional[int]:
         attack_mode = step.options.attack_mode
@@ -203,7 +205,7 @@ class HashcatExecutor:
         rc = self.hashcat.hashcat_session_execute()
 
         self.bound_task = None
-        
+
         # TODO: read from outfile and return result
 
         return rc
