@@ -3,8 +3,7 @@ import logging
 from celery import current_task, shared_task
 from config import Config, Database
 from hashcat import FileManager, HashcatExecutor
-from models import HashcatAsset
-from schemas import HashcatDiscreteTask, HashcatStep
+from schemas import HashcatDiscreteTask, HashcatDiscreteTaskContainer
 
 logger = logging.getLogger(__name__)
 db = Database(Config.get("DATABASE_URL"))
@@ -24,14 +23,15 @@ def run_hashcat(discrete_task_as_dict):
     ...
 
 
-@shared_task(name="client.calc_keyspaces")
-def calc_keyspaces(keyspace_task):
-    step = HashcatStep(**keyspace_task)
-    return hashcat_executor.calc_keyspaces(step)
+@shared_task(name="client.calc_keyspace", ignore_result=False)
+def calc_keyspace(keyspace_task):
+    c = HashcatDiscreteTaskContainer.model_validate({"task": keyspace_task})
+    return hashcat_executor.calc_keyspace(c.task)
+    # return hashcat_executor.calc_keyspaces(step)
 
 
 @shared_task(name="b.benchmark", ignore_result=True)
-def benchmark(hash_modes = None):
+def benchmark(hash_modes=None):
     results = hashcat_executor.benchmark(hash_modes)
 
     # TODO: write results to the backend

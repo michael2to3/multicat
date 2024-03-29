@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import List, Optional, Literal, Annotated, Union
+from typing import List, Optional, Literal, Union
 
 from pydantic import BaseModel, Field, field_validator, validator
 
@@ -56,7 +56,7 @@ class HashcatDiscreteTask(BaseModel, ABC):
     hashes: List[str]
     keyspace_skip: int = 0
     keyspace_work: int = 0
-    type: Literal['HashcatDiscreteTask']
+    type: Literal["HashcatDiscreteTask"]
 
     @classmethod
     def get_subclasses(cls):
@@ -70,7 +70,7 @@ class HashcatDiscreteTask(BaseModel, ABC):
 class HashcatDiscreteStraightTask(HashcatDiscreteTask):
     wordlist: str
     rule: Optional[str] = None
-    type: Literal['HashcatDiscreteStraightTask'] = "HashcatDiscreteStraightTask"
+    type: Literal["HashcatDiscreteStraightTask"] = "HashcatDiscreteStraightTask"
 
     def get_keyspace_name(self):
         if self.rule:
@@ -82,7 +82,7 @@ class HashcatDiscreteStraightTask(HashcatDiscreteTask):
 class HashcatDiscreteCombinatorTask(HashcatDiscreteTask):
     wordlist1: str
     wordlist2: str
-    type: Literal['HashcatDiscreteCombinatorTask'] = "HashcatDiscreteCombinatorTask"
+    type: Literal["HashcatDiscreteCombinatorTask"] = "HashcatDiscreteCombinatorTask"
 
     def get_keyspace_name(self):
         return f"ww:{self.wordlist1}:{self.wordlist2}"
@@ -91,28 +91,29 @@ class HashcatDiscreteCombinatorTask(HashcatDiscreteTask):
 class HashcatDiscreteMaskTask(HashcatDiscreteTask):
     mask: str
     custom_charsets: List[CustomCharset] = Field(default_factory=list)
-    type: Literal['HashcatDiscreteMaskTask'] = "HashcatDiscreteCombinatorTask"
+    type: Literal["HashcatDiscreteMaskTask"] = "HashcatDiscreteCombinatorTask"
 
     def get_keyspace_name(self):
-        charsets = ""
         if len(self.custom_charsets):
-            charsets = ":".join(charset.charset for charset in custom_charsets)
-            return f"mc:{self.mask}:{self.charsets}"
+            charsets = ":".join(charset.charset for charset in self.custom_charsets)
+            return f"mc:{self.mask}:{charsets}"
 
         return f"m:{self.mask}"
+
 
 class HashcatDiscreteHybridTask(HashcatDiscreteTask):
     wordlist: str
     mask: str
 
     wordlist_mask: bool
-    type: Literal['HashcatDiscreteHybridTask'] = "HashcatDiscreteHybridTask"
+    type: Literal["HashcatDiscreteHybridTask"] = "HashcatDiscreteHybridTask"
 
     def get_keyspace_name(self):
         return f"wm:{self.wordlist}:{self.mask}"
 
+
 class HashcatDiscreteTaskContainer(BaseModel):
-    task: Annotated[Union[HashcatDiscreteTask.get_subclasses()], Field(discriminator="type")]
+    task: Union[HashcatDiscreteTask.get_subclasses()] = Field(discriminator="type")
 
 
 class HashcatStep(BaseModel):
@@ -130,20 +131,24 @@ class HashcatStep(BaseModel):
                 if len(self.rules) == 0:
                     for wordlist in self.wordlists:
                         yield HashcatDiscreteStraightTask(
-                            job_id = -1,
-                            hash_type = HashType(hashcat_type=-1, human_readable="unnamed"),
-                            hashes = list(),
-                            wordlist = wordlist,
+                            job_id=-1,
+                            hash_type=HashType(
+                                hashcat_type=-1, human_readable="unnamed"
+                            ),
+                            hashes=list(),
+                            wordlist=wordlist,
                         )
                 else:
                     for wordlist in self.wordlists:
                         for rule in self.rules:
                             yield HashcatDiscreteStraightTask(
-                                job_id = -1,
-                                hash_type = HashType(hashcat_type=-1, human_readable="unnamed"),
-                                hashes = list(),
-                                wordlist = wordlist,
-                                rule = rule,
+                                job_id=-1,
+                                hash_type=HashType(
+                                    hashcat_type=-1, human_readable="unnamed"
+                                ),
+                                hashes=list(),
+                                wordlist=wordlist,
+                                rule=rule,
                             )
 
             case _:
