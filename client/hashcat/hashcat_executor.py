@@ -1,7 +1,7 @@
 import logging
 
 from pydantic import InstanceOf
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Dict
 
 from config import Config
 from .hashcat import Hashcat
@@ -10,6 +10,7 @@ from schemas import HashcatDiscreteTask, HashcatDiscreteStraightTask, HashcatSte
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
+
 
 class Singleton(type):
     _instances = {}
@@ -108,6 +109,20 @@ class HashcatExecutor(metaclass=Singleton):
             raise Exception("Unimplemented")
 
         return (task.get_keyspace_name(), value)
+
+    def devices_info(self) -> Optional[Dict]:
+        self.hashcat.reset()
+        self.hashcat.no_threading = True
+        self.hashcat.quiet = True
+        self.hashcat.backend_info = True
+
+        rc = self.hashcat.hashcat_session_init()
+
+        if rc < 0:
+            logger.error("Hashcat: ", self.hashcat.hashcat_status_get_log())
+            return None
+
+        return self.hashcat.get_backend_devices_info()
 
     def calc_keyspaces(self, step: HashcatStep) -> Optional[int]:
         attack_mode = step.options.attack_mode

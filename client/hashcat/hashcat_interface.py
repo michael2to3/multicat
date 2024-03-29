@@ -327,6 +327,10 @@ class HashcatInterface(ABC):
         pass
 
     @abstractmethod
+    def hashcat_session_init(self):
+        pass
+
+    @abstractmethod
     def hashcat_session_execute(self):
         pass
 
@@ -1722,4 +1726,8 @@ class HashcatInterface(ABC):
     @workload_profile.setter
     @abstractmethod
     def workload_profile(self, value):
+        pass
+
+    @abstractmethod
+    def get_backend_devices_info(self):
         pass

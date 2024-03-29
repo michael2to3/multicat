@@ -266,6 +266,9 @@ class Hashcat(HashcatInterface):
     def hashcat_session_checkpoint(self, value):
         self._instance.hashcat_session_checkpoint = value
 
+    def hashcat_session_init(self):
+        return self._instance.hashcat_session_init()
+
     def hashcat_session_execute(self):
         return self._instance.hashcat_session_execute()
 
@@ -1381,3 +1384,6 @@ class Hashcat(HashcatInterface):
     @no_threading.setter
     def no_threading(self, value: bool):
         self._instance.no_threading = value
+
+    def get_backend_devices_info(self):
+        return self._instance.get_backend_devices_info()
