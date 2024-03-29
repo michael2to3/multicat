@@ -10,8 +10,15 @@ from schemas import HashcatDiscreteTask, HashcatDiscreteStraightTask, HashcatSte
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
+class Singleton(type):
+    _instances = {}
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
 
-class HashcatExecutor:
+
+class HashcatExecutor(Singleton):
     def __init__(self, file_manager: FileManager):
         self.file_manager = file_manager
 
