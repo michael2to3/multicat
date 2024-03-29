@@ -3,6 +3,7 @@ import json
 import schemas
 
 from .hashcat_request import HashType, Step, User, UserRole, Keyspace
+from .hashcat_asset import HashcatAsset
 
 
 class DatabaseHelperNotFoundError(Exception):
@@ -103,3 +104,11 @@ class DatabaseHelper:
 
     def keyspace_exists(self, name: str) -> bool:
         return self.session.get(Keyspace, name) is not None
+
+    def get_worker_devices(self, worker: str):
+        result = (
+            self.session.query(HashcatAsset)
+            .filter(HashcatAsset.worker_id == worker)
+            .first()
+        )
+        return result.devices

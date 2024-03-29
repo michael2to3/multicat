@@ -1,9 +1,7 @@
-import uuid
 from datetime import datetime
-from typing import List
 
 from config import Base
-from sqlalchemy import Column, DateTime, Integer, String, create_engine
+from sqlalchemy import Column, DateTime, Integer, String
 from sqlalchemy.dialects.postgresql import ARRAY, UUID, JSONB
 
 

@@ -5,7 +5,7 @@ from celery import current_app, shared_task, current_task
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 
-from config import Config, Database, UUIDGenerator
+from config import Config, Database
 from models import HashcatAsset
 from schemas import CeleryResponse, HashcatAssetSchema
 
@@ -23,9 +23,12 @@ def fetch_assets_by_uuid(task_uuid):
         assets_data = [HashcatAssetSchema.from_orm(asset).dict() for asset in result]
         return assets_data
 
+
 def get_active_workers():
     current_worker = current_task.request.hostname
-    return [x for x in current_app.control.inspect().stats().keys() if x != current_worker]
+    return [
+        x for x in current_app.control.inspect().stats().keys() if x != current_worker
+    ]
 
 
 def fetch_assets_by_worker_name(worker_name):
@@ -43,11 +46,11 @@ def collect_assets(owner_id: str):
     active_workers = get_active_workers()
     if len(active_workers) == 0:
         return CeleryResponse(
-            warning="No workers currently active, try again later"
+            warning="No workers are currently active, try again later"
         )
 
     try:
-        data = [fetch_assets_by_worker_name(x.split('@')[0]) for x in active_workers]
+        data = [fetch_assets_by_worker_name(x.split("@")[0]) for x in active_workers]
         if len(data) != 0:
             return CeleryResponse(value=data).dict()
 
@@ -60,7 +63,7 @@ def collect_assets(owner_id: str):
 
     task = current_app.send_task(
         "b.get_assets",
-        args=(str(task_uuid),),
+        args=("",),
         exchange="broadcast_exchange",
         routing_key="broadcast",
     )
