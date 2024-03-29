@@ -3,6 +3,7 @@ import logging
 from pydantic import InstanceOf
 from typing import Optional, List, Tuple
 
+from config import Config
 from .hashcat import Hashcat
 from .filemanager import FileManager
 from schemas import HashcatDiscreteTask, HashcatDiscreteStraightTask, HashcatStep, AttackMode, CustomCharset
@@ -18,9 +19,9 @@ class Singleton(type):
         return cls._instances[cls]
 
 
-class HashcatExecutor(Singleton):
-    def __init__(self, file_manager: FileManager):
-        self.file_manager = file_manager
+class HashcatExecutor(metaclass=Singleton):
+    def __init__(self):
+        self.file_manager = FileManager(Config.get("RULES_DIR"), Config.get("WORDLISTS_DIR"))
 
         self.hashcat = Hashcat()
         self.hashcat.potfile_disable = True
