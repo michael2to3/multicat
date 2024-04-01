@@ -364,14 +364,8 @@ class HashcatInterface(ABC):
     def hashcat_session_resume(self, value):
         pass
 
-    @property
     @abstractmethod
     def hashcat_status_get_log(self):
-        pass
-
-    @hashcat_status_get_log.setter
-    @abstractmethod
-    def hashcat_status_get_log(self, value):
         pass
 
     @property

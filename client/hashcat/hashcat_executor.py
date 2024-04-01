@@ -4,6 +4,7 @@ from pydantic import InstanceOf
 from typing import Optional, List, Tuple, Dict
 
 from config import Config
+from schemas.hashcat_request import HashcatDiscreteCombinatorTask, HashcatDiscreteHybridTask, HashcatDiscreteMaskTask
 from .hashcat import Hashcat
 from .filemanager import FileManager
 from schemas import HashcatDiscreteTask, HashcatDiscreteStraightTask, HashcatStep, AttackMode, CustomCharset
@@ -28,6 +29,7 @@ class HashcatExecutor(metaclass=Singleton):
         self.hashcat.potfile_disable = True
         self.bound_task: Optional[HashcatDiscreteTask] = None
 
+    # TODO: reimplement for new discrete tasks
     def error_callback(self, hInstance):
         logger.error(
             "Hashcat error ({}): {}".format(
@@ -36,6 +38,7 @@ class HashcatExecutor(metaclass=Singleton):
         )
         self.bound_task = None
 
+    # TODO: reimplement for new discrete tasks
     def warning_callback(self, hInstance):
         logger.warning(
             "Hashcat warning ({}): {}".format(
@@ -43,9 +46,11 @@ class HashcatExecutor(metaclass=Singleton):
             )
         )
 
+    # TODO: reimplement for new discrete tasks
     def cracked_callback(self, hInstance):
         logger.info(f"Hashcat cracked another hash ({self.bound_task.job_id})")
 
+    # TODO: reimplement for new discrete tasks
     def finished_callback(self, hInstance):
         logger.info(f"Hashcat finished job ({self.bound_task.job_id})")
 
@@ -82,7 +87,8 @@ class HashcatExecutor(metaclass=Singleton):
             self.hashcat.dict2 = self.file_manager.get_wordlist(dict2)
 
         if rule:
-            self.hashcat.rule = self.file_manager.get_rule(rule)
+            # It's better to provide one rule at a time, because we can quickly exceed available memory, or reach integer overflow
+            self.hashcat.rules = (self.file_manager.get_rule(rule),)
 
         if mask:
             self.hashcat.mask = mask
@@ -100,11 +106,20 @@ class HashcatExecutor(metaclass=Singleton):
 
         return self.hashcat.words_base
 
-    def calc_keyspace(self, task: InstanceOf[HashcatDiscreteTask]) -> Tuple[str, int]:
+    def calc_keyspace(self, task: InstanceOf[HashcatDiscreteTask]) -> Tuple[str, Optional[int]]:
         value = 0
 
         if isinstance(task, HashcatDiscreteStraightTask):
             value = self._calc_keyspace(AttackMode.DICTIONARY, dict1=task.wordlist, rule=task.rule)
+        elif isinstance(task, HashcatDiscreteCombinatorTask):
+            value = self._calc_keyspace(AttackMode.COMBINATOR, dict1=task.wordlist1, dict2=task.wordlist2)
+        elif isinstance(task, HashcatDiscreteMaskTask):
+            value = self._calc_keyspace(AttackMode.MASK, mask=task.mask, custom_charsets=task.custom_charsets)
+        elif isinstance(task, HashcatDiscreteHybridTask):
+            if task.wordlist_mask:
+                value = self._calc_keyspace(AttackMode.HYBRID_WORDLIST_MASK, dict1=task.wordlist, mask=task.mask)
+            else:
+                value = self._calc_keyspace(AttackMode.HYBRID_MASK_WORDLIST, dict1=task.wordlist, mask=task.mask)
         else:
             raise Exception("Unimplemented")
 
@@ -124,51 +139,6 @@ class HashcatExecutor(metaclass=Singleton):
 
         return self.hashcat.get_backend_devices_info()
 
-    def calc_keyspaces(self, step: HashcatStep) -> Optional[int]:
-        attack_mode = step.options.attack_mode
-        keyspaces = {}
-        attack_mode = AttackMode.DICTIONARY
-
-        match attack_mode:
-            case AttackMode.DICTIONARY:
-                if len(step.rules) == 0:
-                    for wordlist in step.wordlists:
-                        keyspace = self._calc_keyspace(attack_mode, dict1=wordlist)
-                        keyspaces[keyspace.name] = keyspace
-                else:
-                    for wordlist in step.wordlists:
-                        for rule in step.rules:
-                            keyspace = self._calc_keyspace(
-                                attack_mode, dict1=wordlist, rule=rule
-                            )
-                            keyspaces[keyspace.name] = keyspace
-
-            case AttackMode.COMBINATOR:
-                for wordlist in step.wordlists:
-                    # TODO: Implement left/right rules
-                    dict1, dict2 = wordlist.split(" ")
-                    keyspace = self._calc_keyspace(
-                        attack_mode, dict1=dict1, dict2=dict2
-                    )
-                    keyspaces[keyspace.name] = keyspace
-
-            case AttackMode.MASK:
-                for mask in step.masks:
-                    keyspace = self._calc_keyspace(
-                        attack_mode, mask=mask, custom_charsets=step.custom_charsets
-                    )
-                    keyspaces[keyspace.name] = keyspace
-
-            case AttackMode.HYBRID_WORDLIST_MASK | AttackMode.HYBRID_MASK_WORDLIST:
-                for wordlist in step.wordlists:
-                    for mask in step.masks:
-                        keyspace = self._calc_keyspace(
-                            attack_mode, dict1=wordlist, mask=mask
-                        )
-                        keyspaces[keyspace.name] = keyspace
-
-        return keyspaces
-
     def _reset_benchmark(self, benchmark_all=False):
         self.hashcat.reset()
         self.hashcat.quiet = True
@@ -176,7 +146,7 @@ class HashcatExecutor(metaclass=Singleton):
         self.hashcat.no_threading = True
         self.hashcat.benchmark_all = benchmark_all
 
-    def benchmark(self, hash_modes: List[int] = None):
+    def benchmark(self, hash_modes: Optional[List[int]] = None):
         hashrates = {}
         def set_hashrate():
             hashrates[str(self.hashcat.hash_mode)] = {
@@ -201,6 +171,7 @@ class HashcatExecutor(metaclass=Singleton):
 
         return hashrates
 
+    # TODO: reimplement for new discrete tasks
     def _reset_execute(self, task: HashcatDiscreteTask):
         self.hashcat.reset()
         self.hashcat.hash = "\n".join(task.hashes)
@@ -211,8 +182,9 @@ class HashcatExecutor(metaclass=Singleton):
         self.hashcat.quiet = True
         self.hashcat.no_threading = True
 
+    # TODO: reimplement for new discrete tasks
     def execute(self, task: HashcatDiscreteTask) -> bool:
-        self._reset_execute()
+        self._reset_execute(task)
 
         # TODO: get parameters from task
         self.hashcat.mask = "?l?d?d?l"
