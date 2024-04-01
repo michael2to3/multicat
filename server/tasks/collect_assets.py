@@ -5,7 +5,7 @@ from celery import current_app, shared_task, current_task
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 
-from config import Config, Database
+from config import Config, Database, UUIDGenerator
 from models import HashcatAsset
 from schemas import CeleryResponse, HashcatAssetSchema
 
@@ -61,9 +61,10 @@ def collect_assets(owner_id: str):
         logging.error(f"An unexpected error occurred: {e}")
         return CeleryResponse(error="An unexpected error occurred").dict()
 
+    task_uuid = UUIDGenerator.generate(owner_id)
     task = current_app.send_task(
         "b.get_assets",
-        args=("",),
+        args=(str(task_uuid),),
         exchange="broadcast_exchange",
         routing_key="broadcast",
     )
