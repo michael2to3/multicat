@@ -29,13 +29,13 @@ def _refresh_assets(task_uuid: str, worker_id: str):
                 task_uuid=task_uuid, worker_id=worker_id, wordlists=wordlists, rules=rules
             )
             session.add(hashcat_asset)
-            logger.info(f"Asset added to database: {hashcat_asset}")
+            logger.info("Asset added to database: %s", hashcat_asset)
         else:
             hashcat_asset.rules = rules
             hashcat_asset.wordlists = wordlists
             hashcat_asset.timestamp=datetime.utcnow()
             session.commit()
-            logger.info(f"Asset updated: {hashcat_asset}")
+            logger.info("Asset updated: %s", hashcat_asset)
 
 
 @shared_task(name="b.get_assets", ignore_result=True)

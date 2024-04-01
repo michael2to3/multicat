@@ -27,32 +27,31 @@ class HashcatExecutor(metaclass=Singleton):
 
         self.hashcat = Hashcat()
         self.hashcat.potfile_disable = True
-        self.bound_task: Optional[HashcatDiscreteTask] = None
+        self.bound_task: Optional[InstanceOf[HashcatDiscreteTask]] = None
 
     # TODO: reimplement for new discrete tasks
     def error_callback(self, hInstance):
         logger.error(
-            "Hashcat error ({}): {}".format(
-                self.bound_task.job_id, self.hashcat.hashcat_status_get_log()
-            )
+            "Hashcat error (%d): %s",
+            self.bound_task.job_id, self.hashcat.hashcat_status_get_log()
         )
+
         self.bound_task = None
 
     # TODO: reimplement for new discrete tasks
     def warning_callback(self, hInstance):
         logger.warning(
-            "Hashcat warning ({}): {}".format(
-                self.bound_task.job_id, self.hashcat.hashcat_status_get_log()
-            )
+            "Hashcat error (%d): %s",
+            self.bound_task.job_id, self.hashcat.hashcat_status_get_log()
         )
 
     # TODO: reimplement for new discrete tasks
     def cracked_callback(self, hInstance):
-        logger.info(f"Hashcat cracked another hash ({self.bound_task.job_id})")
+        logger.info("Hashcat cracked another hash (%d)", self.bound_task.job_id)
 
     # TODO: reimplement for new discrete tasks
     def finished_callback(self, hInstance):
-        logger.info(f"Hashcat finished job ({self.bound_task.job_id})")
+        logger.info("Hashcat finished job (%d)", self.bound_task.job_id)
 
     def _reset_keyspace(self, attack_mode: AttackMode):
         self.hashcat.reset()
