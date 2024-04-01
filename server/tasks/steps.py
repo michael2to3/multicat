@@ -21,7 +21,7 @@ def delete_steps(user_id: str, step_name: int):
     user_id = UUIDGenerator.generate(user_id)
     with db.session() as session:
         db_helper = DatabaseHelper(session)
-        user = db_helper.get_or_create_user(user_id)
+        user = db_helper.get_or_create_user(str(user_id))
         step = (
             session.query(Step)
             .filter(
@@ -44,7 +44,7 @@ def get_steps(user_id: str, step_name: str):
     user_id = UUIDGenerator.generate(user_id)
     with db.session() as session:
         db_helper = DatabaseHelper(session)
-        user = db_helper.get_or_create_user(user_id)
+        user = db_helper.get_or_create_user(str(user_id))
 
         step = (
             session.query(Step)
@@ -100,7 +100,7 @@ def post_load_steps(keyspaces, user_id: str = None, steps_name: str = None):
 @shared_task
 def on_chord_error(request, exc, traceback):
     # TODO: remove failed keyspace computation
-    print("Task {0!r} raised error: {1!r}".format(request.id, exc))
+    logger.error("Task {0!r} raised error: {1!r}".format(request.id, exc))
 
 
 @shared_task(name="server.load_steps")
