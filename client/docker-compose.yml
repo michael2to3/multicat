@@ -4,8 +4,9 @@ services:
     build:
       context: .
       dockerfile: ${HASHCAT_TYPE_GPU:-all-gpu}/Dockerfile
-    command: celery -A main:app worker -Q client,broadcast -c 1 --loglevel=info
+    command: celery -A main:app worker -Q client,broadcast -c 1 --loglevel=info -n $(WORKER_NAME)@%i
     environment:
+      WORKER_NAME: ${WORKER_NAME}
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
       TIMEZONE: ${TIMEZONE}
