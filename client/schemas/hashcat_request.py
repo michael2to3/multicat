@@ -82,6 +82,9 @@ class HashcatDiscreteStraightTask(HashcatDiscreteTask):
 class HashcatDiscreteCombinatorTask(HashcatDiscreteTask):
     wordlist1: str
     wordlist2: str
+    # Left/right rules
+    left: Optional[str] = None
+    right: Optional[str] = None
     type: Literal["HashcatDiscreteCombinatorTask"] = "HashcatDiscreteCombinatorTask"
 
     def get_keyspace_name(self):

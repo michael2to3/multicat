@@ -76,6 +76,8 @@ class HashcatExecutor(metaclass=Singleton):
         dict2: Optional[str] = None,
         rule: Optional[str] = None,
         mask: Optional[str] = None,
+        left: Optional[str] = None, # Left rule
+        right: Optional[str] = None, # Right rule
         custom_charsets: Optional[List[CustomCharset]] = None,
     ) -> Optional[int]:
         self._reset_keyspace(attack_mode)
@@ -89,6 +91,12 @@ class HashcatExecutor(metaclass=Singleton):
         if rule:
             # It's better to provide one rule at a time, because we can quickly exceed available memory, or reach integer overflow
             self.hashcat.rules = (self.file_manager.get_rule(rule),)
+
+        if left:
+            self.hashcat.rule_buf_l = left
+
+        if right:
+            self.hashcat.rule_buf_r = right
 
         if mask:
             self.hashcat.mask = mask
@@ -112,7 +120,7 @@ class HashcatExecutor(metaclass=Singleton):
         if isinstance(task, HashcatDiscreteStraightTask):
             value = self._calc_keyspace(AttackMode.DICTIONARY, dict1=task.wordlist, rule=task.rule)
         elif isinstance(task, HashcatDiscreteCombinatorTask):
-            value = self._calc_keyspace(AttackMode.COMBINATOR, dict1=task.wordlist1, dict2=task.wordlist2)
+            value = self._calc_keyspace(AttackMode.COMBINATOR, dict1=task.wordlist1, dict2=task.wordlist2, left=task.left, right=task.right)
         elif isinstance(task, HashcatDiscreteMaskTask):
             value = self._calc_keyspace(AttackMode.MASK, mask=task.mask, custom_charsets=task.custom_charsets)
         elif isinstance(task, HashcatDiscreteHybridTask):
