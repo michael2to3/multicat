@@ -13,6 +13,10 @@ file_manager = FileManager(Config.get("RULES_DIR"), Config.get("WORDLISTS_DIR"))
 hashcat_executor = HashcatExecutor(file_manager)
 
 
+class WorkerIsNotFoundException(Exception):
+    pass
+
+
 def _refresh_assets(task_uuid: str, worker_id: str):
     wordlists = file_manager.get_wordlists_files()
     rules = file_manager.get_rules_files()
@@ -100,7 +104,7 @@ def _update_devices_info(worker_id: str):
         )
 
         if not asset:
-            raise Exception("Worker asset hasn't been found: %s" % worker_id)
+            raise WorkerIsNotFoundException("Worker asset hasn't been found: %s" % worker_id)
 
         if not asset.devices:
             asset.devices = devices
