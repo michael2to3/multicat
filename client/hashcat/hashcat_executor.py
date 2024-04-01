@@ -3,7 +3,7 @@ import logging
 from pydantic import InstanceOf
 from typing import Optional, List, Tuple, Dict
 
-from config import Config
+from config import Config, Singleton
 from schemas.hashcat_request import HashcatDiscreteCombinatorTask, HashcatDiscreteHybridTask, HashcatDiscreteMaskTask
 from .hashcat import Hashcat
 from .filemanager import FileManager
@@ -11,14 +11,6 @@ from schemas import HashcatDiscreteTask, HashcatDiscreteStraightTask, HashcatSte
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
-
-
-class Singleton(type):
-    _instances = {}
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
 
 
 class HashcatExecutor(metaclass=Singleton):
