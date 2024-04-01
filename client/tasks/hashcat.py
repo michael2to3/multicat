@@ -8,7 +8,7 @@ from schemas import HashcatDiscreteTask, HashcatDiscreteTaskContainer
 logger = logging.getLogger(__name__)
 db = Database(Config.get("DATABASE_URL"))
 file_manager = FileManager(Config.get("RULES_DIR"), Config.get("WORDLISTS_DIR"))
-hashcat_executor = HashcatExecutor()
+hashcat_executor = HashcatExecutor(file_manager)
 
 
 @shared_task(name="client.run_hashcat", ignore_result=True)

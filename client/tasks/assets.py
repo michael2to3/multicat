@@ -10,7 +10,7 @@ from models import HashcatAsset
 logger = logging.getLogger(__name__)
 db = Database(Config.get("DATABASE_URL"))
 file_manager = FileManager(Config.get("RULES_DIR"), Config.get("WORDLISTS_DIR"))
-hashcat_executor = HashcatExecutor()
+hashcat_executor = HashcatExecutor(file_manager)
 
 
 def _refresh_assets(task_uuid: str, worker_id: str):
