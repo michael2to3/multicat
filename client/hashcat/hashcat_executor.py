@@ -13,6 +13,14 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
+class UnimplementedAttackModeException(Exception):
+    pass
+
+
+class HashcatCalculationException(Exception):
+    pass
+
+
 class HashcatExecutor(metaclass=Singleton):
     def __init__(self, file_manager: FileManager):
         self.file_manager = file_manager
@@ -55,7 +63,7 @@ class HashcatExecutor(metaclass=Singleton):
     def check_hexec(self) -> bool:
         rc = self.hashcat.hashcat_session_execute()
         if rc < 0:
-            logger.error("Hashcat: ", self.hashcat.hashcat_status_get_log())
+            logger.error("Hashcat: %s", self.hashcat.hashcat_status_get_log())
             return False
 
         return True
@@ -70,7 +78,7 @@ class HashcatExecutor(metaclass=Singleton):
         left: Optional[str] = None, # Left rule
         right: Optional[str] = None, # Right rule
         custom_charsets: Optional[List[CustomCharset]] = None,
-    ) -> Optional[int]:
+    ) -> int:
         self._reset_keyspace(attack_mode)
 
         if dict1:
@@ -101,11 +109,11 @@ class HashcatExecutor(metaclass=Singleton):
                 )
 
         if not self.check_hexec():
-            return None
+            raise HashcatCalculationException(f"Failed to compute keyspace for {dict1} {dict2} {rule} {mask} {left} {right} {custom_charsets}")
 
         return self.hashcat.words_base
 
-    def calc_keyspace(self, task: InstanceOf[HashcatDiscreteTask]) -> Tuple[str, Optional[int]]:
+    def calc_keyspace(self, task: InstanceOf[HashcatDiscreteTask]) -> Tuple[str, int]:
         value = 0
 
         if isinstance(task, HashcatDiscreteStraightTask):
@@ -120,11 +128,11 @@ class HashcatExecutor(metaclass=Singleton):
             else:
                 value = self._calc_keyspace(AttackMode.HYBRID_MASK_WORDLIST, dict1=task.wordlist, mask=task.mask)
         else:
-            raise Exception("Unimplemented")
+            raise UnimplementedAttackModeException(f"Specified method is not implemented for keyspace calculation: {task.type}")
 
         return (task.get_keyspace_name(), value)
 
-    def devices_info(self) -> Optional[Dict]:
+    def devices_info(self) -> Dict:
         self.hashcat.reset()
         self.hashcat.no_threading = True
         self.hashcat.quiet = True
@@ -133,8 +141,8 @@ class HashcatExecutor(metaclass=Singleton):
         rc = self.hashcat.hashcat_session_init()
 
         if rc < 0:
-            logger.error("Hashcat: ", self.hashcat.hashcat_status_get_log())
-            return None
+            logger.error("Hashcat: %s", self.hashcat.hashcat_status_get_log())
+            raise HashcatCalculationException("Failed to gather devices info")
 
         return self.hashcat.get_backend_devices_info()
 
@@ -145,7 +153,7 @@ class HashcatExecutor(metaclass=Singleton):
         self.hashcat.no_threading = True
         self.hashcat.benchmark_all = benchmark_all
 
-    def benchmark(self, hash_modes: Optional[List[int]] = None):
+    def benchmark(self, hash_modes: Optional[List[int]] = None) -> Dict:
         hashrates = {}
         def set_hashrate():
             hashrates[str(self.hashcat.hash_mode)] = {
@@ -158,15 +166,16 @@ class HashcatExecutor(metaclass=Singleton):
                 self.hashcat.hash_mode = hash_mode
 
                 if not self.check_hexec():
-                    return None
+                    raise HashcatCalculationException(f"Failed to benchmark the hash {hash_mode}")
 
                 set_hashrate()
         else:
             self._reset_benchmark(benchmark_all=True)
+            # TODO: did't properly test it
             self.hashcat.event_connect(set_hashrate, "EVENT_CRACKER_FINISHED")
 
             if not self.check_hexec():
-                return None
+                raise HashcatCalculationException("Failed to benchmark all hashes")
 
         return hashrates
 
