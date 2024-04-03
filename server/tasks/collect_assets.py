@@ -24,34 +24,12 @@ def fetch_assets_by_uuid(task_uuid):
         return assets_data
 
 
-def get_active_workers():
-    current_worker = current_task.request.hostname
-    return [
-        x for x in current_app.control.inspect().stats().keys() if x != current_worker
-    ]
-
-
-def fetch_assets_by_worker_name(worker_name):
-    with db.session() as session:
-        asset = (
-            session.query(HashcatAsset)
-            .filter(HashcatAsset.worker_id == worker_name)
-            .first()
-        )
-        return HashcatAssetSchema.from_orm(asset)
-
-
 @shared_task(name="main.collect_assets")
 def collect_assets(owner_id: str):
-    active_workers = get_active_workers()
-    if len(active_workers) == 0:
-        return CeleryResponse(
-            warning="No workers are currently active, try again later"
-        )
-
+    task_uuid = UUIDGenerator.generate(owner_id)
     try:
-        data = [fetch_assets_by_worker_name(x.split("@")[0]) for x in active_workers]
-        if len(data) != 0:
+        data = fetch_assets_by_uuid(task_uuid)
+        if data:
             return CeleryResponse(value=data).dict()
 
     except SQLAlchemyError as e:
@@ -61,7 +39,6 @@ def collect_assets(owner_id: str):
         logging.error(f"An unexpected error occurred: {e}")
         return CeleryResponse(error="An unexpected error occurred").dict()
 
-    task_uuid = UUIDGenerator.generate(owner_id)
     task = current_app.send_task(
         "b.get_assets",
         args=(str(task_uuid),),

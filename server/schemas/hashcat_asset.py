@@ -11,8 +11,6 @@ class HashcatAssetSchema(BaseModel):
     wordlists: List[str]
     rules: List[str]
     timestamp: datetime
-    benchmarks: Optional[Dict]
-    devices: Optional[Dict]
 
     class Config:
         from_attributes = True

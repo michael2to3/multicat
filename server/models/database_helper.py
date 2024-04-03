@@ -1,9 +1,12 @@
 import json
 
+from typing import Dict, List
+
 import schemas
 
 from .hashcat_request import HashType, Step, User, UserRole, Keyspace
 from .hashcat_asset import HashcatAsset
+from .devices import Devices
 
 
 class DatabaseHelperNotFoundError(Exception):
@@ -102,13 +105,46 @@ class DatabaseHelper:
         hashcat_steps = {"steps": [json.loads(s.value) for s in step.hashcat_steps]}
         return schemas.Steps(**hashcat_steps)
 
-    def keyspace_exists(self, name: str) -> bool:
-        return self.session.get(Keyspace, name) is not None
-
-    def get_worker_devices(self, worker: str):
-        result = (
-            self.session.query(HashcatAsset)
-            .filter(HashcatAsset.worker_id == worker)
+    def keyspace_exists(
+        self,
+        wordlist1: str = "",
+        wordlist2: str = "",
+        rule: str = "",
+        left: str = "",
+        right: str = "",
+        mask: str = "",
+        custom_charsets: str = "",
+        **kwargs,
+    ) -> bool:
+        keyspace = (
+            self.session.query(Keyspace)
+            .filter(
+                Keyspace.wordlist1 == wordlist1,
+                Keyspace.wordlist2 == wordlist2,
+                Keyspace.rule == rule,
+                Keyspace.left == left,
+                Keyspace.right == right,
+                Keyspace.mask == mask,
+                Keyspace.custom_charsets == custom_charsets,
+            )
             .first()
         )
-        return result.devices
+        return keyspace is not None
+
+    def get_devices(self) -> List[Devices]:
+        result = self.session.query(Devices).all()
+        return result
+
+    def get_worker_devices(self, worker_name: str) -> Devices:
+        result = (
+            self.session.query(Devices)
+            .filter(Devices.worker_name == worker_name)
+            .first()
+        )
+        return result
+
+    def add_devices_info(self, worker_name: str, value: Dict) -> Devices:
+        devices = Devices(worker_name=worker_name, value=value)
+        self.session.add(devices)
+        self.session.commit()
+        return devices

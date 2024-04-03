@@ -50,10 +50,10 @@ step_hashcat_step_association = Table(
 class Step(Base):
     __tablename__ = "steps"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String)
+    name = Column(String, primary_key=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
-    keyspace_calculated = Column(Boolean, default=False)
+    is_keyspace_calculated = Column(Boolean, default=False)
     hashcat_steps = relationship(
         "HashcatStep",
         secondary=step_hashcat_step_association,
@@ -90,6 +90,14 @@ class HashType(Base):
 
 
 class Keyspace(Base):
-    __tablename__ = "keyspace"
-    name = Column(String, primary_key=True)
-    value = Column(Integer, nullable=False)
+    __tablename__ = "keyspaces"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    attack_mode = Column(Integer)
+    wordlist1 = Column(String, default="")
+    wordlist2 = Column(String, default="")
+    rule = Column(String, default="")
+    left = Column(String, default="")
+    right = Column(String, default="")
+    mask = Column(String, default="")
+    custom_charsets = Column(String, default="")
+    value = Column(Integer)

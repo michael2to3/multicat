@@ -51,7 +51,7 @@ class HashcatOptions(BaseModel):
 
 
 class HashcatDiscreteTask(BaseModel, ABC):
-    job_id: int = -1
+    job_id: int
     hash_type: HashType
     hashes: List[str]
     keyspace_skip: int = 0
@@ -62,33 +62,20 @@ class HashcatDiscreteTask(BaseModel, ABC):
     def get_subclasses(cls):
         return tuple(cls.__subclasses__())
 
-    @abstractmethod
-    def get_keyspace_name(self):
-        pass
-
 
 class HashcatDiscreteStraightTask(HashcatDiscreteTask):
-    wordlist: str
-    rule: Optional[str] = None
+    wordlist1: str
+    rule: str = ""
     type: Literal["HashcatDiscreteStraightTask"] = "HashcatDiscreteStraightTask"
-
-    def get_keyspace_name(self):
-        if self.rule:
-            return f"wr:{self.dict1}:{self.rule}"
-
-        return f"w:{self.wordlist}"
 
 
 class HashcatDiscreteCombinatorTask(HashcatDiscreteTask):
     wordlist1: str
     wordlist2: str
     # Left/right rules
-    left: Optional[str] = None
-    right: Optional[str] = None
+    left: str = ""
+    right: str = ""
     type: Literal["HashcatDiscreteCombinatorTask"] = "HashcatDiscreteCombinatorTask"
-
-    def get_keyspace_name(self):
-        return f"ww:{self.wordlist1}:{self.wordlist2}"
 
 
 class HashcatDiscreteMaskTask(HashcatDiscreteTask):
@@ -96,23 +83,13 @@ class HashcatDiscreteMaskTask(HashcatDiscreteTask):
     custom_charsets: List[CustomCharset] = Field(default_factory=list)
     type: Literal["HashcatDiscreteMaskTask"] = "HashcatDiscreteCombinatorTask"
 
-    def get_keyspace_name(self):
-        if len(self.custom_charsets):
-            charsets = ":".join(charset.charset for charset in self.custom_charsets)
-            return f"mc:{self.mask}:{charsets}"
-
-        return f"m:{self.mask}"
-
 
 class HashcatDiscreteHybridTask(HashcatDiscreteTask):
-    wordlist: str
+    wordlist1: str
     mask: str
 
     wordlist_mask: bool
     type: Literal["HashcatDiscreteHybridTask"] = "HashcatDiscreteHybridTask"
-
-    def get_keyspace_name(self):
-        return f"wm:{self.wordlist}:{self.mask}"
 
 
 class HashcatDiscreteTaskContainer(BaseModel):

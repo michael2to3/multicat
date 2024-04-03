@@ -2,16 +2,14 @@ from datetime import datetime
 
 from config import Base
 from sqlalchemy import Column, DateTime, Integer, String
-from sqlalchemy.dialects.postgresql import ARRAY, UUID
+from sqlalchemy.dialects.postgresql import JSONB
 
 
-class HashcatAsset(Base):
-    __tablename__ = "assets"
+class Devices(Base):
+    __tablename__ = "devices"
     __table_args__ = {"extend_existing": True}
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    task_uuid = Column(UUID(as_uuid=True))
-    worker_id = Column(String, nullable=False)
-    wordlists = Column(ARRAY(String))
-    rules = Column(ARRAY(String))
+    worker_name = Column(String, nullable=False)
+    value = Column(JSONB, nullable=False)
     timestamp = Column(DateTime, default=datetime.utcnow)

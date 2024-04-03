@@ -2,13 +2,15 @@ import logging
 
 from celery import current_task, shared_task
 from config import Config, Database
-from hashcat import FileManager, HashcatExecutor
-from schemas import HashcatDiscreteTask, HashcatDiscreteTaskContainer
+from hashcat import FileManager, HashcatExecutor, HashcatDiscreteTaskContainer
+from hashcat.hashcat import Hashcat
+from schemas import HashcatDiscreteTask
 
 logger = logging.getLogger(__name__)
 db = Database(Config.get("DATABASE_URL"))
 file_manager = FileManager(Config.get("RULES_DIR"), Config.get("WORDLISTS_DIR"))
-hashcat_executor = HashcatExecutor(file_manager)
+hashcat = Hashcat()
+hashcat_executor = HashcatExecutor(file_manager, hashcat)
 
 
 @shared_task(name="client.run_hashcat", ignore_result=True)
@@ -26,8 +28,7 @@ def run_hashcat(discrete_task_as_dict):
 @shared_task(name="client.calc_keyspace", ignore_result=False)
 def calc_keyspace(keyspace_task):
     c = HashcatDiscreteTaskContainer.model_validate({"task": keyspace_task})
-    return hashcat_executor.calc_keyspace(c.task)
-    # return hashcat_executor.calc_keyspaces(step)
+    return c.task.calc_keyspace(hashcat_executor)
 
 
 @shared_task(name="b.benchmark", ignore_result=True)

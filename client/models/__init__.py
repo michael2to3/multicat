@@ -1,5 +1,3 @@
 from .asset import HashcatAsset
 
-__all__ = [
-    "HashcatAsset",
-]
+__all__ = ["HashcatAsset"]

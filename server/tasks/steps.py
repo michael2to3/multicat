@@ -1,11 +1,13 @@
 import json
 import logging
+from typing import List
 
 import yaml
 from celery import shared_task, chord, signature
 from pydantic import ValidationError, parse_obj_as
 from sqlalchemy.exc import SQLAlchemyError
 
+from common import DiscreteTasksGenerator
 from config import Database, UUIDGenerator
 from models import DatabaseHelper, HashcatStep, Step, Keyspace
 from schemas import CeleryResponse, Steps, hashcat_step_loader
@@ -27,7 +29,7 @@ def delete_steps(user_id: str, step_name: int):
             .filter(
                 Step.name == step_name,
                 Step.user_id == user.id,
-                Step.keyspace_calculated == True,
+                Step.is_keyspace_calculated == True,
             )
             .first()
         )
@@ -51,7 +53,7 @@ def get_steps(user_id: str, step_name: str):
             .filter(
                 Step.user_id == user_id,
                 Step.name == step_name,
-                Step.keyspace_calculated == True,
+                Step.is_keyspace_calculated == True,
             )
             .first()
         )
@@ -73,7 +75,7 @@ def list_steps(user_id: str):
         db_helper = DatabaseHelper(session)
         user = db_helper.get_or_create_user(user_id)
 
-        steps = session.query(Step.name).filter(Step.user_id == user_id).all()
+        steps = session.query(Step.name).filter(Step.user_id == user_id, Step.is_keyspace_calculated == True).all()
         steps_name = [step.name for step in steps]
 
         if steps_name:
@@ -83,15 +85,15 @@ def list_steps(user_id: str):
 
 
 @shared_task
-def post_load_steps(keyspaces, user_id: str = None, steps_name: str = None):
+def post_load_steps(keyspaces, user_id: str = "", steps_name: str = ""):
     with db.session() as session:
-        for name, value in keyspaces:
-            ks = Keyspace(name=name, value=value)
+        for keyspace_dict in keyspaces:
+            ks = Keyspace(**keyspace_dict)
             session.add(ks)
 
         db_helper = DatabaseHelper(session)
         step = db_helper.get_steps(user_id, steps_name)
-        step.keyspace_calculated = True
+        step.is_keyspace_calculated = True
         session.commit()
 
     # TODO: Notify user about what happend (not in the world)
@@ -101,6 +103,19 @@ def post_load_steps(keyspaces, user_id: str = None, steps_name: str = None):
 def on_chord_error(request, exc, traceback):
     # TODO: remove failed keyspace computation
     logger.error("Task {0!r} raised error: {1!r}".format(request.id, exc))
+
+
+def calculate_unknown_keyspaces(user_id: str, steps_name: str, unkown_keyspaces: List):
+    pass
+    callback = post_load_steps.subtask(
+        kwargs={"user_id": user_id, "steps_name": steps_name},
+        queue="server",
+    )
+    group_tasks = [
+        signature("client.calc_keyspace", args=(task.model_dump(),))
+        for task in unkown_keyspaces
+    ]
+    chord(group_tasks, callback).on_error(on_chord_error.s()).apply_async()
 
 
 @shared_task(name="server.load_steps")
@@ -124,8 +139,9 @@ def load_steps(user_id: str, steps_name: str, yaml_content: str):
 
         try:
             unkown_keyspaces = []
-            for discrete_task in model.yield_discrete_tasks():
-                if not db_helper.keyspace_exists(discrete_task.get_keyspace_name()):
+            dt_generator = DiscreteTasksGenerator(model)
+            for discrete_task in dt_generator.yield_discrete_tasks():
+                if not db_helper.keyspace_exists(**discrete_task.model_dump()):
                     unkown_keyspaces.append(discrete_task)
 
             step = Step(name=steps_name, user_id=user.id)
@@ -134,22 +150,12 @@ def load_steps(user_id: str, steps_name: str, yaml_content: str):
                 step.hashcat_steps.append(hashcat_steps)
 
             msg = f"{steps_name} saved successfully"
-            if len(unkown_keyspaces) != 0:
-                step.keyspace_calculated = False
-
-                callback = post_load_steps.subtask(
-                    kwargs={"user_id": user_id, "steps_name": steps_name},
-                    queue="server",
-                )
-                group_tasks = [
-                    signature("client.calc_keyspace", args=(task.model_dump(),))
-                    for task in unkown_keyspaces
-                ]
-                chord(group_tasks, callback).on_error(on_chord_error.s()).apply_async()
-
+            if unkown_keyspaces:
+                step.is_keyspace_calculated = False
+                calculate_unknown_keyspaces(user_id, steps_name, unkown_keyspaces)
                 msg = f"Some of the keyspaces are new for the steps {steps_name}. Steps are saved but are not listed for now. I'll be back"
             else:
-                step.keyspace_calculated = True
+                step.is_keyspace_calculated = True
 
             session.add(step)
             session.commit()
