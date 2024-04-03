@@ -1,12 +1,14 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, Optional
+from typing import Dict
 
 from aiogram import Bot
 from aiogram.dispatcher.router import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 from celery import Celery
+
+from .message_wrapper import MessageWrapper
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -33,7 +35,7 @@ class BaseCommand(ABC):
         pass
 
     @abstractmethod
-    async def handle(self, message: Message):
+    async def handle(self, message: Message | MessageWrapper):
         pass
 
     def register_command_handler(self):
