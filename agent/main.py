@@ -5,6 +5,7 @@ import sys
 from aiogram import Bot, Dispatcher, Router
 from commands import command_registry
 from config import CeleryApp, Config
+from middleware import FetchedCommandMiddleware
 
 logging.basicConfig(level=logging.INFO)
 
@@ -16,6 +17,8 @@ app = CeleryApp("agent").get_app()
 async def main() -> None:
     dispatcher = Dispatcher()
     router = Router()
+
+    dispatcher.update.outer_middleware(FetchedCommandMiddleware())
 
     for command_cls in command_registry.list_commands():
         command_cls(bot, router, app)
