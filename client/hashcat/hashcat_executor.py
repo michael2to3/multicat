@@ -1,6 +1,6 @@
 import logging
 
-from pydantic import InstanceOf, BaseModel, Field
+from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Literal, Union
 
 from hashcat.hashcat_interface import HashcatInterface
@@ -48,7 +48,6 @@ class HashcatDiscreteStraightTask(HashcatDiscreteTask):
 class HashcatDiscreteCombinatorTask(HashcatDiscreteTask):
     wordlist1: str
     wordlist2: str
-    # Left/right rules
     left: str = ""
     right: str = ""
     type: Literal["HashcatDiscreteCombinatorTask"] = "HashcatDiscreteCombinatorTask"
@@ -156,7 +155,7 @@ class HashcatExecutor:
 
         self.hashcat = hashcat
         self.hashcat.potfile_disable = True
-        self.bound_task: Optional[InstanceOf[HashcatDiscreteTask]] = None
+        self.bound_task: Optional[HashcatDiscreteTask] = None
 
     # TODO: reimplement for new discrete tasks
     def error_callback(self, hInstance):

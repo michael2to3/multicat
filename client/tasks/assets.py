@@ -45,6 +45,5 @@ def _refresh_assets(task_uuid: str, worker_id: str):
 
 @shared_task(name="b.get_assets", ignore_result=True)
 def get_assets(task_uuid: str):
-    # worker_id = current_task.request.hostname
     worker_id = Config.get("WORKER_NAME")
     _refresh_assets(task_uuid, worker_id)
