@@ -1,9 +1,13 @@
+from config.config import Singleton
 from pyhashcat import Hashcat as Cat
 
 from .hashcat_interface import HashcatInterface
 
 
+# TODO: reimplement metaclass realization
 class Hashcat(HashcatInterface):
+    __metaclass__=Singleton
+
     def __init__(self, instance=Cat()):
         self._instance = instance
 
