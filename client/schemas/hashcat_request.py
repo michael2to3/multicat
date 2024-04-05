@@ -1,6 +1,6 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from enum import Enum
-from typing import List, Optional, Literal, Union
+from typing import List, Literal, Union
 
 from pydantic import BaseModel, Field, field_validator, validator
 
@@ -58,10 +58,6 @@ class HashcatDiscreteTask(BaseModel, ABC):
     keyspace_work: int = 0
     type: Literal["HashcatDiscreteTask"]
 
-    @classmethod
-    def get_subclasses(cls):
-        return tuple(cls.__subclasses__())
-
 
 class HashcatDiscreteStraightTask(HashcatDiscreteTask):
     wordlist1: str
@@ -93,7 +89,12 @@ class HashcatDiscreteHybridTask(HashcatDiscreteTask):
 
 
 class HashcatDiscreteTaskContainer(BaseModel):
-    task: Union[HashcatDiscreteTask.get_subclasses()] = Field(discriminator="type")
+    task: Union[
+        HashcatDiscreteStraightTask,
+        HashcatDiscreteCombinatorTask,
+        HashcatDiscreteMaskTask,
+        HashcatDiscreteHybridTask,
+    ] = Field(discriminator="type")
 
 
 class HashcatStep(BaseModel):
@@ -102,43 +103,6 @@ class HashcatStep(BaseModel):
     rules: List[str] = Field(default_factory=list)
     masks: List[str] = Field(default_factory=list)
 
-    def yield_discrete_tasks(self):
-        # TODO: remove fixed calculation
-        self.options.attack_mode = AttackMode.DICTIONARY
-
-        match self.options.attack_mode:
-            case AttackMode.DICTIONARY:
-                if len(self.rules) == 0:
-                    for wordlist in self.wordlists:
-                        yield HashcatDiscreteStraightTask(
-                            job_id=-1,
-                            hash_type=HashType(
-                                hashcat_type=-1, human_readable="unnamed"
-                            ),
-                            hashes=list(),
-                            wordlist=wordlist,
-                        )
-                else:
-                    for wordlist in self.wordlists:
-                        for rule in self.rules:
-                            yield HashcatDiscreteStraightTask(
-                                job_id=-1,
-                                hash_type=HashType(
-                                    hashcat_type=-1, human_readable="unnamed"
-                                ),
-                                hashes=list(),
-                                wordlist=wordlist,
-                                rule=rule,
-                            )
-
-            case _:
-                raise NotImplementedError("Not implemented")
-
 
 class Steps(BaseModel):
     steps: List[HashcatStep] = Field(default_factory=list)
-
-    def yield_discrete_tasks(self):
-        for step in self.steps:
-            for task in step.yield_discrete_tasks():
-                yield task

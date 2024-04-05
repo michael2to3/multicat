@@ -1,6 +1,6 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from enum import Enum
-from typing import List, Optional, Literal, Union
+from typing import List, Literal, Union
 
 from pydantic import BaseModel, Field, field_validator, validator
 
@@ -57,10 +57,6 @@ class HashcatDiscreteTask(BaseModel, ABC):
     keyspace_skip: int = 0
     keyspace_work: int = 0
     type: Literal["HashcatDiscreteTask"]
-
-    @classmethod
-    def get_subclasses(cls):
-        return tuple(cls.__subclasses__())
 
 
 class HashcatDiscreteStraightTask(HashcatDiscreteTask):
