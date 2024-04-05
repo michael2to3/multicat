@@ -1,13 +1,13 @@
 import logging
 
 from pydantic import InstanceOf, BaseModel, Field
-from typing import Optional, List, Tuple, Dict, Literal, Union
+from typing import Optional, List, Dict, Literal, Union
 
-from config import Config, Singleton
+from config import Singleton
 from hashcat.hashcat_interface import HashcatInterface
 from .hashcat import Hashcat
 from .filemanager import FileManager
-from schemas import HashcatDiscreteTask, HashcatStep, AttackMode, CustomCharset
+from schemas import HashcatDiscreteTask, AttackMode, CustomCharset
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
