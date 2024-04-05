@@ -15,7 +15,4 @@ class BaseSearchEngine(ABC):
         return self._search_for_file(base_dir, search_term)
 
     def _sanitize_path(self, base_dir: Path, path: Path) -> Path:
-        resolved_path = (base_dir / path).resolve()
-        if base_dir not in resolved_path.parents and base_dir != resolved_path:
-            raise ValueError("Attempted directory traversal detected")
-        return resolved_path
+        return base_dir.joinpath(path).resolve().relative_to(base_dir.resolve())
