@@ -50,7 +50,7 @@ step_hashcat_step_association = Table(
 class Step(Base):
     __tablename__ = "steps"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String, primary_key=True)
+    name = Column(String, unique=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     is_keyspace_calculated = Column(Boolean, default=False)

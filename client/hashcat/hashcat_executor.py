@@ -27,7 +27,22 @@ class HashcatDiscreteStraightTask(HashcatDiscreteTask):
     type: Literal["HashcatDiscreteStraightTask"] = "HashcatDiscreteStraightTask"
 
     def calc_keyspace(self, hashcat_executor: 'HashcatExecutor') -> Dict:
-        return hashcat_executor._calc_keyspace(AttackMode.DICTIONARY, dict1=self.wordlist1, rule=self.rule)
+        return hashcat_executor._calc_keyspace(AttackMode.DICTIONARY, self)
+
+    def configure(self, hashcat: Hashcat, file_manager: FileManager):
+        hashcat.dict1 = file_manager.get_wordlist(self.wordlist1)
+
+        if self.rule:
+            # It's better to provide one rule at a time, because we can quickly exceed available memory, or reach integer overflow
+            hashcat.rules = (file_manager.get_rule(self.rule),)
+
+    def build_keyspace(self, value):
+        return {
+            "attack_mode": AttackMode.DICTIONARY.value,
+            "wordlist1": self.wordlist1,
+            "rule": self.rule,
+            "value": value
+        }
 
 
 class HashcatDiscreteCombinatorTask(HashcatDiscreteTask):
@@ -39,8 +54,27 @@ class HashcatDiscreteCombinatorTask(HashcatDiscreteTask):
     type: Literal["HashcatDiscreteCombinatorTask"] = "HashcatDiscreteCombinatorTask"
 
     def calc_keyspace(self, hashcat_executor: 'HashcatExecutor') -> Dict:
-        return hashcat_executor._calc_keyspace(AttackMode.COMBINATOR, dict1=self.wordlist1, dict2=self.wordlist2, left=self.left, right=self.right)
+        return hashcat_executor._calc_keyspace(AttackMode.COMBINATOR, self)
 
+    def configure(self, hashcat: Hashcat, file_manager: FileManager):
+        hashcat.dict1 = file_manager.get_wordlist(self.wordlist1)
+        hashcat.dict2 = file_manager.get_wordlist(self.wordlist2)
+
+        if self.left:
+            hashcat.rule_buf_l = file_manager.get_rule(self.left)
+
+        if self.right:
+            hashcat.rule_buf_r = file_manager.get_rule(self.right)
+
+    def build_keyspace(self, value):
+        return {
+            "attack_mode": AttackMode.COMBINATOR.value,
+            "wordlist1": self.wordlist1,
+            "wordlist2": self.wordlist2,
+            "left": self.left,
+            "right": self.right,
+            "value": value
+        }
 
 
 class HashcatDiscreteMaskTask(HashcatDiscreteTask):
@@ -49,7 +83,26 @@ class HashcatDiscreteMaskTask(HashcatDiscreteTask):
     type: Literal["HashcatDiscreteMaskTask"] = "HashcatDiscreteCombinatorTask"
 
     def calc_keyspace(self, hashcat_executor: 'HashcatExecutor') -> Dict:
-        return hashcat_executor._calc_keyspace(AttackMode.MASK, mask=self.mask, custom_charsets=self.custom_charsets)
+        return hashcat_executor._calc_keyspace(AttackMode.MASK, self)
+
+    def configure(self, hashcat: Hashcat, _):
+        hashcat.mask = self.mask
+
+        if self.custom_charsets:
+            for charset in self.custom_charsets:
+                setattr(
+                    hashcat,
+                    f"custom_charset_{charset.charset_id}",
+                    charset.charset,
+                )
+
+    def build_keyspace(self, value):
+        return {
+            "attack_mode": AttackMode.MASK.value,
+            "mask": self.mask,
+            "custom_charsets": "\n".join(charset.charset for charset in self.custom_charsets),
+            "value": value
+        }
 
 
 class HashcatDiscreteHybridTask(HashcatDiscreteTask):
@@ -61,9 +114,25 @@ class HashcatDiscreteHybridTask(HashcatDiscreteTask):
 
     def calc_keyspace(self, hashcat_executor: 'HashcatExecutor') -> Dict:
         if self.wordlist_mask:
-            return hashcat_executor._calc_keyspace(AttackMode.HYBRID_WORDLIST_MASK, dict1=self.wordlist1, mask=self.mask)
+            return hashcat_executor._calc_keyspace(AttackMode.HYBRID_WORDLIST_MASK, self)
         else:
-            return hashcat_executor._calc_keyspace(AttackMode.HYBRID_MASK_WORDLIST, dict1=self.wordlist1, mask=self.mask)
+            return hashcat_executor._calc_keyspace(AttackMode.HYBRID_MASK_WORDLIST, self)
+
+    def configure(self, hashcat: Hashcat, file_manager: FileManager):
+        hashcat.dict1 = file_manager.get_wordlist(self.wordlist1)
+        hashcat.mask = self.mask
+
+    def build_keyspace(self, value):
+        am = AttackMode.HYBRID_WORDLIST_MASK
+        if not self.wordlist_mask:
+            am = AttackMode.HYBRID_MASK_WORDLIST
+
+        return {
+            "attack_mode": am.value,
+            "wordlist1": self.wordlist1,
+            "mask": self.mask,
+            "value": value
+        }
 
 
 class HashcatDiscreteTaskContainer(BaseModel):
@@ -120,57 +189,15 @@ class HashcatExecutor(metaclass=Singleton):
     def _calc_keyspace(
         self,
         attack_mode: AttackMode,
-        dict1: str = "",
-        dict2: str = "",
-        rule: str = "",
-        mask: str = "",
-        left: str = "", # Left rule
-        right: str = "", # Right rule
-        custom_charsets: Optional[List[CustomCharset]] = None,
+        task,
     ) -> Dict:
         self._reset_keyspace(attack_mode)
-
-        if dict1:
-            self.hashcat.dict1 = self.file_manager.get_wordlist(dict1)
-
-        if dict2:
-            self.hashcat.dict2 = self.file_manager.get_wordlist(dict2)
-
-        if rule:
-            # It's better to provide one rule at a time, because we can quickly exceed available memory, or reach integer overflow
-            self.hashcat.rules = (self.file_manager.get_rule(rule),)
-
-        if left:
-            self.hashcat.rule_buf_l = left
-
-        if right:
-            self.hashcat.rule_buf_r = right
-
-        if mask:
-            self.hashcat.mask = mask
-
-        if custom_charsets:
-            for charset in custom_charsets:
-                setattr(
-                    self.hashcat,
-                    f"custom_charset_{charset.charset_id}",
-                    charset.charset,
-                )
+        task.configure(self.hashcat, self.file_manager)
 
         if not self.check_hexec():
-            raise HashcatCalculationException(f"Failed to compute keyspace for {dict1} {dict2} {rule} {mask} {left} {right} {custom_charsets}")
+            raise HashcatCalculationException(f"Failed to compute keyspace for {task}")
 
-        return {
-            "attack_mode": attack_mode.value,
-            "wordlist1": dict1,
-            "wordlist2": dict2,
-            "rule": rule,
-            "left": left,
-            "right": right,
-            "mask": mask,
-            "custom_charsets": custom_charsets,
-            "value": self.hashcat.words_base
-        }
+        return task.build_keyspace(self.hashcat.words_base)
 
     def devices_info(self) -> Dict:
         self.hashcat.reset()

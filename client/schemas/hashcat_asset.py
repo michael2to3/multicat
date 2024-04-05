@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Dict, Optional
+from typing import List
 
 from pydantic import UUID5, BaseModel, Field
 
@@ -11,8 +11,6 @@ class HashcatAssetSchema(BaseModel):
     wordlists: List[str]
     rules: List[str]
     timestamp: datetime
-    benchmarks: Optional[Dict]
-    devices: Optional[Dict]
 
     class Config:
         from_attributes = True
