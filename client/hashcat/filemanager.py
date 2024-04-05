@@ -1,9 +1,14 @@
+import logging
 from pathlib import Path
 from typing import List
+
+logger = logging.getLogger(__name__)
 
 
 class FileManager:
     def __init__(self, rules_dir: str, wordlists_dir: str):
+        logger.warn("DeprecationWarning: Use the 'filemanager.filemanager' module instead.")
+
         self.rules_dir = Path(rules_dir)
         self.wordlists_dir = Path(wordlists_dir)
         self.rules_dir.mkdir(parents=True, exist_ok=True)
