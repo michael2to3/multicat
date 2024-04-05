@@ -1,7 +1,10 @@
+import logging
 from pathlib import Path
 
 from .fuzzyengine import FuzzySearchEngine
 from .searchengine import BaseSearchEngine
+
+logger = logging.getLogger(__name__)
 
 
 class FileManager:
@@ -10,6 +13,10 @@ class FileManager:
         search_dir: str,
         search_engine: BaseSearchEngine = FuzzySearchEngine(),
     ):
+        logger.warn(
+            "Deprecated: Use 'filemanager.rulesmanager.RulesManager and 'filemanager.wordlistmanager.WordlistManager' instead"
+        )
+
         self._search_dir = Path(search_dir).resolve()
         self._search_engine = search_engine
 
