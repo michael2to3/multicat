@@ -50,3 +50,15 @@ class Steps(BaseModel):
 def hashcat_step_constructor(loader, node):
     value = loader.construct_mapping(node, deep=True)
     return parse_obj_as(HashcatStep, value)
+
+
+class KeyspaceSchema(BaseModel):
+    attack_mode: int
+    wordlist1: str = ""
+    wordlist2: str = "" 
+    rule: str = "" 
+    left: str = ""
+    right: str = ""
+    mask: str = ""
+    custom_charsets: str = ""
+    value: int

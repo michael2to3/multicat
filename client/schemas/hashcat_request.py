@@ -58,6 +58,10 @@ class HashcatDiscreteTask(BaseModel, ABC):
     keyspace_work: int = 0
     type: Literal["HashcatDiscreteTask"]
 
+    @classmethod
+    def get_subclasses(cls):
+        return tuple(cls.__subclasses__())
+
 
 class HashcatDiscreteStraightTask(HashcatDiscreteTask):
     wordlist1: str
@@ -90,10 +94,7 @@ class HashcatDiscreteHybridTask(HashcatDiscreteTask):
 
 class HashcatDiscreteTaskContainer(BaseModel):
     task: Union[
-        HashcatDiscreteStraightTask,
-        HashcatDiscreteCombinatorTask,
-        HashcatDiscreteMaskTask,
-        HashcatDiscreteHybridTask,
+        HashcatDiscreteTask.get_subclasses()
     ] = Field(discriminator="type")
 
 
@@ -106,3 +107,15 @@ class HashcatStep(BaseModel):
 
 class Steps(BaseModel):
     steps: List[HashcatStep] = Field(default_factory=list)
+
+
+class KeyspaceSchema(BaseModel):
+    attack_mode: int
+    wordlist1: str = ""
+    wordlist2: str = "" 
+    rule: str = "" 
+    left: str = ""
+    right: str = ""
+    mask: str = ""
+    custom_charsets: str = ""
+    value: int

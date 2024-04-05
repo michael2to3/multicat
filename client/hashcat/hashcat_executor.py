@@ -1,3 +1,4 @@
+from abc import ABC
 import logging
 
 from pydantic import BaseModel, Field
@@ -6,8 +7,7 @@ from typing import Optional, List, Dict, Literal, Union
 from hashcat.hashcat_interface import HashcatInterface
 from .hashcat import Hashcat
 from .filemanager import FileManager
-from schemas import HashcatDiscreteTask, AttackMode, CustomCharset
-from models import Keyspace
+from schemas import AttackMode, CustomCharset, KeyspaceSchema, HashType
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -19,6 +19,19 @@ class UnimplementedAttackModeException(Exception):
 
 class HashcatCalculationException(Exception):
     pass
+
+
+class HashcatDiscreteTask(BaseModel, ABC):
+    job_id: int
+    hash_type: HashType
+    hashes: List[str]
+    keyspace_skip: int = 0
+    keyspace_work: int = 0
+    type: Literal["HashcatDiscreteTask"]
+
+    @classmethod
+    def get_subclasses(cls):
+        return tuple(cls.__subclasses__())
 
 
 class HashcatDiscreteStraightTask(HashcatDiscreteTask):
@@ -36,8 +49,8 @@ class HashcatDiscreteStraightTask(HashcatDiscreteTask):
             # It's better to provide one rule at a time, because we can quickly exceed available memory, or reach integer overflow
             hashcat.rules = (file_manager.get_rule(self.rule),)
 
-    def build_keyspace(self, value) -> Keyspace:
-        return Keyspace(
+    def build_keyspace(self, value) -> KeyspaceSchema:
+        return KeyspaceSchema(
             attack_mode=AttackMode.DICTIONARY.value,
             wordlist1=self.wordlist1,
             rule=self.rule,
@@ -65,8 +78,8 @@ class HashcatDiscreteCombinatorTask(HashcatDiscreteTask):
         if self.right:
             hashcat.rule_buf_r = file_manager.get_rule(self.right)
 
-    def build_keyspace(self, value) -> Keyspace:
-        return Keyspace(
+    def build_keyspace(self, value) -> KeyspaceSchema:
+        return KeyspaceSchema(
             attack_mode=AttackMode.COMBINATOR.value,
             wordlist1=self.wordlist1,
             wordlist2=self.wordlist2,
@@ -95,8 +108,8 @@ class HashcatDiscreteMaskTask(HashcatDiscreteTask):
                     charset.charset,
                 )
 
-    def build_keyspace(self, value) -> Keyspace:
-        return Keyspace(
+    def build_keyspace(self, value) -> KeyspaceSchema:
+        return KeyspaceSchema(
             attack_mode=AttackMode.MASK.value,
             mask=self.mask,
             custom_charsets="\n".join(
@@ -127,12 +140,12 @@ class HashcatDiscreteHybridTask(HashcatDiscreteTask):
         hashcat.dict1 = file_manager.get_wordlist(self.wordlist1)
         hashcat.mask = self.mask
 
-    def build_keyspace(self, value) -> Keyspace:
+    def build_keyspace(self, value) -> KeyspaceSchema:
         am = AttackMode.HYBRID_WORDLIST_MASK
         if not self.wordlist_mask:
             am = AttackMode.HYBRID_MASK_WORDLIST
 
-        return Keyspace(
+        return KeyspaceSchema(
             attack_mode=am.value,
             wordlist1=self.wordlist1,
             mask=self.mask,
@@ -141,12 +154,7 @@ class HashcatDiscreteHybridTask(HashcatDiscreteTask):
 
 
 class HashcatDiscreteTaskContainer(BaseModel):
-    task: Union[
-        HashcatDiscreteStraightTask,
-        HashcatDiscreteCombinatorTask,
-        HashcatDiscreteMaskTask,
-        HashcatDiscreteHybridTask,
-    ] = Field(discriminator="type")
+    task: Union[HashcatDiscreteTask.get_subclasses()] = Field(discriminator="type")
 
 
 class HashcatExecutor:

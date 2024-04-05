@@ -28,7 +28,7 @@ def run_hashcat(discrete_task_as_dict):
 @shared_task(name="client.calc_keyspace", ignore_result=False)
 def calc_keyspace(keyspace_task):
     c = HashcatDiscreteTaskContainer.model_validate({"task": keyspace_task})
-    return c.task.calc_keyspace(hashcat_executor)
+    return c.task.calc_keyspace(hashcat_executor).dict()
 
 
 @shared_task(name="b.benchmark", ignore_result=True)
