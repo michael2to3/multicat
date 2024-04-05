@@ -28,35 +28,6 @@ def get_devices():
     return CeleryResponse(value=yaml.dump(data)).model_dump()
 
 
-def get_generic_devices(obj):
-    if not obj:
-        return []
-
-    # cuda/hip
-    if dev := obj.get("devices"):
-        return dev
-    # ocl
-    elif plat := obj.get("platforms"):
-        devices = []
-        for x in plat:
-            if devs := x.get("devices"):
-                devices.extend(devs)
-
-        return devices
-    else:
-        return []
-
-
-def devices_info_match(before, after) -> bool:
-    if len(before) != len(after):
-        return False
-
-    devices_before = Devices(before)
-    devices_after = Devices(after)
-
-    return devices_before == devices_after
-
-
 @shared_task(name="server.update_devices_info", ignore_result=True)
 def update_devices_info(worker_name: str, devices_new_dict: Dict):
     with db.session() as session:
@@ -74,3 +45,13 @@ def update_devices_info(worker_name: str, devices_new_dict: Dict):
 
         devices.timestamp = datetime.now(UTC)
         session.commit()
+
+
+def devices_info_match(before, after) -> bool:
+    if len(before) != len(after):
+        return False
+
+    devices_before = Devices(before)
+    devices_after = Devices(after)
+
+    return devices_before == devices_after
