@@ -1,5 +1,6 @@
 from .celeryapp import CeleryApp
-from .config import Config, Singleton
+from .config import Config
+from .singleton import Singleton
 from .db import Base, Database
 from .uuid import UUIDGenerator
 
