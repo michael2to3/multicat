@@ -19,3 +19,24 @@ class TestFuzzySearchEngine(unittest.TestCase):
         fse = FuzzySearchEngine()
         with self.assertRaises(FileNotFoundError):
             fse.search_for_file(Path("/test/dir"), "nonexistent")
+
+    @patch("pathlib.Path.rglob")
+    def test_search_with_path_traversal_attempts(self, mocked_rglob):
+        mocked_rglob.return_value = [Path("/test/dir/safe_file.txt")]
+        fse = FuzzySearchEngine(0.0)
+
+        traversal_attempts = [
+            "../",
+            "a/../b/../etc/passwd",
+            "/tmp////etc/passwd",
+            "../../../etc/passwd",
+            "./././../etc/passwd",
+        ]
+
+        for attempt in traversal_attempts:
+            with self.subTest(attempt=attempt):
+                result = fse.search_for_file(Path("/test/dir"), attempt)
+                self.assertTrue(
+                    "/test/dir" in str(result),
+                    f"Path traversal attempt was not neutralized for {attempt}",
+                )
