@@ -6,6 +6,7 @@ from typing import Dict
 
 from celery import shared_task
 
+from common import Devices
 from config import Database
 from models import DatabaseHelper
 from schemas import CeleryResponse
@@ -50,25 +51,10 @@ def devices_info_match(before, after) -> bool:
     if len(before) != len(after):
         return False
 
-    devices_before = []
-    for x in ["cuda", "hip", "ocl"]:
-        devices_before += get_generic_devices(before.get(x))
+    devices_before = Devices(before)
+    devices_after = Devices(after)
 
-    devices_after = []
-    for x in ["cuda", "hip", "ocl"]:
-        devices_after += get_generic_devices(after.get(x))
-
-    if len(devices_before) != len(devices_after):
-        return False
-
-    checks = ["device_id", "device_name", "device_processors"]
-
-    for bd, ad in zip(devices_before, devices_after):
-        for check in checks:
-            if bd[check] != ad[check]:
-                return False
-
-    return True
+    return devices_before == devices_after
 
 
 @shared_task(name="server.update_devices_info", ignore_result=True)
