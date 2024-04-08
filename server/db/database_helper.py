@@ -106,7 +106,7 @@ class DatabaseHelper:
 
     def keyspace_exists(self, keyspace: schemas.KeyspaceBase) -> bool:
         keyspace_data = {
-            k: v for k, v in keyspace.model_dump().items() if v is not None
+            k: v for k, v in keyspace.model_dump().items()
         }
         query = self.session.query(Keyspace).filter_by(**keyspace_data)
         return query.first() is not None

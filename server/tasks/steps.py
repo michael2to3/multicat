@@ -61,3 +61,9 @@ def post_load_steps(keyspaces, user_id: str = "", steps_name: str = ""):
         session.commit()
 
     # TODO: Notify user about what happend (not in the world)
+
+
+@shared_task
+def on_chord_error(request, exc, traceback):
+    # TODO: remove failed keyspace computation
+    logger.error("Task {0!r} raised error: {1!r}".format(request.id, exc))

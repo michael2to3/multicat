@@ -27,7 +27,6 @@ class HashcatDiscreteTask(BaseModel, ABC):
     hashes: List[str]
     keyspace_skip: int = 0
     keyspace_work: int = 0
-    type: Literal["HashcatDiscreteTask"]
 
     @classmethod
     def get_subclasses(cls):
@@ -42,8 +41,8 @@ class HashcatDiscreteStraightTask(HashcatDiscreteTask):
     def calc_keyspace(self, hashcat_executor: "HashcatExecutor") -> Dict:
         return hashcat_executor._calc_keyspace(AttackMode.DICTIONARY, self)
 
-    def configure(self, hashcat: Hashcat, file_manager: FileManager):
-        hashcat.dict1 = file_manager.get_wordlist(self.wordlist1)
+    def configure(self, hashcat: Hashcat, filename: str):
+        hashcat.dict1 = filename
 
         if self.rule:
             # It's better to provide one rule at a time, because we can quickly exceed available memory, or reach integer overflow
