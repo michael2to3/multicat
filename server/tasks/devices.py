@@ -1,14 +1,13 @@
 import logging
-import yaml
-
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from typing import Dict
 
+import yaml
 from celery import shared_task
 
-from common import Devices
 from config import Database
-from models import DatabaseHelper
+from db import DatabaseHelper
+from models import Devices
 from schemas import CeleryResponse
 
 db = Database()

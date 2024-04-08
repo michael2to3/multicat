@@ -1,12 +1,11 @@
 import yaml
-from pydantic import parse_obj_as
 
-from .hashcat_request import HashcatStep
+from .discrete_task import HashcatStep
 
 
 def hashcat_step_constructor(loader, node):
     value = loader.construct_mapping(node, deep=True)
-    return parse_obj_as(HashcatStep, value)
+    return HashcatStep(**value)
 
 
 def hashcat_step_loader():

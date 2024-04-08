@@ -1,12 +1,9 @@
 import json
-
 from typing import Dict, List
 
+import models
 import schemas
-
-from .hashcat_request import HashType, Step, User, UserRole, Keyspace
-from .hashcat_asset import HashcatAsset
-from .devices import Devices
+from models import HashType, Keyspace, Step, User, UserRole
 
 
 class DatabaseHelperNotFoundError(Exception):
@@ -17,7 +14,7 @@ class DatabaseHelper:
     def __init__(self, session):
         self.session = session
 
-    def get_or_create_hashtype_as_model(self, identifier: str) -> HashType:
+    def get_or_create_hashtype_as_model(self, identifier: str) -> schemas.HashType:
         hashtype = self.get_or_create_hashtype_as_schema(identifier)
         return self._convert_to_schema_hashtype(hashtype)
 
@@ -50,7 +47,9 @@ class DatabaseHelper:
         self.session.commit()
         return hashtype
 
-    def _convert_to_schema_hashtype(self, hashtype: HashType) -> schemas.HashType:
+    def _convert_to_schema_hashtype(
+        self, hashtype: models.HashType
+    ) -> schemas.HashType:
         return schemas.HashType(
             hashcat_type=hashtype.hashcat_type, human_readable=hashtype.human_readable
         )
@@ -105,46 +104,27 @@ class DatabaseHelper:
         hashcat_steps = {"steps": [json.loads(s.value) for s in step.hashcat_steps]}
         return schemas.Steps(**hashcat_steps)
 
-    def keyspace_exists(
-        self,
-        wordlist1: str = "",
-        wordlist2: str = "",
-        rule: str = "",
-        left: str = "",
-        right: str = "",
-        mask: str = "",
-        custom_charsets: str = "",
-        **kwargs,
-    ) -> bool:
-        keyspace = (
-            self.session.query(Keyspace)
-            .filter(
-                Keyspace.wordlist1 == wordlist1,
-                Keyspace.wordlist2 == wordlist2,
-                Keyspace.rule == rule,
-                Keyspace.left == left,
-                Keyspace.right == right,
-                Keyspace.mask == mask,
-                Keyspace.custom_charsets == custom_charsets,
-            )
-            .first()
-        )
-        return keyspace is not None
+    def keyspace_exists(self, keyspace: schemas.KeyspaceBase) -> bool:
+        keyspace_data = {
+            k: v for k, v in keyspace.model_dump().items() if v is not None
+        }
+        query = self.session.query(Keyspace).filter_by(**keyspace_data)
+        return query.first() is not None
 
-    def get_devices(self) -> List[Devices]:
-        result = self.session.query(Devices).all()
+    def get_devices(self) -> List[models.Devices]:
+        result = self.session.query(models.Devices).all()
         return result
 
-    def get_worker_devices(self, worker_name: str) -> Devices:
+    def get_worker_devices(self, worker_name: str) -> models.Devices:
         result = (
-            self.session.query(Devices)
-            .filter(Devices.worker_name == worker_name)
+            self.session.query(models.Devices)
+            .filter(models.Devices.worker_name == worker_name)
             .first()
         )
         return result
 
-    def add_devices_info(self, worker_name: str, value: Dict) -> Devices:
-        devices = Devices(worker_name=worker_name, value=value)
+    def add_devices_info(self, worker_name: str, value: Dict) -> models.Devices:
+        devices = models.Devices(worker_name=worker_name, value=value)
         self.session.add(devices)
         self.session.commit()
         return devices

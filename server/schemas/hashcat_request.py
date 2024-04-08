@@ -1,6 +1,5 @@
-from abc import ABC
 from enum import Enum
-from typing import List, Literal, Union
+from typing import List
 
 from pydantic import BaseModel, Field, field_validator, validator
 
@@ -48,74 +47,3 @@ class HashcatOptions(BaseModel):
         if rules:
             return AttackMode.HYBRID_MASK_WORDLIST
         return AttackMode.MASK
-
-
-class HashcatDiscreteTask(BaseModel, ABC):
-    job_id: int
-    hash_type: HashType
-    hashes: List[str]
-    keyspace_skip: int = 0
-    keyspace_work: int = 0
-    type: Literal["HashcatDiscreteTask"]
-
-    @classmethod
-    def get_subclasses(cls):
-        return tuple(cls.__subclasses__())
-
-
-class HashcatDiscreteStraightTask(HashcatDiscreteTask):
-    wordlist1: str
-    rule: str = ""
-    type: Literal["HashcatDiscreteStraightTask"] = "HashcatDiscreteStraightTask"
-
-
-class HashcatDiscreteCombinatorTask(HashcatDiscreteTask):
-    wordlist1: str
-    wordlist2: str
-    # Left/right rules
-    left: str = ""
-    right: str = ""
-    type: Literal["HashcatDiscreteCombinatorTask"] = "HashcatDiscreteCombinatorTask"
-
-
-class HashcatDiscreteMaskTask(HashcatDiscreteTask):
-    mask: str
-    custom_charsets: List[CustomCharset] = Field(default_factory=list)
-    type: Literal["HashcatDiscreteMaskTask"] = "HashcatDiscreteCombinatorTask"
-
-
-class HashcatDiscreteHybridTask(HashcatDiscreteTask):
-    wordlist1: str
-    mask: str
-
-    wordlist_mask: bool
-    type: Literal["HashcatDiscreteHybridTask"] = "HashcatDiscreteHybridTask"
-
-
-class HashcatDiscreteTaskContainer(BaseModel):
-    task: Union[
-        HashcatDiscreteTask.get_subclasses()
-    ] = Field(discriminator="type")
-
-
-class HashcatStep(BaseModel):
-    options: HashcatOptions = Field(default_factory=HashcatOptions)
-    wordlists: List[str] = Field(default_factory=list)
-    rules: List[str] = Field(default_factory=list)
-    masks: List[str] = Field(default_factory=list)
-
-
-class Steps(BaseModel):
-    steps: List[HashcatStep] = Field(default_factory=list)
-
-
-class KeyspaceSchema(BaseModel):
-    attack_mode: int
-    wordlist1: str = ""
-    wordlist2: str = "" 
-    rule: str = "" 
-    left: str = ""
-    right: str = ""
-    mask: str = ""
-    custom_charsets: str = ""
-    value: int

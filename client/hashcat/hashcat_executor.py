@@ -210,7 +210,7 @@ class HashcatExecutor:
         self,
         attack_mode: AttackMode,
         task,
-    ) -> Dict:
+    ) -> KeyspaceSchema:
         self._reset_keyspace(attack_mode)
         task.configure(self.hashcat, self.file_manager)
 

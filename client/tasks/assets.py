@@ -1,7 +1,7 @@
 import logging
+from datetime import UTC, datetime
 
-from datetime import datetime, UTC
-from celery import current_task, shared_task
+from celery import shared_task
 
 from config import Config, Database
 from hashcat import FileManager, HashcatExecutor
