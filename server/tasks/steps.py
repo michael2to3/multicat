@@ -1,9 +1,11 @@
 import logging
+from typing import List
 
 from celery import shared_task
 
 from config import Database, UUIDGenerator
 from db import DatabaseHelper, StepManager
+from models.keyspaces import Keyspace
 from schemas import CeleryResponse
 
 logger = logging.getLogger(__name__)
@@ -49,10 +51,12 @@ def load_steps(user_id: str, steps_name: str, yaml_content: str):
 
 
 @shared_task
-def post_load_steps(keyspaces, user_id: str = "", steps_name: str = ""):
+def post_load_steps(keyspaces, unkown_keyspaces: List = list(), user_id: str = "", steps_name: str = ""):
     with db.session() as session:
-        for keyspace_dict in keyspaces:
-            ks = Keyspace(**keyspace_dict)
+        for keyspace, value in zip(unkown_keyspaces, keyspaces):
+            keyspace.value = value
+
+            ks = Keyspace(**keyspace.model_dump())
             session.add(ks)
 
         db_helper = DatabaseHelper(session)

@@ -1,9 +1,11 @@
 import json
 import logging
+from typing import Generator, List
 
 import yaml
 from celery import chord, signature
 from pydantic import ValidationError
+from schemas.keyspaces import KeyspaceBase
 from sqlalchemy.orm import Session
 
 from db import DatabaseHelper
@@ -79,13 +81,15 @@ class StepManager:
             logger.error(f"Error loading steps: {str(e)}")
             raise
 
+        is_keyspace_calculated = True
         unkown_keyspaces = []
-        for discrete_task in self._generate_task(model):
-            if not self.db_helper.keyspace_exists(**discrete_task.model_dump()):
-                logger.info(f"Unknown keyspace: {discrete_task}")
-                unkown_keyspaces.append(discrete_task)
+        for keyspace_task in self._generate_keyspace_tasks(model):
+            if not self.db_helper.keyspace_exists(keyspace_task):
+                logger.info("Unknown keyspace: %s", keyspace_task)
+                unkown_keyspaces.append(keyspace_task)
+                is_keyspace_calculated = False
 
-        step = Step(name=steps_name, user_id=self.user_id, is_keyspace_calculated=False)
+        step = Step(name=steps_name, user_id=self.user_id, is_keyspace_calculated=is_keyspace_calculated)
         self.session.add(step)
         self.session.commit()
 
@@ -95,8 +99,8 @@ class StepManager:
     def _calculate_and_save_unknown_keyspaces(self, unkown_keyspaces, steps_name: str):
         logger.info(f"Unknown keyspaces found: {unkown_keyspaces}")
         tasks = [
-            signature("client.calc_keyspace", args=(discrete_task.model_dump(),))
-            for discrete_task in unkown_keyspaces
+            signature("client.calc_keyspace", args=(keyspace_task.model_dump(),))
+            for keyspace_task in unkown_keyspaces
         ]
         callback = signature(
             "server.post_load_steps",
@@ -104,7 +108,7 @@ class StepManager:
         )
         chord(tasks)(callback)
 
-    def _generate_task(self, model: Steps):
+    def _generate_keyspace_tasks(self, model: Steps):
         for step in model.steps:
-            for task in DiscreteTasksGenerator.generate_tasks(step):
+            for task in DiscreteTasksGenerator.generate_keyspace_tasks(step):
                 yield task
