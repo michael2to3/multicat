@@ -1,13 +1,14 @@
-from abc import ABC
 import logging
+from abc import ABC
+from typing import Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Literal, Union
 
 from hashcat.hashcat_interface import HashcatInterface
-from .hashcat import Hashcat
+from schemas import AttackMode, CustomCharset, HashType, KeyspaceSchema
+
 from .filemanager import FileManager
-from schemas import AttackMode, CustomCharset, KeyspaceSchema, HashType
+from .hashcat import Hashcat
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -41,8 +42,8 @@ class HashcatDiscreteStraightTask(HashcatDiscreteTask):
     def calc_keyspace(self, hashcat_executor: "HashcatExecutor") -> Dict:
         return hashcat_executor._calc_keyspace(AttackMode.DICTIONARY, self)
 
-    def configure(self, hashcat: Hashcat, filename: str):
-        hashcat.dict1 = filename
+    def configure(self, hashcat: Hashcat, file_manager: FileManager):
+        hashcat.dict1 = file_manager.get_wordlist(self.wordlist1)
 
         if self.rule:
             # It's better to provide one rule at a time, because we can quickly exceed available memory, or reach integer overflow
