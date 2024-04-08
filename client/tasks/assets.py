@@ -4,15 +4,12 @@ from datetime import UTC, datetime
 from celery import shared_task
 
 from config import Config, Database
-from hashcat import FileManager, HashcatExecutor
-from hashcat.hashcat import Hashcat
+from hashcat import FileManager
 from models import HashcatAsset
 
 logger = logging.getLogger(__name__)
 db = Database(Config.get("DATABASE_URL"))
 file_manager = FileManager(Config.get("RULES_DIR"), Config.get("WORDLISTS_DIR"))
-hashcat = Hashcat()
-hashcat_executor = HashcatExecutor(file_manager, hashcat)
 
 
 def _refresh_assets(task_uuid: str, worker_id: str):

@@ -72,7 +72,6 @@ class HashcatDiscreteStraightTask(HashcatDiscreteTask):
 class HashcatDiscreteCombinatorTask(HashcatDiscreteTask):
     wordlist1: str
     wordlist2: str
-    # Left/right rules
     left: str = ""
     right: str = ""
     type: Literal["HashcatDiscreteCombinatorTask"] = "HashcatDiscreteCombinatorTask"

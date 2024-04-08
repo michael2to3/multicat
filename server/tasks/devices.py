@@ -7,7 +7,7 @@ from celery import shared_task
 
 from config import Database
 from db import DatabaseHelper
-from models import Devices
+from devices import Devices
 from schemas import CeleryResponse
 
 db = Database()
@@ -50,6 +50,7 @@ def devices_info_match(before, after) -> bool:
     if len(before) != len(after):
         return False
 
+    print(before)
     devices_before = Devices(before)
     devices_after = Devices(after)
 

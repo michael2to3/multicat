@@ -50,13 +50,14 @@ def load_steps(user_id: str, steps_name: str, yaml_content: str):
         return CeleryResponse(value=f"{steps_name} saved successfully").model_dump()
 
 
-@shared_task
+@shared_task(name="server.post_load_steps")
 def post_load_steps(keyspaces, unkown_keyspaces: List = list(), user_id: str = "", steps_name: str = ""):
+    print(keyspaces)
     with db.session() as session:
         for keyspace, value in zip(unkown_keyspaces, keyspaces):
-            keyspace.value = value
+            keyspace["value"] = value
 
-            ks = Keyspace(**keyspace.model_dump())
+            ks = Keyspace(**keyspace)
             session.add(ks)
 
         db_helper = DatabaseHelper(session)

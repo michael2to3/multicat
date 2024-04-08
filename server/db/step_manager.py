@@ -104,7 +104,8 @@ class StepManager:
         ]
         callback = signature(
             "server.post_load_steps",
-            kwargs={"user_id": self.user_id, "steps_name": steps_name},
+            queue="server",
+            kwargs={"unkown_keyspaces": [x.model_dump() for x in unkown_keyspaces], "user_id": self.user_id, "steps_name": steps_name},
         )
         chord(tasks)(callback)
 

@@ -2,26 +2,26 @@ from typing import List, Literal
 
 from pydantic import BaseModel
 
-from .hashcat_request import AttackMode
-
+from schemas.hashcat_request import AttackMode
 
 class KeyspaceBase(BaseModel):
-    # attack_mode: AttackMode
+    attack_mode: AttackMode
     value: int
 
     class Config:
         from_attributes = True
+        fields = {"attack_mode": {"exclude": True}}
 
 
 class KeyspaceStraightSchema(KeyspaceBase):
-    # attack_mode: AttackMode = AttackMode.DICTIONARY
+    attack_mode: AttackMode = AttackMode.DICTIONARY
     wordlist1: str
     rule: str
     type: Literal["keyspacestraight"] = "keyspacestraight"
 
 
 class KeyspaceCombinatorSchema(KeyspaceBase):
-    # attack_mode: AttackMode = AttackMode.COMBINATOR
+    attack_mode: AttackMode = AttackMode.COMBINATOR
     wordlist1: str
     wordlist2: str
     left: str
@@ -30,7 +30,7 @@ class KeyspaceCombinatorSchema(KeyspaceBase):
 
 
 class KeyspaceMaskSchema(KeyspaceBase):
-    # attack_mode: AttackMode = AttackMode.MASK
+    attack_mode: AttackMode = AttackMode.MASK
     mask: str
     custom_charsets: List[str]
     type: Literal["keyspacemask"] = "keyspacemask"
@@ -42,9 +42,9 @@ class KeyspaceHybridSchema(KeyspaceBase):
     wordlist_mask: bool
     type: Literal["keyspacehybrid"] = "keyspacehybrid"
 
-    # @property
-    # def attack_mode(self) -> AttackMode:
-    #     if self.wordlist_mask:
-    #         return AttackMode.HYBRID_WORDLIST_MASK
-    #     else:
-    #         return AttackMode.HYBRID_MASK_WORDLIST
+    @property
+    def attack_mode(self) -> AttackMode:
+        if self.wordlist_mask:
+            return AttackMode.HYBRID_WORDLIST_MASK
+
+        return AttackMode.HYBRID_MASK_WORDLIST
