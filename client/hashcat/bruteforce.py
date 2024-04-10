@@ -1,8 +1,8 @@
 import logging
 from typing import Optional
 
-from hashcat.hashcat_executor_base import HashcatExecutorBase
-from hashcat.hashcat_interface import HashcatInterface
+from hashcat.executor_base import HashcatExecutorBase
+from hashcat.interface import HashcatInterface
 from schemas.hashcat_request import HashcatDiscreteTask
 
 from .filemanager import FileManager

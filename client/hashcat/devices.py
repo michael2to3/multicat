@@ -1,14 +1,14 @@
 import logging
-
 from typing import Dict
 
 from hashcat.filemanager import FileManager
-from hashcat.hashcat_interface import HashcatInterface
+from hashcat.interface import HashcatInterface
 
-from .hashcat_executor_base import HashcatExecutorBase
+from .executor_base import HashcatExecutorBase
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
+
 
 class HashcatDevicesInfoException(Exception):
     pass

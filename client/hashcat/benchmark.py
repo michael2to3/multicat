@@ -1,7 +1,7 @@
 from typing import Dict, List
 from hashcat.filemanager import FileManager
-from hashcat.hashcat_executor_base import HashcatExecutorBase
-from hashcat.hashcat_interface import HashcatInterface
+from hashcat.executor_base import HashcatExecutorBase
+from hashcat.interface import HashcatInterface
 
 
 class HashcatBenchmarkCalculationException(Exception):

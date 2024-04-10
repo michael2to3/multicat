@@ -4,12 +4,12 @@ from typing import List, Literal, Tuple, Union
 
 from pydantic import BaseModel, Field
 
-from hashcat.hashcat_interface import HashcatInterface
+from hashcat.interface import HashcatInterface
 from schemas import AttackMode, KeyspaceSchema
 
+from .executor_base import HashcatExecutorBase
 from .filemanager import FileManager
 from .hashcat import Hashcat
-from .hashcat_executor_base import HashcatExecutorBase
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -31,10 +31,10 @@ class KeyspaceBase(BaseModel, ABC):
         from_attributes = True
         fields = {"attack_mode": {"exclude": True}}
 
-
     @abstractmethod
     def configure(self, hashcat: Hashcat, file_manager: FileManager):
         pass
+
 
 class KeyspaceStraightSchema(KeyspaceBase):
     attack_mode: AttackMode = AttackMode.DICTIONARY
@@ -132,6 +132,8 @@ class HashcatKeyspace(HashcatExecutorBase):
         task.configure(self.hashcat, self.file_manager)
 
         if not self.check_hexec():
-            raise HashcatKeyspaceCalculationException(f"Failed to compute keyspace for {task}")
+            raise HashcatKeyspaceCalculationException(
+                f"Failed to compute keyspace for {task}"
+            )
 
         return self.hashcat.words_base

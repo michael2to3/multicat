@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Dict
 
 
 class HashcatInterface(ABC):
@@ -327,7 +328,7 @@ class HashcatInterface(ABC):
         pass
 
     @abstractmethod
-    def hashcat_session_init(self):
+    def hashcat_session_init(self) -> int:
         pass
 
     @abstractmethod
@@ -710,6 +711,16 @@ class HashcatInterface(ABC):
 
     @property
     @abstractmethod
+    def no_threading(self) -> bool:
+        pass
+
+    @no_threading.setter
+    @abstractmethod
+    def no_threading(self, value):
+        pass
+
+    @property
+    @abstractmethod
     def quiet(self):
         pass
 
@@ -738,14 +749,8 @@ class HashcatInterface(ABC):
     def remove_timer(self, value):
         pass
 
-    @property
     @abstractmethod
     def reset(self):
-        pass
-
-    @reset.setter
-    @abstractmethod
-    def reset(self, value):
         pass
 
     @property
@@ -1268,14 +1273,8 @@ class HashcatInterface(ABC):
     def status_get_hash_target(self, value):
         pass
 
-    @property
     @abstractmethod
-    def status_get_hashes_msec_all(self):
-        pass
-
-    @status_get_hashes_msec_all.setter
-    @abstractmethod
-    def status_get_hashes_msec_all(self, value):
+    def status_get_hashes_msec_all(self) -> str:
         pass
 
     @property
@@ -1723,5 +1722,5 @@ class HashcatInterface(ABC):
         pass
 
     @abstractmethod
-    def get_backend_devices_info(self):
+    def get_backend_devices_info(self) -> Dict:
         pass
