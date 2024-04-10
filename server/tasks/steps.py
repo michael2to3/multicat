@@ -45,6 +45,10 @@ def list_steps(user_id: str):
 def load_steps(user_id: str, steps_name: str, yaml_content: str):
     user_id = str(UUIDGenerator.generate(user_id))
     with db.session() as session:
+        db_helper = DatabaseHelper(session)
+        db_helper.get_or_create_user(user_id)
+        session.commit()
+
         manager = StepManager(user_id, session)
         manager.load_steps(steps_name, yaml_content)
         return CeleryResponse(value=f"{steps_name} saved successfully").model_dump()
@@ -54,11 +58,9 @@ def load_steps(user_id: str, steps_name: str, yaml_content: str):
 def post_load_steps(
     keyspaces, unkown_keyspaces: List = list(), user_id: str = "", steps_name: str = ""
 ):
-    print(keyspaces)
     with db.session() as session:
         for keyspace, value in zip(unkown_keyspaces, keyspaces):
             keyspace["value"] = value
-
             ks = Keyspace(**keyspace)
             session.add(ks)
 

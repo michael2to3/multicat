@@ -28,7 +28,7 @@ class HashcatBruteforce(HashcatExecutorBase):
         logger.error(
             "Hashcat error (%d): %s",
             self.bound_task.job_id,
-            self._hashcat._hashcat_status_get_log(),
+            self._hashcat.hashcat_status_get_log(),
         )
 
         self.bound_task = None
@@ -38,7 +38,7 @@ class HashcatBruteforce(HashcatExecutorBase):
         logger.warning(
             "Hashcat error (%d): %s",
             self.bound_task.job_id,
-            self._hashcat._hashcat_status_get_log(),
+            self._hashcat.hashcat_status_get_log(),
         )
 
     # TODO: reimplement for new discrete tasks

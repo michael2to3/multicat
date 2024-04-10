@@ -1,12 +1,10 @@
 import json
 import logging
-from typing import Generator, List
 
 import yaml
 from celery import chord, signature
 from pydantic import ValidationError
-from schemas.keyspaces import KeyspaceBase
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import scoped_session
 
 from db import DatabaseHelper
 from generator import DiscreteTasksGenerator
@@ -17,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class StepManager:
-    def __init__(self, user_id: str, session: Session):
+    def __init__(self, user_id: str, session: scoped_session):
         self.user_id = user_id
         self.session = session
         self.db_helper = DatabaseHelper(session)
@@ -95,7 +93,6 @@ class StepManager:
             is_keyspace_calculated=is_keyspace_calculated,
         )
         self.session.add(step)
-        self.session.commit()
 
         if unkown_keyspaces:
             self._calculate_and_save_unknown_keyspaces(unkown_keyspaces, steps_name)

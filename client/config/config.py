@@ -12,7 +12,8 @@ class Singleton(type):
 
 class Config:
     @staticmethod
-    def get(key: str):
-        if os.environ.get(key):
-            return os.environ.get(key)
+    def get(key: str) -> str:
+        value = os.environ.get(key)
+        if value is not None:
+            return value
         raise ValueError(f"Environment variable {key} is not set")
