@@ -2,14 +2,15 @@ from typing import TYPE_CHECKING, Callable
 
 from sqlalchemy.orm import scoped_session
 
+from models import (
+    Keyspace,
+    KeyspaceCombinator,
+    KeyspaceHybrid,
+    KeyspaceMask,
+    KeyspaceStraight,
+)
+
 if TYPE_CHECKING:
-    from models import (
-        Keyspace,
-        KeyspaceCombinator,
-        KeyspaceHybrid,
-        KeyspaceMask,
-        KeyspaceStraight,
-    )
     from schemas import (
         KeyspaceBase,
         KeyspaceCombinatorSchema,
@@ -43,7 +44,7 @@ class KeyspaceExistVisitor(IKeyspaceVisitor):
 
     def _make_query(self, model: "Keyspace", schema: "KeyspaceBase"):
         keyspace_data = {
-            k: v for k, v in schema.model_dump(exclude={"value", "type"}).items()
+            k: v for k, v in schema.model_dump(exclude={"value", "attack_mode"}).items()
         }
         query = self._session.query(model).filter_by(**keyspace_data)
         self._callback(query.first() is not None)

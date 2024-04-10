@@ -1,8 +1,7 @@
-from sqlalchemy import JSON, Column, Integer, String, Boolean
+from sqlalchemy import JSON, Boolean, Column, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.ext.declarative import declarative_base
 
-Base = declarative_base()
+from config import Base
 
 
 class Keyspace(Base):
