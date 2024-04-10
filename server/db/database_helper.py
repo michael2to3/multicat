@@ -3,7 +3,8 @@ from typing import Dict, List
 
 import models
 import schemas
-from models import HashType, Step, User, UserRole, Keyspace
+from models import HashType, Step, User, UserRole
+from visitor.keyspace_exist import KeyspaceExistVisitor
 
 
 class DatabaseHelperNotFoundError(Exception):
@@ -105,11 +106,14 @@ class DatabaseHelper:
         return schemas.Steps(**hashcat_steps)
 
     def keyspace_exists(self, keyspace: schemas.KeyspaceBase) -> bool:
-        keyspace_data = {
-            k: v for k, v in keyspace.model_dump(exclude={"value", "type"}).items()
-        }
-        query = self.session.query(Keyspace).filter_by(**keyspace_data)
-        return query.first() is not None
+        callback_result = [False]
+
+        def callback(exist: bool):
+            callback_result[0] = exist
+
+        visitor = KeyspaceExistVisitor(self.session, callback)
+        keyspace.accept(visitor)
+        return callback_result[0]
 
     def get_devices(self) -> List[models.Devices]:
         result = self.session.query(models.Devices).all()
