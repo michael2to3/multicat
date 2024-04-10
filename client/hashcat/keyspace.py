@@ -27,13 +27,13 @@ class KeyspaceBase(BaseModel, ABC):
     def get_subclasses(cls) -> Tuple:
         return tuple(cls.__subclasses__())
 
-    class Config:
-        from_attributes = True
-        fields = {"attack_mode": {"exclude": True}}
-
     @abstractmethod
     def configure(self, hashcat: Hashcat, file_manager: FileManager):
         pass
+
+    class Config:
+        from_attributes = True
+        fields = {"attack_mode": {"exclude": True}}
 
 
 class KeyspaceStraightSchema(KeyspaceBase):
