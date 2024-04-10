@@ -4,9 +4,9 @@ from typing import Annotated, List, Literal, Union
 
 from pydantic import BaseModel, Field, TypeAdapter, validator
 
-from hashcat.configurer import IHashcatConfigurer
 from schemas import AttackMode
 from schemas.hashcat_request import CustomCharset
+from visitor import IKeyspaceVisitor
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ class KeyspaceBase(BaseModel, ABC):
         return tuple(cls.__subclasses__())
 
     @abstractmethod
-    def accept(self, configurer: IHashcatConfigurer):
+    def accept(self, configurer: IKeyspaceVisitor):
         pass
 
     class Config:
@@ -34,7 +34,7 @@ class KeyspaceStraightSchema(KeyspaceBase):
     rule: str
     type: Literal["keyspacestraight"] = "keyspacestraight"
 
-    def accept(self, configurer: IHashcatConfigurer):
+    def accept(self, configurer: IKeyspaceVisitor):
         configurer.configure_straight(self)
 
 
@@ -46,7 +46,7 @@ class KeyspaceCombinatorSchema(KeyspaceBase):
     right: str
     type: Literal["keyspacecombinator"] = "keyspacecombinator"
 
-    def accept(self, configurer: IHashcatConfigurer):
+    def accept(self, configurer: IKeyspaceVisitor):
         configurer.configure_combinator(self)
 
 
@@ -56,7 +56,7 @@ class KeyspaceMaskSchema(KeyspaceBase):
     custom_charsets: List[CustomCharset]
     type: Literal["keyspacemask"] = "keyspacemask"
 
-    def accept(self, configurer: IHashcatConfigurer):
+    def accept(self, configurer: IKeyspaceVisitor):
         configurer.configure_mask(self)
 
 
@@ -67,7 +67,7 @@ class KeyspaceHybridSchema(KeyspaceBase):
     wordlist_mask: bool
     type: Literal["keyspacehybrid"] = "keyspacehybrid"
 
-    def accept(self, configurer: IHashcatConfigurer):
+    def accept(self, configurer: IKeyspaceVisitor):
         configurer.configure_hybrid(self)
 
     @validator("attack_mode", pre=True, always=True)

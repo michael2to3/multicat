@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     )
 
 
-class IHashcatConfigurer(ABC):
+class IKeyspaceVisitor(ABC):
     @abstractmethod
     def configure_straight(self, schema: "KeyspaceStraightSchema"):
         pass

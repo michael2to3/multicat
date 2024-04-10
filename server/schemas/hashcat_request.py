@@ -8,8 +8,8 @@ class AttackMode(int, Enum):
     DICTIONARY = 0
     COMBINATOR = 1
     MASK = 3
-    HYBRID_WORDLIST_MASK = 6
-    HYBRID_MASK_WORDLIST = 7
+    HYBRID_DICT_MASK = 6
+    HYBRID_MASK_DICT = 7
 
 
 class HashType(BaseModel):
