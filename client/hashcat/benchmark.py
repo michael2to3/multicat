@@ -1,8 +1,6 @@
 from typing import Dict, List
 
 from hashcat.executor_base import HashcatExecutorBase
-from hashcat.filemanager import FileManager
-from hashcat.interface import HashcatInterface
 
 
 class HashcatBenchmarkCalculationException(Exception):
@@ -10,23 +8,19 @@ class HashcatBenchmarkCalculationException(Exception):
 
 
 class HashcatBenchmark(HashcatExecutorBase):
-    def __init__(self, file_manager: FileManager, hashcat: HashcatInterface):
-        self.file_manager = file_manager
-        self.hashcat = hashcat
-
     def _reset_benchmark(self, benchmark_all=False):
-        self.hashcat.reset()
-        self.hashcat.quiet = True
-        self.hashcat.benchmark = True
-        self.hashcat.no_threading = True
-        self.hashcat.benchmark_all = benchmark_all
+        self._hashcat.reset()
+        self._hashcat.quiet = True
+        self._hashcat.benchmark = True
+        self._hashcat.no_threading = True
+        self._hashcat.benchmark_all = benchmark_all
 
     def benchmark(self, hash_modes: List[int]) -> Dict:
         hashrates = {}
 
         for hash_mode in hash_modes:
             self._reset_benchmark(benchmark_all=False)
-            self.hashcat.hash_mode = hash_mode
+            self._hashcat.hash_mode = hash_mode
 
             if not self.check_hexec():
                 raise HashcatBenchmarkCalculationException(
@@ -34,7 +28,7 @@ class HashcatBenchmark(HashcatExecutorBase):
                 )
 
             hashrates[str(hash_mode)] = {
-                "overall": self.hashcat.status_get_hashes_msec_all()
+                "overall": self._hashcat.status_get_hashes_msec_all()
             }
 
         return hashrates

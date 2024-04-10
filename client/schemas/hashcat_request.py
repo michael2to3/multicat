@@ -1,6 +1,6 @@
 from abc import ABC
 from enum import Enum
-from typing import List, Literal, Union
+from typing import List, Literal
 
 from pydantic import BaseModel, Field, field_validator, validator
 
@@ -9,8 +9,8 @@ class AttackMode(int, Enum):
     DICTIONARY = 0
     COMBINATOR = 1
     MASK = 3
-    HYBRID_WORDLIST_MASK = 6
-    HYBRID_MASK_WORDLIST = 7
+    HYBRID_DICT_MASK = 6
+    HYBRID_MASK_DICT = 7
 
 
 class HashType(BaseModel):
@@ -46,53 +46,17 @@ class HashcatOptions(BaseModel):
 
         rules = values.get("rules", [])
         if rules:
-            return AttackMode.HYBRID_MASK_WORDLIST
+            return AttackMode.HYBRID_MASK_DICT
         return AttackMode.MASK
 
 
-class HashcatDiscreteTask(BaseModel, ABC):
+class HashcatDiscreteTask(BaseModel):
     job_id: int
     hash_type: HashType
     hashes: List[str]
     keyspace_skip: int = 0
     keyspace_work: int = 0
     type: Literal["HashcatDiscreteTask"]
-
-    @classmethod
-    def get_subclasses(cls):
-        return tuple(cls.__subclasses__())
-
-
-class HashcatDiscreteStraightTask(HashcatDiscreteTask):
-    wordlist1: str
-    rule: str = ""
-    type: Literal["HashcatDiscreteStraightTask"] = "HashcatDiscreteStraightTask"
-
-
-class HashcatDiscreteCombinatorTask(HashcatDiscreteTask):
-    wordlist1: str
-    wordlist2: str
-    left: str = ""
-    right: str = ""
-    type: Literal["HashcatDiscreteCombinatorTask"] = "HashcatDiscreteCombinatorTask"
-
-
-class HashcatDiscreteMaskTask(HashcatDiscreteTask):
-    mask: str
-    custom_charsets: List[CustomCharset] = Field(default_factory=list)
-    type: Literal["HashcatDiscreteMaskTask"] = "HashcatDiscreteCombinatorTask"
-
-
-class HashcatDiscreteHybridTask(HashcatDiscreteTask):
-    wordlist1: str
-    mask: str
-
-    wordlist_mask: bool
-    type: Literal["HashcatDiscreteHybridTask"] = "HashcatDiscreteHybridTask"
-
-
-class HashcatDiscreteTaskContainer(BaseModel):
-    task: Union[HashcatDiscreteTask.get_subclasses()] = Field(discriminator="type")
 
 
 class HashcatStep(BaseModel):
@@ -104,15 +68,3 @@ class HashcatStep(BaseModel):
 
 class Steps(BaseModel):
     steps: List[HashcatStep] = Field(default_factory=list)
-
-
-class KeyspaceSchema(BaseModel):
-    attack_mode: int
-    wordlist1: str = ""
-    wordlist2: str = ""
-    rule: str = ""
-    left: str = ""
-    right: str = ""
-    mask: str = ""
-    custom_charsets: str = ""
-    value: int

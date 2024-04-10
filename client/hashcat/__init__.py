@@ -1,10 +1,11 @@
+from .benchmark import HashcatBenchmark
+from .bruteforce import HashcatBruteforce
+from .configurer import configurer
+from .devices import HashcatDevices
 from .filemanager import FileManager
 from .hashcat import Hashcat
 from .interface import HashcatInterface
-from .bruteforce import HashcatBruteforce
-from .keyspace import HashcatKeyspace
-from .devices import HashcatDevices
-from .benchmark import HashcatBenchmark
+from .keyspaces import HashcatKeyspace
 
 __all__ = [
     "FileManager",
@@ -14,4 +15,5 @@ __all__ = [
     "HashcatBruteforce",
     "HashcatInterface",
     "HashcatKeyspace",
+    "configurer",
 ]

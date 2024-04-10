@@ -332,7 +332,7 @@ class HashcatInterface(ABC):
         pass
 
     @abstractmethod
-    def hashcat_session_execute(self):
+    def hashcat_session_execute(self) -> bool:
         pass
 
     @property
@@ -343,6 +343,11 @@ class HashcatInterface(ABC):
     @hashcat_session_pause.setter
     @abstractmethod
     def hashcat_session_pause(self, value):
+        pass
+
+    @property
+    @abstractmethod
+    def words_base(self) -> int:
         pass
 
     @property
