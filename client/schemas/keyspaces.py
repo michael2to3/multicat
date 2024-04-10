@@ -1,8 +1,8 @@
 import logging
-from abc import abstractmethod
-from typing import List, Literal, Tuple
+from abc import ABC, abstractmethod
+from typing import Annotated, List, Literal, Union
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, Field, TypeAdapter, validator
 
 from hashcat.configurer import IHashcatConfigurer
 from schemas import AttackMode
@@ -11,12 +11,12 @@ from schemas.hashcat_request import CustomCharset
 logger = logging.getLogger(__name__)
 
 
-class KeyspaceBase(BaseModel):
+class KeyspaceBase(BaseModel, ABC):
     attack_mode: AttackMode
     value: int
 
     @classmethod
-    def get_subclasses(cls) -> Tuple:
+    def get_subclasses(cls) -> tuple:
         return tuple(cls.__subclasses__())
 
     @abstractmethod
@@ -80,3 +80,9 @@ class KeyspaceHybridSchema(KeyspaceBase):
             return AttackMode.HYBRID_DICT_MASK
 
         return AttackMode.HYBRID_MASK_DICT
+
+
+def get_keyspace_adapter() -> Annotated:
+    return TypeAdapter(
+        Annotated[Union[KeyspaceBase.get_subclasses()], Field(discriminator="type")]
+    )

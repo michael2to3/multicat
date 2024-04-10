@@ -10,6 +10,7 @@ from .hashcat_request import (
     Steps,
 )
 from .keyspaces import (
+    get_keyspace_adapter,
     KeyspaceBase,
     KeyspaceCombinatorSchema,
     KeyspaceHybridSchema,
@@ -33,4 +34,5 @@ __all__ = [
     "KeyspaceHybridSchema",
     "KeyspaceMaskSchema",
     "KeyspaceStraightSchema",
+    "get_keyspace_adapter",
 ]
