@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 from schemas.hashcat_request import AttackMode
 
+
 class KeyspaceBase(BaseModel):
     attack_mode: AttackMode
     value: int

@@ -92,9 +92,7 @@ class HashcatDiscreteHybridTask(HashcatDiscreteTask):
 
 
 class HashcatDiscreteTaskContainer(BaseModel):
-    task: Union[
-        HashcatDiscreteTask.get_subclasses()
-    ] = Field(discriminator="type")
+    task: Union[HashcatDiscreteTask.get_subclasses()] = Field(discriminator="type")
 
 
 class HashcatStep(BaseModel):
@@ -111,8 +109,8 @@ class Steps(BaseModel):
 class KeyspaceSchema(BaseModel):
     attack_mode: int
     wordlist1: str = ""
-    wordlist2: str = "" 
-    rule: str = "" 
+    wordlist2: str = ""
+    rule: str = ""
     left: str = ""
     right: str = ""
     mask: str = ""

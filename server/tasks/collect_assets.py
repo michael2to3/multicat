@@ -21,7 +21,9 @@ def fetch_assets_by_uuid(task_uuid):
             .filter(HashcatAsset.timestamp >= (func.now() - timedelta(minutes=2)))
             .all()
         )
-        assets_data = [HashcatAssetSchema.model_validate(asset).model_dump() for asset in result]
+        assets_data = [
+            HashcatAssetSchema.model_validate(asset).model_dump() for asset in result
+        ]
         return assets_data
 
 

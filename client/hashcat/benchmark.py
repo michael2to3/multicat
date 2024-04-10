@@ -1,6 +1,7 @@
 from typing import Dict, List
-from hashcat.filemanager import FileManager
+
 from hashcat.executor_base import HashcatExecutorBase
+from hashcat.filemanager import FileManager
 from hashcat.interface import HashcatInterface
 
 
@@ -37,4 +38,3 @@ class HashcatBenchmark(HashcatExecutorBase):
             }
 
         return hashrates
-

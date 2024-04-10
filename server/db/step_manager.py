@@ -89,7 +89,11 @@ class StepManager:
                 unkown_keyspaces.append(keyspace_task)
                 is_keyspace_calculated = False
 
-        step = Step(name=steps_name, user_id=self.user_id, is_keyspace_calculated=is_keyspace_calculated)
+        step = Step(
+            name=steps_name,
+            user_id=self.user_id,
+            is_keyspace_calculated=is_keyspace_calculated,
+        )
         self.session.add(step)
         self.session.commit()
 
@@ -105,7 +109,11 @@ class StepManager:
         callback = signature(
             "server.post_load_steps",
             queue="server",
-            kwargs={"unkown_keyspaces": [x.model_dump() for x in unkown_keyspaces], "user_id": self.user_id, "steps_name": steps_name},
+            kwargs={
+                "unkown_keyspaces": [x.model_dump() for x in unkown_keyspaces],
+                "user_id": self.user_id,
+                "steps_name": steps_name,
+            },
         )
         chord(tasks)(callback)
 
