@@ -3,7 +3,7 @@ from typing import Dict, List
 
 import models
 import schemas
-from models import HashType, Keyspace, Step, User, UserRole
+from models import HashType, Step, User, UserRole, Keyspace
 
 
 class DatabaseHelperNotFoundError(Exception):

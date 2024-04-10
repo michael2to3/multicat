@@ -87,17 +87,3 @@ class HashType(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     hashcat_type = Column(Integer)
     human_readable = Column(String)
-
-
-class Keyspace(Base):
-    __tablename__ = "keyspaces"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    attack_mode = Column(Integer)
-    wordlist1 = Column(String, default="")
-    wordlist2 = Column(String, default="")
-    rule = Column(String, default="")
-    left = Column(String, default="")
-    right = Column(String, default="")
-    mask = Column(String, default="")
-    custom_charsets = Column(String, default="")
-    value = Column(Integer)
