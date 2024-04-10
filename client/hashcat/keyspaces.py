@@ -1,7 +1,7 @@
 import logging
 
-from hashcat.configurer import IHashcatConfigurer
 from schemas import AttackMode, KeyspaceBase
+from visitor.ikeyspace import IKeyspaceVisitor
 
 from .executor_base import HashcatExecutorBase
 
@@ -24,10 +24,10 @@ class HashcatKeyspace(HashcatExecutorBase):
     def calc_keyspace(
         self,
         task: KeyspaceBase,
-        configure: IHashcatConfigurer
+        visitor: IKeyspaceVisitor
     ) -> int:
         self._reset_keyspace(task.attack_mode)
-        task.accept(configure)
+        task.accept(visitor)
 
         if not self.check_hexec():
             raise HashcatKeyspaceCalculationException(

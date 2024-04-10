@@ -1,22 +1,22 @@
-from abc import abstractmethod
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 
 from sqlalchemy.orm import scoped_session
 
-from models import (
-    Keyspace,
-    KeyspaceCombinator,
-    KeyspaceHybrid,
-    KeyspaceMask,
-    KeyspaceStraight,
-)
-from schemas import (
-    KeyspaceBase,
-    KeyspaceCombinatorSchema,
-    KeyspaceHybridSchema,
-    KeyspaceMaskSchema,
-    KeyspaceStraightSchema,
-)
+if TYPE_CHECKING:
+    from models import (
+        Keyspace,
+        KeyspaceCombinator,
+        KeyspaceHybrid,
+        KeyspaceMask,
+        KeyspaceStraight,
+    )
+    from schemas import (
+        KeyspaceBase,
+        KeyspaceCombinatorSchema,
+        KeyspaceHybridSchema,
+        KeyspaceMaskSchema,
+        KeyspaceStraightSchema,
+    )
 
 from .ikeyspace import IKeyspaceVisitor
 
@@ -29,7 +29,6 @@ class KeyspaceExistVisitor(IKeyspaceVisitor):
         self._session = session
         self._callback = callback
 
-    @abstractmethod
     def configure_straight(self, schema: "KeyspaceStraightSchema"):
         self._make_query(KeyspaceStraight, schema)
 
@@ -42,7 +41,7 @@ class KeyspaceExistVisitor(IKeyspaceVisitor):
     def configure_hybrid(self, schema: "KeyspaceHybridSchema"):
         self._make_query(KeyspaceHybrid, schema)
 
-    def _make_query(self, model: Keyspace, schema: "KeyspaceBase"):
+    def _make_query(self, model: "Keyspace", schema: "KeyspaceBase"):
         keyspace_data = {
             k: v for k, v in schema.model_dump(exclude={"value", "type"}).items()
         }

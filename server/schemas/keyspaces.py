@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, TypeAdapter, validator
 
 from schemas import AttackMode
 from schemas.hashcat_request import CustomCharset
-from visitor import IKeyspaceVisitor
+from visitor.ikeyspace import IKeyspaceVisitor
 
 logger = logging.getLogger(__name__)
 

@@ -1,4 +1,4 @@
 from .ikeyspace import IKeyspaceVisitor
-from .keyspace_exist import KeyspaceExistVisitor
+from .keyspace_hashcat import KeyspaceHashcatConfigurerVisitor
 
-__all__ = ["IKeyspaceVisitor", "KeyspaceExistVisitor"]
+__all__ = ["IKeyspaceVisitor", "KeyspaceHashcatConfigurerVisitor"]

@@ -4,9 +4,9 @@ from celery import current_task, shared_task
 
 from config import Config, Database
 from hashcat import FileManager, HashcatBenchmark, HashcatKeyspace
-from hashcat.configurer import HashcatConfigurer
 from hashcat.hashcat import Hashcat
 from schemas import HashcatDiscreteTask, KeyspaceBase, get_keyspace_adapter
+from visitor import KeyspaceHashcatConfigurerVisitor
 
 logger = logging.getLogger(__name__)
 db = Database(Config.get("DATABASE_URL"))
@@ -37,7 +37,7 @@ def run_hashcat(discrete_task_as_dict):
 
 @shared_task(name="client.calc_keyspace", ignore_result=False)
 def calc_keyspace(keyspace_task):
-    configurer = HashcatConfigurer(hashcat, file_manager)
+    configurer = KeyspaceHashcatConfigurerVisitor(hashcat, file_manager)
     keyspace_schema: KeyspaceBase = get_keyspace_adapter().validate_python(
         keyspace_task
     )
