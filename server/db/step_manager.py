@@ -9,6 +9,7 @@ from sqlalchemy.orm import scoped_session
 from db import DatabaseHelper
 from generator import DiscreteTasksGenerator
 from models import Step
+from models.hashcat_request import HashcatStep
 from schemas import Steps, hashcat_step_loader
 
 logger = logging.getLogger(__name__)
@@ -74,14 +75,14 @@ class StepManager:
     def load_steps(self, steps_name: str, yaml_content: str):
         try:
             data = yaml.load(yaml_content, Loader=hashcat_step_loader())
-            model = Steps(**data)
+            steps = Steps(**data)
         except (yaml.YAMLError, ValidationError) as e:
             logger.error(f"Error loading steps: {str(e)}")
             raise
 
         is_keyspace_calculated = True
         unkown_keyspaces = []
-        for keyspace_task in self._generate_keyspace_tasks(model):
+        for keyspace_task in self._generate_keyspace_tasks(steps):
             if not self.db_helper.keyspace_exists(keyspace_task):
                 logger.info("Unknown keyspace: %s", keyspace_task)
                 unkown_keyspaces.append(keyspace_task)
@@ -93,6 +94,17 @@ class StepManager:
             is_keyspace_calculated=is_keyspace_calculated,
         )
         self.session.add(step)
+        self.session.flush()
+
+        for hashcat_task in steps.steps:
+            hashcat_step_model = HashcatStep(
+                value=hashcat_task.model_dump_json(), related_steps=Step
+            )
+            self.session.add(hashcat_step_model)
+            self.session.flush()
+            step.hashcat_steps.append(hashcat_step_model)
+
+        self.session.commit()
 
         if unkown_keyspaces:
             self._calculate_and_save_unknown_keyspaces(unkown_keyspaces, steps_name)
