@@ -1,4 +1,4 @@
-from .delter import StepDeleter
+from .deleter import StepDeleter
 from .loader import StepLoader
 from .retriever import StepRetriever
 
