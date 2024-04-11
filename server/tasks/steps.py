@@ -4,7 +4,8 @@ from typing import List
 from celery import shared_task
 
 from config import Database, UUIDGenerator
-from db import DatabaseHelper, StepManager
+from db import DatabaseHelper
+from steps import StepDeleter, StepRetriever, StepLoader
 from models.keyspaces import Keyspace
 from schemas import CeleryResponse
 
@@ -18,8 +19,8 @@ db = Database()
 def delete_steps(user_id: str, step_name: int):
     user_id = str(UUIDGenerator.generate(user_id))
     with db.session() as session:
-        manager = StepManager(user_id, session)
-        manager.delete_steps(step_name)
+        manager = StepDeleter(user_id, session)
+        manager.delete_step(step_name)
         return CeleryResponse(value="Step deleted successfully").model_dump()
 
 
@@ -27,7 +28,7 @@ def delete_steps(user_id: str, step_name: int):
 def get_steps(user_id: str, step_name: str):
     user_id = str(UUIDGenerator.generate(user_id))
     with db.session() as session:
-        manager = StepManager(user_id, session)
+        manager = StepRetriever(user_id, session)
         yaml_dump = manager.get_steps(step_name)
         return CeleryResponse(value=yaml_dump).model_dump()
 
@@ -36,7 +37,7 @@ def get_steps(user_id: str, step_name: str):
 def list_steps(user_id: str):
     user_id = str(UUIDGenerator.generate(user_id))
     with db.session() as session:
-        manager = StepManager(user_id, session)
+        manager = StepRetriever(user_id, session)
         steps_name = manager.list_steps()
         return CeleryResponse(value=steps_name).model_dump()
 
@@ -49,7 +50,7 @@ def load_steps(user_id: str, steps_name: str, yaml_content: str):
         db_helper.get_or_create_user(user_id)
         session.commit()
 
-        manager = StepManager(user_id, session)
+        manager = StepLoader(user_id, session)
         manager.load_steps(steps_name, yaml_content)
         return CeleryResponse(value=f"{steps_name} saved successfully").model_dump()
 

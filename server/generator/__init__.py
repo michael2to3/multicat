@@ -1,3 +1,3 @@
-from .discrete_task import DiscreteTasksGenerator
+from .discrete_task import KeyspaceGenerator
 
-__all__ = ["DiscreteTasksGenerator"]
+__all__ = ["KeyspaceGenerator"]
