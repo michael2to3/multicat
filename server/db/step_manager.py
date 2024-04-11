@@ -25,11 +25,7 @@ class StepManager:
         user = self.db_helper.get_or_create_user(self.user_id)
         step = (
             self.session.query(Step)
-            .filter(
-                Step.name == step_name,
-                Step.user_id == user.id,
-                Step.is_keyspace_calculated,
-            )
+            .filter(Step.name == step_name, Step.user_id == user.id)
             .first()
         )
         if not step:
@@ -60,11 +56,7 @@ class StepManager:
 
     def list_steps(self):
         user = self.db_helper.get_or_create_user(self.user_id)
-        steps = (
-            self.session.query(Step.name)
-            .filter(Step.user_id == user.id, Step.is_keyspace_calculated)
-            .all()
-        )
+        steps = self.session.query(Step.name).filter(Step.user_id == user.id).all()
         steps_name = [step.name for step in steps]
 
         if not steps_name:
