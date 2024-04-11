@@ -52,11 +52,22 @@ class StepLoader:
 
     def _add_hashcat_steps(self, step, steps):
         for hashcat_task in steps.steps:
-            hashcat_step_model = HashcatStep(
-                value=hashcat_task.model_dump_json(), related_steps=[step]
+            hashcat_step_value = hashcat_task.model_dump_json()
+            existing_hashcat_step = (
+                self.session.query(HashcatStep)
+                .filter(HashcatStep.value == hashcat_step_value)
+                .first()
             )
-            self.session.add(hashcat_step_model)
-            step.hashcat_steps.append(hashcat_step_model)
+            if existing_hashcat_step:
+                hashcat_step_model = existing_hashcat_step
+            else:
+                hashcat_step_model = HashcatStep(value=hashcat_step_value)
+
+            if hashcat_step_model not in step.hashcat_steps:
+                step.hashcat_steps.append(hashcat_step_model)
+                if not existing_hashcat_step:
+                    self.session.add(hashcat_step_model)
+
         self.session.commit()
 
     def _calculate_and_save_unknown_keyspaces(self, unknown_keyspaces, steps_name):
