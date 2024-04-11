@@ -98,7 +98,7 @@ class StepManager:
 
         for hashcat_task in steps.steps:
             hashcat_step_model = HashcatStep(
-                value=hashcat_task.model_dump_json(), related_steps=Step
+                value=hashcat_task.model_dump_json(), related_steps=[step]
             )
             self.session.add(hashcat_step_model)
             self.session.flush()
