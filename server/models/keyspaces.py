@@ -18,27 +18,27 @@ class Keyspace(Base):
 
 
 class KeyspaceStraight(Keyspace):
-    wordlist1: Mapped[str] = mapped_column(use_existing_column=True)
-    rule = Column(String)
     __mapper_args__ = {"polymorphic_identity": "keyspacestraight"}
+    wordlist1: Mapped[str] = mapped_column(use_existing_column=True, nullable=True)
+    rule = Column(String, use_existing_column=True, nullable=True)
 
 
 class KeyspaceCombinator(Keyspace):
-    wordlist1: Mapped[str] = mapped_column(use_existing_column=True)
+    __mapper_args__ = {"polymorphic_identity": "keyspacecombinator"}
+    wordlist1: Mapped[str] = mapped_column(use_existing_column=True, nullable=True)
     wordlist2 = Column(String)
     left = Column(String)
     right = Column(String)
-    __mapper_args__ = {"polymorphic_identity": "keyspacecombinator"}
 
 
 class KeyspaceMask(Keyspace):
-    mask: Mapped[str] = mapped_column(use_existing_column=True)
-    custom_charsets = Column(JSON)
     __mapper_args__ = {"polymorphic_identity": "keyspacemask"}
+    mask: Mapped[str] = mapped_column(use_existing_column=True, nullable=True)
+    custom_charsets = Column(JSON)
 
 
 class KeyspaceHybrid(Keyspace):
-    wordlist1: Mapped[str] = mapped_column(use_existing_column=True)
-    mask: Mapped[str] = mapped_column(use_existing_column=True)
-    wordlist_mask = Column(Boolean)
     __mapper_args__ = {"polymorphic_identity": "keyspacehybrid"}
+    wordlist1: Mapped[str] = mapped_column(use_existing_column=True, nullable=True)
+    mask: Mapped[str] = mapped_column(use_existing_column=True, nullable=True)
+    wordlist_mask = Column(Boolean)

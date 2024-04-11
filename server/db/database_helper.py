@@ -1,10 +1,12 @@
 import json
 from typing import Dict, List
 
+from sqlalchemy.orm import Query
+
 import models
 import schemas
 from models import HashType, Step, User, UserRole
-from visitor.keyspace_exist import KeyspaceExistVisitor
+from visitor import KeyspaceToModelVisitor
 
 
 class DatabaseHelperNotFoundError(Exception):
@@ -108,10 +110,12 @@ class DatabaseHelper:
     def keyspace_exists(self, keyspace: schemas.KeyspaceBase) -> bool:
         callback_result = [False]
 
-        def callback(exist: bool):
-            callback_result[0] = exist
+        def callback(query: Query):
+            callback_result[0] = query.first() is not None
 
-        visitor = KeyspaceExistVisitor(self.session, callback)
+        visitor = KeyspaceToModelVisitor(
+            self.session, callback, {"value", "attack_mode"}
+        )
         keyspace.accept(visitor)
         return callback_result[0]
 

@@ -5,9 +5,11 @@ from celery import shared_task
 
 from config import Database, UUIDGenerator
 from db import DatabaseHelper
-from steps import StepDeleter, StepRetriever, StepLoader
 from models.keyspaces import Keyspace
 from schemas import CeleryResponse
+from schemas.keyspaces import get_keyspace_adapter
+from steps import StepDeleter, StepLoader, StepRetriever
+from visitor.keyspace_to_model import KeyspaceCreateModelVisitor
 
 logger = logging.getLogger(__name__)
 
@@ -62,8 +64,13 @@ def post_load_steps(
     with db.session() as session:
         for keyspace, value in zip(unkown_keyspaces, keyspaces):
             keyspace["value"] = value
-            ks = Keyspace(**keyspace)
-            session.add(ks)
+            keyspace_schema = get_keyspace_adapter().validate_python(keyspace)
+
+            def callback(keyspace_model: Keyspace):
+                session.add(keyspace_model)
+
+            visitor = KeyspaceCreateModelVisitor(callback, {})
+            keyspace_schema.accept(visitor)
 
         db_helper = DatabaseHelper(session)
         step = db_helper.get_steps(user_id, steps_name)
