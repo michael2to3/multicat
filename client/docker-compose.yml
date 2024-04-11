@@ -13,6 +13,7 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       RULES_DIR: ${RULES_DIR}
       WORDLISTS_DIR: ${WORDLISTS_DIR}
+      HC_PATH: ${HC_PATH}
     devices:
       - "/dev/dri:/dev/dri"
     networks:
