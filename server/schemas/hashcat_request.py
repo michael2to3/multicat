@@ -45,5 +45,5 @@ class HashcatOptions(BaseModel):
 
         rules = values.get("rules", [])
         if rules:
-            return AttackMode.HYBRID_MASK_WORDLIST
+            return AttackMode.HYBRID_MASK_DICT
         return AttackMode.MASK

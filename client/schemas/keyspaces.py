@@ -25,7 +25,6 @@ class KeyspaceBase(BaseModel, ABC):
 
     class Config:
         from_attributes = True
-        fields = {"attack_mode": {"exclude": True}}
 
 
 class KeyspaceStraightSchema(KeyspaceBase):
