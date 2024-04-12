@@ -1,7 +1,8 @@
-from datetime import datetime
+from datetime import UTC, datetime
+
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 
 from config import Base
-from sqlalchemy import Column, DateTime, Integer, String, ForeignKey
 
 
 class Benchmark(Base):
@@ -12,4 +13,4 @@ class Benchmark(Base):
     worker_name = Column(String, nullable=False)
     hash_type_id = Column(Integer, ForeignKey("hash_types.id"))
     value = Column(Integer)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=datetime.now(UTC))
