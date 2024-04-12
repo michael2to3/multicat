@@ -16,7 +16,7 @@ class HashcatDevicesInfoException(Exception):
 
 class HashcatDevices(HashcatExecutorBase):
     def __init__(self, file_manager: FileManager, hashcat: HashcatInterface):
-        self.file_manager = file_manager
+        self._file_manager = file_manager
         self._hashcat = hashcat
 
     def devices_info(self) -> Dict:
@@ -28,7 +28,7 @@ class HashcatDevices(HashcatExecutorBase):
         rc = self._hashcat.hashcat_session_init()
 
         if rc < 0:
-            logger.error("Hashcat: %s", self._hashcat._hashcat_status_get_log())
+            logger.error("Hashcat: %s", self._hashcat.hashcat_status_get_log())
             raise HashcatDevicesInfoException("Failed to gather devices info")
 
         return self._hashcat.get_backend_devices_info()
