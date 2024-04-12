@@ -1,7 +1,15 @@
 from .celery_response import CeleryResponse
-from .discrete_task import HashcatDiscreteTask, HashcatStep, Steps
+from .discrete_task import (
+    HashcatDiscreteTask,
+    BaseStep,
+    Steps,
+    StraightStep,
+    CombinatorStep,
+    MaskStep,
+    HybridStep,
+)
 from .hashcat_asset import HashcatAssetSchema
-from .hashcat_helpers import hashcat_step_constructor, hashcat_step_loader
+from .hashcat_helpers import hashcat_step_loader
 from .hashcat_request import AttackMode, HashType
 from .keyspaces import (
     KeyspaceBase,
@@ -13,17 +21,20 @@ from .keyspaces import (
 
 __all__ = [
     "AttackMode",
-    "KeyspaceBase",
-    "KeyspaceMaskSchema",
-    "KeyspaceHybridSchema",
-    "KeyspaceStraightSchema",
-    "KeyspaceCombinatorSchema",
+    "BaseStep",
     "CeleryResponse",
+    "CombinatorStep",
     "HashType",
     "HashcatAssetSchema",
     "HashcatDiscreteTask",
-    "HashcatStep",
+    "HybridStep",
+    "KeyspaceBase",
+    "KeyspaceCombinatorSchema",
+    "KeyspaceHybridSchema",
+    "KeyspaceMaskSchema",
+    "KeyspaceStraightSchema",
+    "MaskStep",
     "Steps",
-    "hashcat_step_constructor",
+    "StraightStep",
     "hashcat_step_loader",
 ]

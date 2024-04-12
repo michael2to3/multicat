@@ -1,14 +1,21 @@
-import yaml
-
-from .discrete_task import HashcatStep
+from ruamel.yaml import YAML
 
 
-def hashcat_step_constructor(loader, node):
-    value = loader.construct_mapping(node, deep=True)
-    return HashcatStep(**value)
+from .discrete_task import StraightStep, CombinatorStep, MaskStep, HybridStep
 
 
 def hashcat_step_loader():
-    loader = yaml.SafeLoader
-    loader.add_constructor("!hashcatstep", hashcat_step_constructor)
-    return loader
+    CLASSES = [
+        StraightStep,
+        CombinatorStep,
+        MaskStep,
+        HybridStep,
+    ]
+
+    yaml = YAML()
+    yaml.indent(mapping=2, sequence=4, offset=2)
+
+    for x in CLASSES:
+        yaml.register_class(x)
+
+    return yaml

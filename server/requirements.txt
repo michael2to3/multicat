@@ -1,3 +1,5 @@
+PyYAML==6.0.1
+SQLAlchemy==2.0.28
 amqp==5.2.0
 annotated-types==0.6.0
 astroid==3.1.0
@@ -5,17 +7,17 @@ async-timeout==4.0.3
 asyncpg==0.29.0
 billiard==4.2.0
 celery==5.3.6
-click==8.1.7
 click-didyoumean==0.3.0
 click-plugins==1.1.1
 click-repl==0.3.0
+click==8.1.7
 dill==0.3.8
 greenlet==3.0.3
 isort==5.13.2
 kombu==5.3.5
 mccabe==0.7.0
-mypy==1.9.0
 mypy-extensions==1.0.0
+mypy==1.9.0
 platformdirs==4.2.0
 prompt-toolkit==3.0.43
 psycopg2-binary==2.9.9
@@ -24,9 +26,8 @@ pydantic_core==2.16.3
 pylint==3.1.0
 python-dateutil==2.9.0.post0
 python-gnupg==0.5.2
-PyYAML==6.0.1
+ruamel-yaml==0.18.6
 six==1.16.0
-SQLAlchemy==2.0.28
 sqlmodel==0.0.16
 tomlkit==0.12.4
 types-PyYAML==6.0.12.20240311

@@ -1,5 +1,6 @@
-from sqlalchemy import JSON, Boolean, Column, Integer, String
+from sqlalchemy import Boolean, Column, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.dialects.postgresql import JSONB
 
 from config import Base
 
@@ -34,11 +35,16 @@ class KeyspaceCombinator(Keyspace):
 class KeyspaceMask(Keyspace):
     __mapper_args__ = {"polymorphic_identity": "keyspacemask"}
     mask: Mapped[str] = mapped_column(use_existing_column=True, nullable=True)
-    custom_charsets = Column(JSON)
+    custom_charsets: Mapped[dict[int, str]] = mapped_column(
+        type_=JSONB, use_existing_column=True, nullable=True
+    )
 
 
 class KeyspaceHybrid(Keyspace):
     __mapper_args__ = {"polymorphic_identity": "keyspacehybrid"}
     wordlist1: Mapped[str] = mapped_column(use_existing_column=True, nullable=True)
     mask: Mapped[str] = mapped_column(use_existing_column=True, nullable=True)
+    custom_charsets: Mapped[dict[int, str]] = mapped_column(
+        type_=JSONB, use_existing_column=True, nullable=True
+    )
     wordlist_mask = Column(Boolean)

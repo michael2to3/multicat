@@ -4,8 +4,7 @@ from typing import Annotated, List, Literal, Union
 
 from pydantic import BaseModel, Field, TypeAdapter, validator
 
-from schemas import AttackMode
-from schemas.hashcat_request import CustomCharset
+from schemas.hashcat_request import AttackMode, CustomCharset
 from visitor.ikeyspace import IKeyspaceVisitor
 
 logger = logging.getLogger(__name__)
@@ -64,6 +63,7 @@ class KeyspaceHybridSchema(KeyspaceBase):
     attack_mode: AttackMode
     wordlist1: str
     mask: str
+    custom_charsets: List[CustomCharset]
     wordlist_mask: bool
     type: Literal["keyspacehybrid"] = "keyspacehybrid"
 

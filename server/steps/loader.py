@@ -6,10 +6,10 @@ from pydantic import ValidationError
 from sqlalchemy.orm import scoped_session
 
 from db import DatabaseHelper
-from generator import KeyspaceGenerator
 from models import Step
 from models.hashcat_request import HashcatStep
 from schemas import Steps, hashcat_step_loader
+from visitor.keyspace_tasks_generator import KeyspaceGeneratorVisitor
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,8 @@ class StepLoader:
 
     def load_steps(self, steps_name: str, yaml_content: str):
         try:
-            data = yaml.load(yaml_content, Loader=hashcat_step_loader())
+            loader = hashcat_step_loader()
+            data = loader.load(yaml_content)
             steps = Steps(**data)
         except (yaml.YAMLError, ValidationError) as e:
             logger.error(f"Error loading steps: {str(e)}")
@@ -88,6 +89,14 @@ class StepLoader:
         chord(tasks)(callback)
 
     def _generate_keyspace_tasks(self, model: Steps):
+        tasks = []
+
+        def callback(_tasks):
+            tasks.extend(_tasks)
+
+        generator = KeyspaceGeneratorVisitor(callback)
+
         for step in model.steps:
-            for task in KeyspaceGenerator.generate_tasks(step):
-                yield task
+            step.accept(generator)
+
+        return tasks
