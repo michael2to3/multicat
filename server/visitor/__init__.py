@@ -1,4 +1,4 @@
 from .ikeyspace import IKeyspaceVisitor
-from .keyspace_to_model import KeyspaceCreateModelVisitor, KeyspaceToModelVisitor
+from .keyspace_to_model import KeyspaceModelCreator, KeyspaceModelQueryExecutor
 
-__all__ = ["IKeyspaceVisitor", "KeyspaceToModelVisitor", "KeyspaceCreateModelVisitor"]
+__all__ = ["IKeyspaceVisitor", "KeyspaceModelCreator", "KeyspaceModelQueryExecutor"]

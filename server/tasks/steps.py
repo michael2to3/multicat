@@ -9,7 +9,7 @@ from models.keyspaces import Keyspace
 from schemas import CeleryResponse
 from schemas.keyspaces import get_keyspace_adapter
 from steps import StepDeleter, StepLoader, StepRetriever
-from visitor.keyspace_to_model import KeyspaceCreateModelVisitor
+from visitor.keyspace_to_model import KeyspaceModelCreator
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +69,7 @@ def post_load_steps(
             def callback(keyspace_model: Keyspace):
                 session.add(keyspace_model)
 
-            visitor = KeyspaceCreateModelVisitor(callback, {})
+            visitor = KeyspaceModelCreator(callback, {})
             keyspace_schema.accept(visitor)
 
         db_helper = DatabaseHelper(session)

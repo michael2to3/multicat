@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 from .ikeyspace import IKeyspaceVisitor
 
 
-class KeyspaceToModelVisitorBase(IKeyspaceVisitor):
+class BaseKeyspaceModelConverter(IKeyspaceVisitor):
     _exclude_fields: Dict
 
     def _to_dict(self, schema: "KeyspaceBase") -> Dict:
@@ -31,7 +31,7 @@ class KeyspaceToModelVisitorBase(IKeyspaceVisitor):
         }
 
 
-class KeyspaceToModelVisitor(KeyspaceToModelVisitorBase):
+class KeyspaceModelQueryExecutor(BaseKeyspaceModelConverter):
     _session: scoped_session
     _callback: Callable[[Query], None]
 
@@ -63,7 +63,7 @@ class KeyspaceToModelVisitor(KeyspaceToModelVisitorBase):
         self._callback(query)
 
 
-class KeyspaceCreateModelVisitor(KeyspaceToModelVisitorBase):
+class KeyspaceModelCreator(BaseKeyspaceModelConverter):
     _callback: Callable[[Keyspace], None]
 
     def __init__(self, callback: Callable[[Keyspace], None], exclude_fields: Dict):

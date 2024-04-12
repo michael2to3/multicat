@@ -6,7 +6,7 @@ from sqlalchemy.orm import Query
 import models
 import schemas
 from models import HashType, Step, User, UserRole
-from visitor import KeyspaceToModelVisitor
+from visitor import KeyspaceModelQueryExecutor
 
 
 class DatabaseHelperNotFoundError(Exception):
@@ -113,7 +113,7 @@ class DatabaseHelper:
         def callback(query: Query):
             callback_result[0] = query.first() is not None
 
-        visitor = KeyspaceToModelVisitor(
+        visitor = KeyspaceModelQueryExecutor(
             self.session, callback, {"value", "attack_mode"}
         )
         keyspace.accept(visitor)
