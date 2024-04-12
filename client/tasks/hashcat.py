@@ -22,9 +22,6 @@ def run_hashcat(discrete_task_as_dict):
     wordlists = file_manager.get_wordlists_files()
     rules = file_manager.get_rules_files()
 
-    # hashcat_bruteforce = HashcatBruteforce(file_manager, hashcat)
-    # success = hashcat_bruteforce.bruteforce(discrete_task)
-
     logger.debug(
         "discrete_task: %s, worker_id: %s, wordlists: %s, rules: %s",
         discrete_task,
