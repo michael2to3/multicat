@@ -1,9 +1,6 @@
 import logging
 from typing import Dict
 
-from hashcat.filemanager import FileManager
-from hashcat.interface import HashcatInterface
-
 from .executor_base import HashcatExecutorBase
 
 logger = logging.getLogger(__name__)
@@ -15,10 +12,6 @@ class HashcatDevicesInfoException(Exception):
 
 
 class HashcatDevices(HashcatExecutorBase):
-    def __init__(self, file_manager: FileManager, hashcat: HashcatInterface):
-        self._file_manager = file_manager
-        self._hashcat = hashcat
-
     def devices_info(self) -> Dict:
         self._hashcat.reset()
         self._hashcat.no_threading = True
