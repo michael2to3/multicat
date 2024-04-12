@@ -12,17 +12,17 @@ if TYPE_CHECKING:
 
 class IHashcatStepVisitor(ABC):
     @abstractmethod
-    def generate_straight(self, schema: "StraightStep"):
+    def process_straight(self, schema: "StraightStep"):
         pass
 
     @abstractmethod
-    def generate_combinator(self, schema: "CombinatorStep"):
+    def process_combinator(self, schema: "CombinatorStep"):
         pass
 
     @abstractmethod
-    def generate_mask(self, schema: "MaskStep"):
+    def process_mask(self, schema: "MaskStep"):
         pass
 
     @abstractmethod
-    def generate_hybrid(self, schema: "HybridStep"):
+    def process_hybrid(self, schema: "HybridStep"):
         pass

@@ -45,16 +45,16 @@ class KeyspaceModelQueryExecutor(BaseKeyspaceModelConverter):
         self._callback = callback
         self._exclude_fields = exclude_fields
 
-    def configure_straight(self, schema: "KeyspaceStraightSchema"):
+    def process_straight(self, schema: "KeyspaceStraightSchema"):
         self._make_query(KeyspaceStraight, schema)
 
-    def configure_combinator(self, schema: "KeyspaceCombinatorSchema"):
+    def process_combinator(self, schema: "KeyspaceCombinatorSchema"):
         self._make_query(KeyspaceCombinator, schema)
 
-    def configure_mask(self, schema: "KeyspaceMaskSchema"):
+    def process_mask(self, schema: "KeyspaceMaskSchema"):
         self._make_query(KeyspaceMask, schema)
 
-    def configure_hybrid(self, schema: "KeyspaceHybridSchema"):
+    def process_hybrid(self, schema: "KeyspaceHybridSchema"):
         self._make_query(KeyspaceHybrid, schema)
 
     def _make_query(self, model: "Keyspace", schema: "KeyspaceBase"):
@@ -70,16 +70,16 @@ class KeyspaceModelCreator(BaseKeyspaceModelConverter):
         self._callback = callback
         self._exclude_fields = exclude_fields
 
-    def configure_straight(self, schema: "KeyspaceStraightSchema"):
+    def process_straight(self, schema: "KeyspaceStraightSchema"):
         self._make_query(KeyspaceStraight, schema)
 
-    def configure_combinator(self, schema: "KeyspaceCombinatorSchema"):
+    def process_combinator(self, schema: "KeyspaceCombinatorSchema"):
         self._make_query(KeyspaceCombinator, schema)
 
-    def configure_mask(self, schema: "KeyspaceMaskSchema"):
+    def process_mask(self, schema: "KeyspaceMaskSchema"):
         self._make_query(KeyspaceMask, schema)
 
-    def configure_hybrid(self, schema: "KeyspaceHybridSchema"):
+    def process_hybrid(self, schema: "KeyspaceHybridSchema"):
         self._make_query(KeyspaceHybrid, schema)
 
     def _make_query(self, model: "Keyspace", schema: "KeyspaceBase"):

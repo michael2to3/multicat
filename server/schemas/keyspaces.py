@@ -34,7 +34,7 @@ class KeyspaceStraightSchema(KeyspaceBase):
     type: Literal["keyspacestraight"] = "keyspacestraight"
 
     def accept(self, configurer: IKeyspaceVisitor):
-        configurer.configure_straight(self)
+        configurer.process_straight(self)
 
 
 class KeyspaceCombinatorSchema(KeyspaceBase):
@@ -46,7 +46,7 @@ class KeyspaceCombinatorSchema(KeyspaceBase):
     type: Literal["keyspacecombinator"] = "keyspacecombinator"
 
     def accept(self, configurer: IKeyspaceVisitor):
-        configurer.configure_combinator(self)
+        configurer.process_combinator(self)
 
 
 class KeyspaceMaskSchema(KeyspaceBase):
@@ -56,7 +56,7 @@ class KeyspaceMaskSchema(KeyspaceBase):
     type: Literal["keyspacemask"] = "keyspacemask"
 
     def accept(self, configurer: IKeyspaceVisitor):
-        configurer.configure_mask(self)
+        configurer.process_mask(self)
 
 
 class KeyspaceHybridSchema(KeyspaceBase):
@@ -68,7 +68,7 @@ class KeyspaceHybridSchema(KeyspaceBase):
     type: Literal["keyspacehybrid"] = "keyspacehybrid"
 
     def accept(self, configurer: IKeyspaceVisitor):
-        configurer.configure_hybrid(self)
+        configurer.process_hybrid(self)
 
     @validator("attack_mode", pre=True, always=True)
     @classmethod

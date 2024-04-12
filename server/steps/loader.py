@@ -9,7 +9,7 @@ from db import DatabaseHelper
 from models import Step
 from models.hashcat_request import HashcatStep
 from schemas import Steps, hashcat_step_loader
-from visitor.keyspace_tasks_generator import KeyspaceGeneratorVisitor
+from visitor.hashcatstep_keyspace_tasks import HashcatStepKeyspaceVisitor
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +94,7 @@ class StepLoader:
         def callback(_tasks):
             tasks.extend(_tasks)
 
-        generator = KeyspaceGeneratorVisitor(callback)
+        generator = HashcatStepKeyspaceVisitor(callback)
 
         for step in model.steps:
             step.accept(generator)

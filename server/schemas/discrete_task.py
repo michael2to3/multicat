@@ -37,7 +37,7 @@ class StraightStep(BaseStep):
     rules: List[str] = Field(default_factory=list)
 
     def accept(self, visitor: IHashcatStepVisitor):
-        visitor.generate_straight(self)
+        visitor.process_straight(self)
 
 
 class CombinatorStep(BaseStep):
@@ -50,7 +50,7 @@ class CombinatorStep(BaseStep):
     right_rules: List[str] = Field(default_factory=list)
 
     def accept(self, visitor: IHashcatStepVisitor):
-        visitor.generate_combinator(self)
+        visitor.process_combinator(self)
 
 
 class MaskStep(BaseStep):
@@ -62,7 +62,7 @@ class MaskStep(BaseStep):
     custom_charsets: List[CustomCharset] = Field(default_factory=list)
 
     def accept(self, visitor: IHashcatStepVisitor):
-        visitor.generate_mask(self)
+        visitor.process_mask(self)
 
 
 class HybridStep(BaseStep):
@@ -87,7 +87,7 @@ class HybridStep(BaseStep):
         return AttackMode.HYBRID_MASK_DICT
 
     def accept(self, visitor: IHashcatStepVisitor):
-        visitor.generate_hybrid(self)
+        visitor.process_hybrid(self)
 
 
 class Steps(BaseModel):

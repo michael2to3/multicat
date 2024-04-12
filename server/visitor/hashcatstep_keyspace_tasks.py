@@ -14,20 +14,20 @@ if TYPE_CHECKING:
 from .ihashcatstep import IHashcatStepVisitor
 
 
-class KeyspaceGeneratorVisitor(IHashcatStepVisitor):
+class HashcatStepKeyspaceVisitor(IHashcatStepVisitor):
     _callback: Callable[[List], None]
 
     def __init__(self, callback: Callable[[List], None]):
         self._callback = callback
 
-    def generate_straight(self, schema: "StraightStep"):
+    def process_straight(self, schema: "StraightStep"):
         tasks = []
         rules = schema.rules or ("",)
         for wordlist, rule in itertools.product(schema.wordlists, rules):
             tasks.append(KeyspaceStraightSchema(wordlist1=wordlist, rule=rule, value=0))
         self._callback(tasks)
 
-    def generate_combinator(self, schema: "CombinatorStep"):
+    def process_combinator(self, schema: "CombinatorStep"):
         tasks = []
         left_rules = schema.left_rules or ("",)
         right_rules = schema.right_rules or ("",)
@@ -46,7 +46,7 @@ class KeyspaceGeneratorVisitor(IHashcatStepVisitor):
             )
         self._callback(tasks)
 
-    def generate_mask(self, schema: "MaskStep"):
+    def process_mask(self, schema: "MaskStep"):
         tasks = []
 
         for mask in schema.masks:
@@ -57,7 +57,7 @@ class KeyspaceGeneratorVisitor(IHashcatStepVisitor):
             )
         self._callback(tasks)
 
-    def generate_hybrid(self, schema: "HybridStep"):
+    def process_hybrid(self, schema: "HybridStep"):
         tasks = []
 
         for wordlist, mask in itertools.product(schema.wordlists, schema.masks):
