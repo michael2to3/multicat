@@ -1279,7 +1279,7 @@ class HashcatInterface(ABC):
         pass
 
     @abstractmethod
-    def status_get_hashes_msec_all(self) -> str:
+    def status_get_hashes_msec_all(self) -> int:
         pass
 
     @property

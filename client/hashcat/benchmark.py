@@ -1,10 +1,17 @@
-from typing import Dict, List
+from dataclasses import dataclass
+from typing import List
 
 from hashcat.executor_base import HashcatExecutorBase
 
 
 class HashcatBenchmarkCalculationException(Exception):
     pass
+
+
+@dataclass
+class HashrateDTO:
+    hash_mode: int
+    overall_hashrate: float
 
 
 class HashcatBenchmark(HashcatExecutorBase):
@@ -15,8 +22,8 @@ class HashcatBenchmark(HashcatExecutorBase):
         self._hashcat.no_threading = True
         self._hashcat.benchmark_all = benchmark_all
 
-    def benchmark(self, hash_modes: List[int]) -> Dict:
-        hashrates = {}
+    def benchmark(self, hash_modes: List[int]) -> List[HashrateDTO]:
+        hashrate_dtos = []
 
         for hash_mode in hash_modes:
             self._reset_benchmark(benchmark_all=False)
@@ -27,8 +34,7 @@ class HashcatBenchmark(HashcatExecutorBase):
                     f"Failed to benchmark the hash {hash_mode}"
                 )
 
-            hashrates[str(hash_mode)] = {
-                "overall": self._hashcat.status_get_hashes_msec_all()
-            }
+            overall_hashrate = self._hashcat.status_get_hashes_msec_all()
+            hashrate_dtos.append(HashrateDTO(hash_mode, overall_hashrate))
 
-        return hashrates
+        return hashrate_dtos
