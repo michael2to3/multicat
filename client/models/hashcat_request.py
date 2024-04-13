@@ -1,11 +1,10 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from enum import Enum, auto
 
+from config import Base
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-
-from config import Base
 
 
 class UserRole(Enum):
@@ -51,9 +50,9 @@ class Step(Base):
     __tablename__ = "steps"
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, unique=True)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=datetime.now(UTC))
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
-    is_keyspace_calculated = Column(Boolean, default=False)
+    is_keyspace_calculated = Column(Boolean)
     hashcat_steps = relationship(
         "HashcatStep",
         secondary=step_hashcat_step_association,
