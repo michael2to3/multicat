@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 from typing import Annotated, List, Literal, Union
 
 from pydantic import BaseModel, Field, TypeAdapter, validator
-
 from schemas.hashcat_request import AttackMode, CustomCharset
 from visitor.ikeyspace import IKeyspaceVisitor
 
@@ -24,7 +23,6 @@ class KeyspaceBase(BaseModel, ABC):
 
     class Config:
         from_attributes = True
-        fields = {"attack_mode": {"exclude": True}}
 
 
 class KeyspaceStraightSchema(KeyspaceBase):
