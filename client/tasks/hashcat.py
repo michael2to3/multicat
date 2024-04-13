@@ -40,7 +40,7 @@ def calc_keyspace(keyspace_task):
 
 
 @shared_task(name="b.benchmark", ignore_result=True)
-def benchmark(hash_modes=None):
+def benchmark(hash_modes):
     results = hashcat_benchmark.benchmark(hash_modes)
 
     # TODO: write results to the backend
