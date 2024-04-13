@@ -30,7 +30,7 @@ def send_discrete_task(
             models.Hash(hash_type=hash_type, parent_job=job, value=i)
 
         session.add(job)
-        session.commit()
+        session.flush()
         for step in step.steps:
             task_data = schemas.HashcatDiscreteTask(
                 job_id=job.id,

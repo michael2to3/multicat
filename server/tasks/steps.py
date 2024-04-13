@@ -1,14 +1,16 @@
 import logging
 from typing import List
 
+import yaml
 from celery import shared_task
+from pydantic import ValidationError
 
 from config import Database, UUIDGenerator
 from db import DatabaseHelper
 from models.keyspaces import Keyspace
-from schemas import CeleryResponse
+from schemas import CeleryResponse, Steps, hashcat_step_loader
 from schemas.keyspaces import get_keyspace_adapter
-from steps import StepDeleter, StepLoader, StepRetriever
+from steps import StepDeleter, StepFacade, StepRetriever
 from visitor.keyspace_to_model import KeyspaceModelCreator
 
 logger = logging.getLogger(__name__)
@@ -47,15 +49,26 @@ def list_steps(user_id: str):
 
 @shared_task(name="server.load_steps")
 def load_steps(user_id: str, steps_name: str, yaml_content: str):
-    user_id = str(UUIDGenerator.generate(user_id))
-    with db.session() as session:
-        db_helper = DatabaseHelper(session)
-        db_helper.get_or_create_user(user_id)
-        session.commit()
+    user_uuid = UUIDGenerator.generate(user_id)
+    try:
+        loader = hashcat_step_loader()
+        data = loader.load(yaml_content)
+        steps = Steps(**data)
+    except (yaml.YAMLError, ValidationError) as e:
+        logger.error(f"Error loading and validating steps: {str(e)}")
+        raise
+    except TypeError as e:
+        logger.error("Failed to instantiate steps: %s", str(e))
+        logger.debug("Data reveived: %s", yaml_content)
+        raise
 
-        manager = StepLoader(user_id, session)
-        manager.load_steps(steps_name, yaml_content)
-        return CeleryResponse(value=f"{steps_name} saved successfully").model_dump()
+    with db.session() as session:
+        facade = StepFacade(user_uuid, session)
+        facade.load_and_calculate_steps(steps_name, steps)
+        session.commit()
+        return CeleryResponse(
+            value=f"{steps_name} loaded and processed successfully"
+        ).model_dump()
 
 
 @shared_task(name="server.post_load_steps")

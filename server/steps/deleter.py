@@ -20,7 +20,6 @@ class StepDeleter:
         if not step:
             raise ValueError("Step not found.")
         self.session.delete(step)
-        self.session.commit()
 
     def _get_step(self, user_id, step_name):
         return (
