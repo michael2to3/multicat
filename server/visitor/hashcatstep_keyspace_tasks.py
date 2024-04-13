@@ -1,7 +1,8 @@
 import itertools
-from typing import Callable, List, TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, List
 
 from schemas.keyspaces import (
+    KeyspaceBase,
     KeyspaceCombinatorSchema,
     KeyspaceHybridSchema,
     KeyspaceMaskSchema,
@@ -15,9 +16,9 @@ from .ihashcatstep import IHashcatStepVisitor
 
 
 class HashcatStepKeyspaceVisitor(IHashcatStepVisitor):
-    _callback: Callable[[List], None]
+    _callback: Callable[[List[KeyspaceBase]], None]
 
-    def __init__(self, callback: Callable[[List], None]):
+    def __init__(self, callback: Callable[[List[KeyspaceBase]], None]):
         self._callback = callback
 
     def process_straight(self, schema: "StraightStep"):
