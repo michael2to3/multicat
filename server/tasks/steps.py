@@ -23,6 +23,7 @@ def delete_steps(user_id: str, step_name: int):
     with db.session() as session:
         manager = StepDeleter(user_id, session)
         manager.delete_step(step_name)
+        session.commit()
         return CeleryResponse(value="Step deleted successfully").model_dump()
 
 

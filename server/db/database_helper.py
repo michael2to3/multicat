@@ -47,7 +47,6 @@ class DatabaseHelper:
     def _create_unnamed_hashtype(self, hashcat_type: int) -> HashType:
         hashtype = HashType(human_readable="unnamed", hashcat_type=hashcat_type)
         self.session.add(hashtype)
-        self.session.commit()
         return hashtype
 
     def _convert_to_schema_hashtype(
@@ -62,7 +61,7 @@ class DatabaseHelper:
         if not user:
             user = User(id=user_id, role=UserRole.USER.value)
             self.session.add(user)
-            self.session.commit()
+            self.session.flush()
         return user
 
     def get_unique_name_hashcatrules(self, desired_name: str) -> str:
@@ -134,5 +133,5 @@ class DatabaseHelper:
     def add_devices_info(self, worker_name: str, value: Dict) -> models.Devices:
         devices = models.Devices(worker_name=worker_name, value=value)
         self.session.add(devices)
-        self.session.commit()
+        self.session.flush()
         return devices
