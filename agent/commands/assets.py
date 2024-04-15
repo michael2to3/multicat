@@ -3,9 +3,11 @@ import logging
 from typing import Dict, List
 
 from aiogram.types import Message
+
 from schemas import CeleryResponse, HashcatAssetSchema
 
 from .command import BaseCommand
+from .fetched_command import fetched
 from .register_command import register_command
 
 logger = logging.getLogger(__name__)
@@ -21,6 +23,7 @@ class Assets(BaseCommand):
     def description(self):
         return "Get assets for hashcat"
 
+    @fetched()
     async def handle(self, message: Message):
         if message.from_user is None:
             await message.answer("Please use this command in private")
