@@ -25,10 +25,10 @@ services:
       - db
     command: /bin/sh -c "pip install watchdog && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A main:app beat --loglevel=info"
     environment:
-      DATABASE_URL: ${DATABASE_URL}
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
       TIMEZONE: ${TIMEZONE}
+      DATABASE_URL: ${DATABASE_URL}
     volumes:
       - .:/app
     networks:

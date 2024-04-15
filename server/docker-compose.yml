@@ -22,10 +22,12 @@ services:
       - db
     command: celery -A main:app beat -l info
     environment:
-      DATABASE_URL: ${DATABASE_URL}
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
       TIMEZONE: ${TIMEZONE}
+      DATABASE_URL: ${DATABASE_URL}
+    networks:
+      - multicat
   rabbitmq:
     image: rabbitmq:3.13.0-management-alpine
     environment:

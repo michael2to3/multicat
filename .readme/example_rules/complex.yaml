@@ -1,0 +1,39 @@
+steps:
+  - !straight
+    wordlists:
+      - rockyou.txt
+      - wordlist-probable.txt
+
+  - !straight
+    wordlists:
+      - rockyou.txt
+    rules:
+      - dive.rule
+    options:
+      work_mode: 3
+
+  - !combinator
+    left_wordlists:
+      - rockyou.txt
+    right_wordlists:
+      - wordlist-probable.txt
+
+  - !combinator
+    left_wordlists:
+      - rockyou.txt
+    right_wordlists:
+      - wordlist-probable.txt
+    left_rules:
+      - dive.rule
+
+  - !combinator
+    left_wordlists:
+      - rockyou.txt
+    right_wordlists:
+      - wordlist-probable.txt
+    right_rules:
+      - dive.rule
+
+  - !mask
+    masks:
+      - "?d?d?d"
