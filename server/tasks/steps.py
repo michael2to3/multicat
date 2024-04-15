@@ -6,7 +6,7 @@ import yaml
 from celery import shared_task
 from pydantic import ValidationError
 
-from config import Database, UUIDGenerator
+from config import Database
 from db import DatabaseHelper
 from models.keyspaces import Keyspace
 from schemas import CeleryResponse, Steps, hashcat_step_loader
