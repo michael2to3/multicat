@@ -5,4 +5,4 @@ from filemanager.fuzzyengine import FuzzySearchEngine
 
 class AssetsFileManager(FileManager):
     def __init__(self):
-        super().__init__(Config.get(ConfigKey.ASSETS_DIR), FuzzySearchEngine())
+        super().__init__(Config.get(ConfigKey.ASSETS_DIR), FuzzySearchEngine(0.6))

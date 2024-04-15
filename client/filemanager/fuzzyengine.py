@@ -13,8 +13,9 @@ class FuzzySearchEngine(BaseSearchEngine):
         highest_similarity = 0
 
         for file in self._walk(base_dir):
-            file_path_lower = str(file).lower()
-            similarity = self._calculate_similarity(file_path_lower, search_term)
+
+            relative_path_lower = str(file.relative_to(base_dir)).lower()
+            similarity = self._calculate_similarity(relative_path_lower, search_term)
             if similarity > highest_similarity:
                 highest_similarity = similarity
                 best_match = file

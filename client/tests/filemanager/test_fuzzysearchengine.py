@@ -16,7 +16,7 @@ class TestFuzzySearchEngine(unittest.TestCase):
     @patch("pathlib.Path.rglob")
     def test_search_for_file_not_found(self, mocked_rglob):
         mocked_rglob.return_value = []
-        fse = FuzzySearchEngine()
+        fse = FuzzySearchEngine(0.6)
         with self.assertRaises(FileNotFoundError):
             fse.search_for_file(Path("/test/dir"), "nonexistent")
 
