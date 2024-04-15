@@ -1,0 +1,5 @@
+steps:
+  - !straight
+    wordlists:
+      - rockyou.txt
+      - wordlist-probable.txt
