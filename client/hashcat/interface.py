@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Dict
 
 
 class HashcatInterface(ABC):
@@ -327,7 +328,11 @@ class HashcatInterface(ABC):
         pass
 
     @abstractmethod
-    def hashcat_session_execute(self):
+    def hashcat_session_init(self) -> int:
+        pass
+
+    @abstractmethod
+    def hashcat_session_execute(self) -> bool:
         pass
 
     @property
@@ -338,6 +343,11 @@ class HashcatInterface(ABC):
     @hashcat_session_pause.setter
     @abstractmethod
     def hashcat_session_pause(self, value):
+        pass
+
+    @property
+    @abstractmethod
+    def words_base(self) -> int:
         pass
 
     @property
@@ -360,14 +370,8 @@ class HashcatInterface(ABC):
     def hashcat_session_resume(self, value):
         pass
 
-    @property
     @abstractmethod
     def hashcat_status_get_log(self):
-        pass
-
-    @hashcat_status_get_log.setter
-    @abstractmethod
-    def hashcat_status_get_log(self, value):
         pass
 
     @property
@@ -712,6 +716,16 @@ class HashcatInterface(ABC):
 
     @property
     @abstractmethod
+    def no_threading(self) -> bool:
+        pass
+
+    @no_threading.setter
+    @abstractmethod
+    def no_threading(self, value):
+        pass
+
+    @property
+    @abstractmethod
     def quiet(self):
         pass
 
@@ -740,14 +754,8 @@ class HashcatInterface(ABC):
     def remove_timer(self, value):
         pass
 
-    @property
     @abstractmethod
     def reset(self):
-        pass
-
-    @reset.setter
-    @abstractmethod
-    def reset(self, value):
         pass
 
     @property
@@ -1270,14 +1278,8 @@ class HashcatInterface(ABC):
     def status_get_hash_target(self, value):
         pass
 
-    @property
     @abstractmethod
-    def status_get_hashes_msec_all(self):
-        pass
-
-    @status_get_hashes_msec_all.setter
-    @abstractmethod
-    def status_get_hashes_msec_all(self, value):
+    def status_get_hashes_msec_all(self) -> int:
         pass
 
     @property
@@ -1722,4 +1724,8 @@ class HashcatInterface(ABC):
     @workload_profile.setter
     @abstractmethod
     def workload_profile(self, value):
+        pass
+
+    @abstractmethod
+    def get_backend_devices_info(self) -> Dict:
         pass

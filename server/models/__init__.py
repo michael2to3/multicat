@@ -1,15 +1,29 @@
+from .benchmarks import Benchmark
+from .devices import Devices
 from .hashcat_asset import HashcatAsset
-from .database_helper import DatabaseHelper
 from .hashcat_request import Hash, HashcatStep, HashType, Job, Step, User, UserRole
+from .keyspaces import (
+    Keyspace,
+    KeyspaceCombinator,
+    KeyspaceHybrid,
+    KeyspaceMask,
+    KeyspaceStraight,
+)
 
 __all__ = [
-    "HashcatAsset",
-    "UserRole",
-    "User",
-    "Job",
-    "HashcatStep",
+    "Benchmark",
+    "Devices",
     "Hash",
     "HashType",
+    "HashcatAsset",
+    "HashcatStep",
+    "Job",
     "Step",
-    "DatabaseHelper",
+    "User",
+    "UserRole",
+    "Keyspace",
+    "KeyspaceCombinator",
+    "KeyspaceHybrid",
+    "KeyspaceMask",
+    "KeyspaceStraight",
 ]

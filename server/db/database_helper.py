@@ -1,8 +1,12 @@
 import json
+from typing import Dict, List
 
+from sqlalchemy.orm import Query
+
+import models
 import schemas
-
-from .hashcat_request import HashType, Step, User, UserRole
+from models import HashType, Step, User, UserRole
+from visitor import KeyspaceModelQueryExecutor
 
 
 class DatabaseHelperNotFoundError(Exception):
@@ -13,7 +17,7 @@ class DatabaseHelper:
     def __init__(self, session):
         self.session = session
 
-    def get_or_create_hashtype_as_model(self, identifier: str) -> HashType:
+    def get_or_create_hashtype_as_model(self, identifier: str) -> schemas.HashType:
         hashtype = self.get_or_create_hashtype_as_schema(identifier)
         return self._convert_to_schema_hashtype(hashtype)
 
@@ -43,10 +47,11 @@ class DatabaseHelper:
     def _create_unnamed_hashtype(self, hashcat_type: int) -> HashType:
         hashtype = HashType(human_readable="unnamed", hashcat_type=hashcat_type)
         self.session.add(hashtype)
-        self.session.commit()
         return hashtype
 
-    def _convert_to_schema_hashtype(self, hashtype: HashType) -> schemas.HashType:
+    def _convert_to_schema_hashtype(
+        self, hashtype: models.HashType
+    ) -> schemas.HashType:
         return schemas.HashType(
             hashcat_type=hashtype.hashcat_type, human_readable=hashtype.human_readable
         )
@@ -56,7 +61,7 @@ class DatabaseHelper:
         if not user:
             user = User(id=user_id, role=UserRole.USER.value)
             self.session.add(user)
-            self.session.commit()
+            self.session.flush()
         return user
 
     def get_unique_name_hashcatrules(self, desired_name: str) -> str:
@@ -75,6 +80,17 @@ class DatabaseHelper:
 
         return unique_name
 
+    def get_steps(self, user_id: str, step_name: str) -> Step:
+        step = (
+            self.session.query(Step)
+            .filter(Step.user_id == user_id, Step.name == step_name)
+            .first()
+        )
+        if not step:
+            raise ValueError("Loaded steps not found")
+
+        return step
+
     def get_hashcat_steps(self, user_id: str, step_name: str) -> schemas.Steps:
         step = (
             self.session.query(Step)
@@ -89,3 +105,33 @@ class DatabaseHelper:
     def _convert_to_schema_steps(self, step: Step) -> schemas.Steps:
         hashcat_steps = {"steps": [json.loads(s.value) for s in step.hashcat_steps]}
         return schemas.Steps(**hashcat_steps)
+
+    def keyspace_exists(self, keyspace: schemas.KeyspaceBase) -> bool:
+        callback_result = [False]
+
+        def callback(query: Query):
+            callback_result[0] = query.first() is not None
+
+        visitor = KeyspaceModelQueryExecutor(
+            self.session, callback, {"value", "attack_mode"}
+        )
+        keyspace.accept(visitor)
+        return callback_result[0]
+
+    def get_devices(self) -> List[models.Devices]:
+        result = self.session.query(models.Devices).all()
+        return result
+
+    def get_worker_devices(self, worker_name: str) -> models.Devices:
+        result = (
+            self.session.query(models.Devices)
+            .filter(models.Devices.worker_name == worker_name)
+            .first()
+        )
+        return result
+
+    def add_devices_info(self, worker_name: str, value: Dict) -> models.Devices:
+        devices = models.Devices(worker_name=worker_name, value=value)
+        self.session.add(devices)
+        self.session.flush()
+        return devices

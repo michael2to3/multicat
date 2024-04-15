@@ -1,6 +1,6 @@
 from pyhashcat import Hashcat as Cat
 
-from .hashcat_interface import HashcatInterface
+from .interface import HashcatInterface
 
 
 class Hashcat(HashcatInterface):
@@ -207,8 +207,8 @@ class Hashcat(HashcatInterface):
     def dict2(self, value):
         self._instance.dict2 = value
 
-    def event_connect(self, callback, signal):
-        pass
+    def event_connect(self, callback, signal: str):
+        self._instance.event_connect(callback, signal)
 
     @property
     def event_types(self):
@@ -266,8 +266,11 @@ class Hashcat(HashcatInterface):
     def hashcat_session_checkpoint(self, value):
         self._instance.hashcat_session_checkpoint = value
 
+    def hashcat_session_init(self):
+        return self._instance.hashcat_session_init()
+
     def hashcat_session_execute(self):
-        pass
+        return self._instance.hashcat_session_execute()
 
     @property
     def hashcat_session_pause(self):
@@ -293,16 +296,12 @@ class Hashcat(HashcatInterface):
     def hashcat_session_resume(self, value):
         self._instance.hashcat_session_resume = value
 
-    @property
-    def hashcat_status_get_log(self):
-        return self._instance.hashcat_status_get_log
-
-    @hashcat_status_get_log.setter
-    def hashcat_status_get_log(self, value):
-        self._instance.hashcat_status_get_log = value
+    def hashcat_status_get_log(self) -> str:
+        return self._instance.hashcat_status_get_log()
 
     @property
     def hashcat_status_get_status(self):
+        # TODO: observed crash
         return self._instance.hashcat_status_get_status
 
     @hashcat_status_get_status.setter
@@ -597,13 +596,8 @@ class Hashcat(HashcatInterface):
     def remove_timer(self, value):
         self._instance.remove_timer = value
 
-    @property
     def reset(self):
-        return self._instance.reset
-
-    @reset.setter
-    def reset(self, value):
-        self._instance.reset = value
+        return self._instance.reset()
 
     @property
     def restore(self):
@@ -1277,16 +1271,11 @@ class Hashcat(HashcatInterface):
     def status_get_speed_sec_dev(self, value):
         self._instance.status_get_speed_sec_dev = value
 
-    @property
-    def status_get_status_number(self):
-        return self._instance.status_get_status_number
+    def status_get_status_number(self) -> int:
+        return self._instance.status_get_status_number()
 
-    @status_get_status_number.setter
-    def status_get_status_number(self, value):
-        self._instance.status_get_status_number = value
-
-    def status_get_status_string(self):
-        pass
+    def status_get_status_string(self) -> str:
+        return self._instance.status_get_status_string()
 
     @property
     def status_get_time_estimated_absolute(self):
@@ -1383,3 +1372,18 @@ class Hashcat(HashcatInterface):
     @workload_profile.setter
     def workload_profile(self, value):
         self._instance.workload_profile = value
+
+    @property
+    def words_base(self):
+        return self._instance.words_base
+
+    @property
+    def no_threading(self) -> bool:
+        return self._instance.no_threading
+
+    @no_threading.setter
+    def no_threading(self, value: bool):
+        self._instance.no_threading = value
+
+    def get_backend_devices_info(self):
+        return self._instance.get_backend_devices_info()

@@ -6,14 +6,16 @@ services:
       dockerfile: ${HASHCAT_TYPE_GPU:-all-gpu}/Dockerfile
     volumes:
       - .:/app
-    command: /bin/sh -c "pip install watchdog && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A main:app worker -Q client,broadcast -c 1 --loglevel=info"
+    command: /bin/sh -c "pip install watchdog && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A main:app worker -Q client,broadcast -c 1 --loglevel=info -n ${WORKER_NAME}@%i"
     environment:
+      WORKER_NAME: ${WORKER_NAME}
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
       TIMEZONE: ${TIMEZONE}
       DATABASE_URL: ${DATABASE_URL}
       RULES_DIR: ${RULES_DIR}
       WORDLISTS_DIR: ${WORDLISTS_DIR}
+      HC_PATH: ${HC_PATH}
     networks:
       - multicat
 networks:

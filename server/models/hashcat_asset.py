@@ -1,14 +1,12 @@
-import uuid
 from datetime import datetime
-from typing import List
 
 from config import Base
-from sqlalchemy import Column, DateTime, Integer, String, create_engine
+from sqlalchemy import Column, DateTime, Integer, String
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 
 
 class HashcatAsset(Base):
-    __tablename__ = "worker"
+    __tablename__ = "assets"
     __table_args__ = {"extend_existing": True}
 
     id = Column(Integer, primary_key=True, autoincrement=True)

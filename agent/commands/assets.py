@@ -1,3 +1,4 @@
+import yaml
 import logging
 from typing import Dict, List
 
@@ -53,16 +54,7 @@ class Assets(BaseCommand):
                 asset.rules or ["empty rule"]
             )
 
-        message_text = ""
-        for worker_id, assets in assets_by_worker.items():
-            wordlists_text = "\n".join(
-                f"- {wordlist}" for wordlist in assets["wordlists"]
-            )
-            rules_text = "\n".join(f"- {rule}" for rule in assets["rules"])
-            worker_assets_text = (
-                f"{worker_id}:\nWordlists:\n{wordlists_text}\nRules:\n{rules_text}"
-            )
-            message_text += worker_assets_text + "\n\n"
+        message_text = yaml.dump(assets_by_worker)
 
         await message.answer(
             message_text.strip() if message_text else "No assets found."

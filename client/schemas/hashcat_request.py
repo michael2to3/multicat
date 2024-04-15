@@ -1,14 +1,16 @@
+from abc import ABC
 from enum import Enum
-from typing import List
+from typing import List, Literal
 
 from pydantic import BaseModel, Field, field_validator, validator
 
 
 class AttackMode(int, Enum):
     DICTIONARY = 0
+    COMBINATOR = 1
     MASK = 3
-    HYBRID_WORDLIST_MASK = 6
-    HYBRID_MASK_WORDLIST = 7
+    HYBRID_DICT_MASK = 6
+    HYBRID_MASK_DICT = 7
 
 
 class HashType(BaseModel):
@@ -44,8 +46,17 @@ class HashcatOptions(BaseModel):
 
         rules = values.get("rules", [])
         if rules:
-            return AttackMode.HYBRID_MASK_WORDLIST
+            return AttackMode.HYBRID_MASK_DICT
         return AttackMode.MASK
+
+
+class HashcatDiscreteTask(BaseModel):
+    job_id: int
+    hash_type: HashType
+    hashes: List[str]
+    keyspace_skip: int = 0
+    keyspace_work: int = 0
+    type: Literal["HashcatDiscreteTask"]
 
 
 class HashcatStep(BaseModel):

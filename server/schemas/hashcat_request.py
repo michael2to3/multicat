@@ -1,14 +1,15 @@
 from enum import Enum
 from typing import List
 
-from pydantic import BaseModel, Field, field_validator, validator
+from pydantic import AliasChoices, BaseModel, Field, field_validator
 
 
 class AttackMode(int, Enum):
     DICTIONARY = 0
+    COMBINATOR = 1
     MASK = 3
-    HYBRID_WORDLIST_MASK = 6
-    HYBRID_MASK_WORDLIST = 7
+    HYBRID_DICT_MASK = 6
+    HYBRID_MASK_DICT = 7
 
 
 class HashType(BaseModel):
@@ -29,31 +30,8 @@ class CustomCharset(BaseModel):
 
 
 class HashcatOptions(BaseModel):
-    optimization: bool = Field(default=False, alias="O")
-    work_mode: int = Field(default=4, alias="w")
-    increment: bool = Field(default=False, alias="increment")
-    custom_charsets: List[CustomCharset] = Field(default_factory=list)
-    attack_mode: AttackMode = Field(default=None, alias="a")
+    optimization: bool = Field(
+        default=False, validation_alias=AliasChoices("optimization", "opt", "O")
+    )
+    work_mode: int = Field(default=4, validation_alias=AliasChoices("work_mode", "w"))
     dry_run: bool = Field(default=False)
-
-    @validator("attack_mode", pre=True, always=True)
-    @classmethod
-    def set_default_attack_mode(cls, v, values):
-        if v is not None:
-            return v
-
-        rules = values.get("rules", [])
-        if rules:
-            return AttackMode.HYBRID_MASK_WORDLIST
-        return AttackMode.MASK
-
-
-class HashcatStep(BaseModel):
-    options: HashcatOptions = Field(default_factory=HashcatOptions)
-    wordlists: List[str] = Field(default_factory=list)
-    rules: List[str] = Field(default_factory=list)
-    masks: List[str] = Field(default_factory=list)
-
-
-class Steps(BaseModel):
-    steps: List[HashcatStep] = Field(default_factory=list)
