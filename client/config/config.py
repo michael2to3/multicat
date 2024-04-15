@@ -1,4 +1,5 @@
 import os
+from enum import Enum
 
 
 class Singleton(type):
@@ -8,6 +9,12 @@ class Singleton(type):
         if cls not in cls._instances:
             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
+
+
+class ConfigKey(str, Enum):
+    ASSETS_DIR = "ASSETS_DIR"
+    DATABASE_URL = "DATABASE_URL"
+    WORKER_NAME = "WORKER_NAME"
 
 
 class Config:
