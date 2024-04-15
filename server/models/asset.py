@@ -1,8 +1,9 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
-from config import Base
 from sqlalchemy import Column, DateTime, Integer, String
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
+
+from config import Base
 
 
 class HashcatAsset(Base):
@@ -12,6 +13,5 @@ class HashcatAsset(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     task_uuid = Column(UUID(as_uuid=True))
     worker_id = Column(String, nullable=False)
-    wordlists = Column(ARRAY(String))
-    rules = Column(ARRAY(String))
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    files = Column(ARRAY(String))
+    timestamp = Column(DateTime, default=datetime.now(UTC))

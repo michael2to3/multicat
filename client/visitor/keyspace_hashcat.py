@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from hashcat.filemanager import FileManager
+from filemanager import FileManager
 from hashcat.hashcat import HashcatInterface
 
 if TYPE_CHECKING:
@@ -23,21 +23,21 @@ class KeyspaceHashcatConfigurerVisitor(IKeyspaceVisitor):
         self._fm = file_manager
 
     def configure_straight(self, schema: "KeyspaceStraightSchema"):
-        self._hashcat.dict1 = self._fm.get_wordlist(schema.wordlist1)
+        self._hashcat.dict1 = self._fm.get_file(schema.wordlist1)
 
         if schema.rule:
             # It's better to provide one rule at a time, because we can quickly exceed available memory, or reach integer overflow
-            self._hashcat.rules = (self._fm.get_rule(schema.rule),)
+            self._hashcat.rules = (self._fm.get_file(schema.rule),)
 
     def configure_combinator(self, schema: "KeyspaceCombinatorSchema"):
-        self._hashcat.dict1 = self._fm.get_wordlist(schema.wordlist1)
-        self._hashcat.dict2 = self._fm.get_wordlist(schema.wordlist2)
+        self._hashcat.dict1 = self._fm.get_file(schema.wordlist1)
+        self._hashcat.dict2 = self._fm.get_file(schema.wordlist2)
 
         if schema.left:
-            self._hashcat.rule_buf_l = self._fm.get_rule(schema.left)
+            self._hashcat.rule_buf_l = self._fm.get_file(schema.left)
 
         if schema.right:
-            self._hashcat.rule_buf_r = self._fm.get_rule(schema.right)
+            self._hashcat.rule_buf_r = self._fm.get_file(schema.right)
 
     def configure_mask(self, schema: "KeyspaceMaskSchema"):
         self._hashcat.mask = schema.mask
@@ -50,5 +50,5 @@ class KeyspaceHashcatConfigurerVisitor(IKeyspaceVisitor):
             )
 
     def configure_hybrid(self, schema: "KeyspaceHybridSchema"):
-        self._hashcat.dict1 = self._fm.get_wordlist(schema.wordlist1)
+        self._hashcat.dict1 = self._fm.get_file(schema.wordlist1)
         self._hashcat.mask = schema.mask

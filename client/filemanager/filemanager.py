@@ -1,6 +1,5 @@
 from pathlib import Path
 
-from .fuzzyengine import FuzzySearchEngine
 from .searchengine import BaseSearchEngine
 
 
@@ -8,7 +7,7 @@ class FileManager:
     def __init__(
         self,
         search_dir: str,
-        search_engine: BaseSearchEngine = FuzzySearchEngine(),
+        search_engine: BaseSearchEngine,
     ):
         self._search_dir = Path(search_dir).resolve()
         self._search_engine = search_engine
@@ -25,3 +24,10 @@ class FileManager:
 
     def get_file(self, filename: str) -> str:
         return str(self._search_engine.search_for_file(self._search_dir, filename))
+
+    def get_all_files(self) -> list[str]:
+        return [
+            str(file_path)
+            for file_path in self._search_dir.rglob("*")
+            if file_path.is_file()
+        ]

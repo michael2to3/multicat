@@ -1,7 +1,7 @@
 import logging
 
 from hashcat import HashcatInterface
-from hashcat.filemanager import FileManager
+from filemanager import FileManager
 from schemas import AttackMode, KeyspaceBase
 from visitor.ikeyspace import IKeyspaceVisitor
 from visitor.keyspace_hashcat import KeyspaceHashcatConfigurerVisitor

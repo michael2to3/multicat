@@ -3,18 +3,20 @@ import logging
 from celery import shared_task, signature
 
 from config import Config, Database
-from hashcat import FileManager, HashcatDevices
+from config.config import ConfigKey
+from filemanager import AssetsFileManager
+from hashcat import HashcatDevices
 from hashcat.hashcat import Hashcat
 
 logger = logging.getLogger(__name__)
-db = Database(Config.get("DATABASE_URL"))
-file_manager = FileManager(Config.get("RULES_DIR"), Config.get("WORDLISTS_DIR"))
+db = Database(Config.get(ConfigKey.DATABASE_URL))
+file_manager = AssetsFileManager()
 hashcat = Hashcat()
 hashcat_devices = HashcatDevices(file_manager, hashcat)
 
 
 def _update_devices():
-    worker_name = Config.get("WORKER_NAME")
+    worker_name = Config.get(ConfigKey.WORKER_NAME)
     devices_obj = hashcat_devices.devices_info()
     signature(
         "server.update_devices_info", queue="server", args=(worker_name, devices_obj)
