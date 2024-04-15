@@ -1,8 +1,12 @@
 import logging
+from uuid import UUID
 
 from aiogram.types import ContentType, Message
 from aiogram.types.input_file import BufferedInputFile
+
 from commands import BaseCommand
+from commands.message_wrapper import MessageWrapper
+from config.uuid import UUIDGenerator
 from schemas import CeleryResponse
 
 from .register_command import register_command
@@ -20,24 +24,28 @@ class Steps(BaseCommand):
     def description(self):
         return "Manage workflow steps with subcommands: /steps list (view all steps), /steps get (details of a step), /steps load (add/update steps via YAML file), /steps delete (remove a step)."
 
-    async def handle(self, message: Message):
+    async def handle(self, message: Message | MessageWrapper | MessageWrapper):
         subcommand = self._parse_command(message)
+        userid = UUIDGenerator.generate(str(message.from_user.id))
         match subcommand:
             case "list" | "l":
-                return await self._handle_list(message)
+                return await self._handle_list(userid, message)
             case "get" | "g":
-                return await self._handle_get(message)
+                return await self._handle_get(userid, message)
             case "load" | "lo":
-                return await self._handle_load(message)
+                return await self._handle_load(userid, message)
             case "delete" | "d":
-                return await self._handle_delete(message)
+                return await self._handle_delete(userid, message)
             case _:
                 return await message.answer(f"Unknown subcommand: {subcommand}")
 
-    def _get_message_text(self, message: Message) -> str:
-        return message.text if message.text else message.caption
+    def _get_message_text(
+        self, message: Message | MessageWrapper | MessageWrapper
+    ) -> str:
+        text = message.text if message.text else message.caption
+        return text if text else ""
 
-    def _parse_command(self, message: Message) -> str:
+    def _parse_command(self, message: Message | MessageWrapper | MessageWrapper) -> str:
         message_text = self._get_message_text(message)
         if not message_text:
             return ""
@@ -46,7 +54,7 @@ class Steps(BaseCommand):
             return parts[1]
         return ""
 
-    def _parse_text(self, message: Message) -> str:
+    def _parse_text(self, message: Message | MessageWrapper) -> str:
         message_text = self._get_message_text(message)
         if not message_text:
             return ""
@@ -55,7 +63,9 @@ class Steps(BaseCommand):
             return parts[2]
         return ""
 
-    async def _process_celery_response(self, message: Message, response):
+    async def _process_celery_response(
+        self, message: Message | MessageWrapper, response
+    ):
         celery_response = CeleryResponse(**response.get(timeout=10))
 
         if celery_response.error:
@@ -67,8 +77,7 @@ class Steps(BaseCommand):
         else:
             await message.answer("Operation completed successfully.")
 
-    async def _handle_list(self, message: Message):
-        userid = str(message.from_user.id)
+    async def _handle_list(self, userid: UUID, message: Message | MessageWrapper):
         result = self.app.send_task("server.list_steps", args=(userid,))
         celery_response = CeleryResponse(**result.get(timeout=10))
 
@@ -86,8 +95,8 @@ class Steps(BaseCommand):
 
         return await message.answer(response_message)
 
-    async def _handle_get(self, message: Message):
-        userid, step_name = str(message.from_user.id), self._parse_text(message)
+    async def _handle_get(self, userid: UUID, message: Message | MessageWrapper):
+        step_name = self._parse_text(message)
         if not step_name:
             await message.answer("Please enter step name")
             return
@@ -112,12 +121,11 @@ class Steps(BaseCommand):
             document=document, caption=f"Details for step '{step_name}':"
         )
 
-    async def _handle_load(self, message: Message):
+    async def _handle_load(self, userid: UUID, message: Message | MessageWrapper):
         if message.content_type != ContentType.DOCUMENT:
             await message.answer("Please send a YAML file.")
             return
 
-        userid = str(message.from_user.id)
         document_id, file_name = message.document.file_id, message.document.file_name
         file_info = await self.bot.get_file(document_id)
         file_bytes = await self.bot.download_file(file_info.file_path)
@@ -128,8 +136,8 @@ class Steps(BaseCommand):
         )
         await self._process_celery_response(message, result)
 
-    async def _handle_delete(self, message: Message):
-        userid, text_message = str(message.from_user.id), self._parse_text(message)
+    async def _handle_delete(self, userid: UUID, message: Message | MessageWrapper):
+        text_message = self._parse_text(message)
         if not text_message:
             await message.answer("Please enter step name")
             return

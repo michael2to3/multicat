@@ -8,7 +8,7 @@ from celery import current_app, shared_task
 import gnupg
 import models
 import schemas
-from config import Database, UUIDGenerator
+from config import Database
 from db import DatabaseHelper
 
 db = Database()
@@ -17,14 +17,13 @@ db = Database()
 def send_discrete_task(
     owner_id: UUID, step_name: str, hashtype: str, hashes: List[str]
 ):
-    owner_str = str(owner_id)
     with db.session() as session:
         db_helper = DatabaseHelper(session)
-        step = db_helper.get_hashcat_steps(owner_str, step_name)
+        step = db_helper.get_hashcat_steps(owner_id, step_name)
         hash_type: schemas.HashType = db_helper.get_or_create_hashtype_as_schema(
             hashtype
         )
-        user: models.User = db_helper.get_or_create_user(owner_str)
+        user: models.User = db_helper.get_or_create_user(owner_id)
         job = models.Job(owning_user=user)
         for i in hashes:
             models.Hash(hash_type=hash_type, parent_job=job, value=i)
@@ -51,10 +50,9 @@ def send_discrete_task(
 
 @shared_task(name="server.run_hashcat")
 def run_hashcat(
-    owner_id: str, hashtype: str, step_name: str, base64_encrypt_hashes: str
+    owner_id: UUID, hashtype: str, step_name: str, base64_encrypt_hashes: str
 ):
     gpg = gnupg.GPG()
-    owner_uid = UUIDGenerator.generate(owner_id)
 
     encrypt_hashes = base64.b64decode(base64_encrypt_hashes)
     hashes_in_memory = io.BytesIO(encrypt_hashes)
@@ -70,7 +68,7 @@ def run_hashcat(
 
     hashes = [i for i in hashes.decode("utf-8").split("\n") if i]
     try:
-        job_id = send_discrete_task(owner_uid, step_name, hashtype, hashes)
+        job_id = send_discrete_task(owner_id, step_name, hashtype, hashes)
     except ValueError as e:
         return schemas.CeleryResponse(error=str(e)).model_dump()
 

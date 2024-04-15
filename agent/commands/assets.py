@@ -4,6 +4,8 @@ from typing import Dict, List
 
 from aiogram.types import Message
 
+from commands.message_wrapper import MessageWrapper
+from config.uuid import UUIDGenerator
 from schemas import CeleryResponse, HashcatAssetSchema
 
 from .command import BaseCommand
@@ -24,12 +26,12 @@ class Assets(BaseCommand):
         return "Get assets for hashcat"
 
     @fetched()
-    async def handle(self, message: Message):
+    async def handle(self, message: Message | MessageWrapper):
         if message.from_user is None:
             await message.answer("Please use this command in private")
             return
 
-        userid = str(message.from_user.id)
+        userid = UUIDGenerator.generate(str(message.from_user.id))
         task = self.app.send_task("main.collect_assets", args=(userid,), queue="server")
         resp = CeleryResponse(**task.get(timeout=60))
 

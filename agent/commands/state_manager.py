@@ -25,7 +25,9 @@ class StateManager:
     def remove_command(cls, user_id: str):
         user_state = cls._get_or_create_user_state(user_id)
         if user_state.active_command:
-            logger.info("Command '%s' removed for user %s", user_state.active_command, user_id)
+            logger.info(
+                "Command '%s' removed for user %s", user_state.active_command, user_id
+            )
             user_state.active_command = ""
         else:
             logger.info("Tried to remove command for user %s", user_id)

@@ -1,4 +1,5 @@
 import logging
+from uuid import UUID
 
 from sqlalchemy.orm import scoped_session
 
@@ -9,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class StepDeleter:
-    def __init__(self, user_id: str, session: scoped_session):
+    def __init__(self, user_id: UUID, session: scoped_session):
         self._dbh = DatabaseHelper(session)
         self._session = session
         self._user_id = user_id

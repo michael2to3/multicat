@@ -3,6 +3,7 @@ import base64
 from aiogram.types import ContentType, Message
 
 from commands import BaseCommand
+from config.uuid import UUIDGenerator
 from schemas import CeleryResponse
 
 from .register_command import register_command
@@ -34,7 +35,7 @@ class Hashcat(BaseCommand):
                 )
                 return
 
-            user_id = str(message.from_user.id)
+            user_id = UUIDGenerator.generate(str(message.from_user.id))
             hash_type, step_name = parts[1], parts[2]
             file_info = await self.bot.get_file(document_id)
             file_path = file_info.file_path
