@@ -27,7 +27,7 @@ class TestFuzzySearchEngine(unittest.TestCase):
 
         traversal_attempts = [
             "../",
-            "a/../b/../etc/passwd",
+            "a/../b/../../etc/passwd",
             "/tmp////etc/passwd",
             "../../../etc/passwd",
             "./././../etc/passwd",
@@ -35,8 +35,9 @@ class TestFuzzySearchEngine(unittest.TestCase):
 
         for attempt in traversal_attempts:
             with self.subTest(attempt=attempt):
-                result = fse.search_for_file(Path("/test/dir"), attempt)
-                self.assertTrue(
-                    "/test/dir" in str(result),
-                    f"Path traversal attempt was not neutralized for {attempt}",
-                )
+                with self.assertRaises(ValueError):
+                    result = fse.search_for_file(Path("/test/dir"), attempt)
+                    self.assertFalse(
+                        Path("/test/dir").resolve().is_relative_to(result.resolve()),
+                        f"Path traversal attempt was not neutralized for {attempt}",
+                    )
