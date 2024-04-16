@@ -13,8 +13,7 @@ services:
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
       TIMEZONE: ${TIMEZONE}
       DATABASE_URL: ${DATABASE_URL}
-      RULES_DIR: ${RULES_DIR}
-      WORDLISTS_DIR: ${WORDLISTS_DIR}
+      ASSETS_DIR: ${ASSETS_DIR}
       HC_PATH: ${HC_PATH}
     networks:
       - multicat

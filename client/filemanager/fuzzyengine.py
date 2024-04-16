@@ -1,18 +1,21 @@
 from pathlib import Path
 
+from filemanager.searchengine import BaseSearchEngine
 
-class FuzzySearchEngine:
+
+class FuzzySearchEngine(BaseSearchEngine):
     def __init__(self, min_similarity=0.6):
         self.min_similarity = min_similarity
 
-    def search_for_file(self, base_dir: Path, search_term: str) -> Path:
+    def _search_for_file(self, base_dir: Path, search_term: str) -> Path:
         search_term = search_term.lower()
         best_match = None
         highest_similarity = 0
 
         for file in self._walk(base_dir):
-            file_path_lower = str(file).lower()
-            similarity = self._calculate_similarity(file_path_lower, search_term)
+
+            relative_path_lower = str(file.relative_to(base_dir)).lower()
+            similarity = self._calculate_similarity(relative_path_lower, search_term)
             if similarity > highest_similarity:
                 highest_similarity = similarity
                 best_match = file

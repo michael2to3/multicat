@@ -1,7 +1,7 @@
-import yaml
 import logging
 from typing import Dict, List
 
+import yaml
 from aiogram.types import Message
 
 from commands.message_wrapper import MessageWrapper
@@ -48,13 +48,8 @@ class Assets(BaseCommand):
         assets_by_worker: Dict[str, Dict[str, List[str]]] = {}
         for asset in assets_schemas:
             if asset.worker_id not in assets_by_worker:
-                assets_by_worker[asset.worker_id] = {"wordlists": [], "rules": []}
-            assets_by_worker[asset.worker_id]["wordlists"].extend(
-                asset.wordlists or ["empty wordlist"]
-            )
-            assets_by_worker[asset.worker_id]["rules"].extend(
-                asset.rules or ["empty rule"]
-            )
+                assets_by_worker[asset.worker_id] = {"files": []}
+            assets_by_worker[asset.worker_id]["files"].extend(asset.files or ["empty"])
 
         message_text = yaml.dump(assets_by_worker)
 

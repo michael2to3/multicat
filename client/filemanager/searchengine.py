@@ -4,10 +4,10 @@ from pathlib import Path
 
 class BaseSearchEngine(ABC):
     @abstractmethod
-    async def _search_for_file(self, base_dir: Path, search_term: str) -> Path:
+    def _search_for_file(self, base_dir: Path, search_term: str) -> Path:
         pass
 
-    async def search_for_file(self, base_dir: Path, search_term: str) -> Path:
+    def search_for_file(self, base_dir: Path, search_term: str) -> Path:
         rpath = self._sanitize_path(base_dir, Path(search_term))
         if rpath.is_file():
             return rpath
