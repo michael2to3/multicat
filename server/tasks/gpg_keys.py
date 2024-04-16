@@ -4,7 +4,7 @@ from gnupg import GPG
 from schemas import CeleryResponse
 
 
-@shared_task(name="main.get_pubkey")
+@shared_task(name="server.get_pubkey")
 def get_pubkey():
     try:
         gpg = GPG()
