@@ -33,15 +33,23 @@ def delete_steps(user_id: UUID, step_name: int):
 def get_steps(user_id: UUID, step_name: str):
     with db.session() as session:
         manager = StepRetriever(user_id, session)
-        yaml_dump = manager.get_steps(step_name)
-        return CeleryResponse(value=yaml_dump).model_dump()
+        hashcat_steps = manager.get_steps(step_name)
+        return CeleryResponse(value=hashcat_steps).model_dump()
+
+
+@shared_task(name="server.get_orig_steps")
+def get_orig_steps(user_id: UUID, step_name: str):
+    with db.session() as session:
+        manager = StepRetriever(user_id, session)
+        original_content = manager.get_orig_steps(step_name)
+        return CeleryResponse(value=original_content).model_dump()
 
 
 @shared_task(name="server.list_steps")
 def list_steps(user_id: UUID):
     with db.session() as session:
         manager = StepRetriever(user_id, session)
-        steps_name = manager.list_steps()
+        steps_name = manager.get_steps_names()
         return CeleryResponse(value=steps_name).model_dump()
 
 
@@ -61,7 +69,7 @@ def load_steps(user_id: UUID, steps_name: str, yaml_content: str):
 
     with db.session() as session:
         facade = StepFacade(user_id, session)
-        facade.load_and_calculate_steps(steps_name, steps)
+        facade.load_and_calculate_steps(steps_name, steps, yaml_content)
         session.commit()
         return CeleryResponse(
             value=f"{steps_name} loaded and processed successfully"

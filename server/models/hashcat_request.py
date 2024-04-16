@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 from enum import Enum, auto
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 
 from config import Base
@@ -54,6 +54,7 @@ class Step(Base):
     timestamp = Column(DateTime, default=datetime.now(UTC))
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     is_keyspace_calculated = Column(Boolean)
+    original_content = Column(String)
     hashcat_steps = relationship(
         "HashcatStep",
         secondary=step_hashcat_step_association,
@@ -64,7 +65,7 @@ class Step(Base):
 class HashcatStep(Base):
     __tablename__ = "hashcat_steps"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    value = Column(String)
+    value = Column(JSONB)
     related_steps = relationship(
         "Step", secondary=step_hashcat_step_association, back_populates="hashcat_steps"
     )
