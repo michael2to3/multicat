@@ -4,7 +4,7 @@ from hashcat.executor_base import HashcatExecutorBase
 from hashcat.interface import HashcatInterface
 from schemas.hashcat_request import HashcatDiscreteTask
 
-from .filemanager import FileManager
+from filemanager import FileManager
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)

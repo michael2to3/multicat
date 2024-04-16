@@ -2,15 +2,14 @@ import logging
 from datetime import timedelta
 
 from celery import current_app, shared_task
-from sqlalchemy import func
-from sqlalchemy.exc import SQLAlchemyError
-
 from config import Config, Database, UUIDGenerator
 from models import HashcatAsset
 from schemas import CeleryResponse, HashcatAssetSchema
+from sqlalchemy import func
+from sqlalchemy.exc import SQLAlchemyError
 
 logger = logging.getLogger(__name__)
-db = Database(Config.get("DATABASE_URL"))
+db = Database(Config().database_url)
 
 
 def fetch_assets_by_uuid(task_uuid):
@@ -30,6 +29,10 @@ def fetch_assets_by_uuid(task_uuid):
 @shared_task(name="main.collect_assets")
 def collect_assets(owner_id: str):
     task_uuid = UUIDGenerator.generate(owner_id)
+
+    task = current_app.send_task("b.get_assets", args=(str(task_uuid),))
+    task.forget()
+
     try:
         data = fetch_assets_by_uuid(task_uuid)
         if data:
@@ -42,13 +45,6 @@ def collect_assets(owner_id: str):
         logging.error(f"An unexpected error occurred: {e}")
         return CeleryResponse(error="An unexpected error occurred").model_dump()
 
-    task = current_app.send_task(
-        "b.get_assets",
-        args=(str(task_uuid),),
-        exchange="broadcast_exchange",
-        routing_key="broadcast",
-    )
-    task.forget()
     return CeleryResponse(
         warning="No assets found within the time limit, initiated broadcast task"
     ).model_dump()

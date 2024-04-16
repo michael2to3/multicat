@@ -13,6 +13,5 @@ class HashcatAsset(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     task_uuid = Column(UUID(as_uuid=True))
     worker_id = Column(String, nullable=False)
-    wordlists = Column(ARRAY(String))
-    rules = Column(ARRAY(String))
+    files = Column(ARRAY(String))
     timestamp = Column(DateTime, default=datetime.now(UTC))

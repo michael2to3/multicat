@@ -1,6 +1,7 @@
 import logging
 
 from celery.signals import worker_init, worker_process_init
+
 from config import CeleryApp, Config, Database
 from tasks.devices import _update_devices
 
@@ -17,5 +18,5 @@ def setup_essentials(*args, **kwargs):
 
 @worker_process_init.connect
 def setup_database(*args, **kwargs):
-    Database(Config.get("DATABASE_URL"))
+    Database(Config().database_url)
     logger.info("Database initialized.")

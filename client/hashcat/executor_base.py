@@ -1,6 +1,6 @@
 import logging
 
-from hashcat.filemanager import FileManager
+from filemanager import FileManager
 from hashcat.interface import HashcatInterface
 
 logger = logging.getLogger(__name__)
