@@ -1,12 +1,12 @@
 from .celery_response import CeleryResponse
 from .discrete_task import (
-    HashcatDiscreteTask,
     BaseStep,
+    CombinatorStep,
+    HashcatDiscreteTask,
+    HybridStep,
+    MaskStep,
     Steps,
     StraightStep,
-    CombinatorStep,
-    MaskStep,
-    HybridStep,
 )
 from .hashcat_asset import HashcatAssetSchema
 from .hashcat_helpers import hashcat_step_loader

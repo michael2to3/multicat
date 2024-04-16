@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, ClassVar
+from typing import ClassVar, List
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -27,6 +27,10 @@ class BaseStep(BaseModel, ABC):
     @abstractmethod
     def accept(self, visitor: IHashcatStepVisitor):
         pass
+
+    @classmethod
+    def get_subclasses(cls) -> tuple:
+        return tuple(cls.__subclasses__())
 
 
 class StraightStep(BaseStep):

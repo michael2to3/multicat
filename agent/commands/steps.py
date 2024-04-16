@@ -5,6 +5,7 @@ from aiogram.types import ContentType, Message
 from aiogram.types.input_file import BufferedInputFile
 from commands import BaseCommand
 from commands.message_wrapper import MessageWrapper
+
 from config.uuid import UUIDGenerator
 from schemas import CeleryResponse
 
@@ -31,12 +32,24 @@ class Steps(BaseCommand):
                 return await self._handle_list(userid, message)
             case "get" | "g":
                 return await self._handle_get(userid, message)
+            case "original" | "o":
+                return await self._handle_orig(userid, message)
             case "load" | "lo":
                 return await self._handle_load(userid, message)
             case "delete" | "d":
                 return await self._handle_delete(userid, message)
             case _:
-                return await message.answer(f"Unknown subcommand: {subcommand}")
+                await self._process_unknown_subcommand(message, subcommand)
+
+    async def _process_unknown_subcommand(
+        self, message: Message | MessageWrapper, subcommand: str
+    ):
+        text = (
+            "Unknown subcommand. Available subcommands: list, get, original, load, delete"
+            if subcommand
+            else "You can use subcommands: list, get, original, load, delete"
+        )
+        return await message.answer(text)
 
     def _get_message_text(self, message: Message | MessageWrapper) -> str:
         text = message.text if message.text else message.caption
@@ -92,13 +105,15 @@ class Steps(BaseCommand):
 
         return await message.answer(response_message)
 
-    async def _handle_get(self, userid: UUID, message: Message | MessageWrapper):
+    async def _common_handle(
+        self, userid: UUID, message: Message | MessageWrapper, task: str
+    ):
         step_name = self._parse_text(message)
         if not step_name:
             await message.answer("Please enter step name")
             return
 
-        result = self.app.send_task("server.get_steps", args=(userid, step_name))
+        result = self.app.send_task(task, args=(userid, step_name))
         celery_response = CeleryResponse(**result.get(timeout=10))
 
         if celery_response.error:
@@ -117,6 +132,12 @@ class Steps(BaseCommand):
         await message.answer_document(
             document=document, caption=f"Details for step '{step_name}':"
         )
+
+    async def _handle_get(self, userid: UUID, message: Message | MessageWrapper):
+        await self._common_handle(userid, message, "server.get_steps")
+
+    async def _handle_orig(self, userid: UUID, message: Message | MessageWrapper):
+        await self._common_handle(userid, message, "server.get_orig_steps")
 
     async def _handle_load(self, userid: UUID, message: Message | MessageWrapper):
         if message.content_type != ContentType.DOCUMENT:

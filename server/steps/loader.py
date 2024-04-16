@@ -4,8 +4,8 @@ from uuid import UUID
 from celery import chord, signature
 from sqlalchemy.orm import scoped_session
 
+import models
 from db import DatabaseHelper
-from models import Step
 from models.hashcat_request import HashcatStep
 from schemas import Steps
 from visitor.hashcatstep_keyspace_tasks import HashcatStepKeyspaceVisitor
@@ -19,14 +19,17 @@ class StepLoader:
         self._session = session
         self._user_id = user_id
 
-    def load_steps(self, steps_name: str, steps: Steps):
-        step = Step(name=steps_name, user_id=self._user_id)
+    def load_steps(self, steps_name: str, steps: Steps, original_content: str):
+        step = models.Step(
+            name=steps_name, user_id=self._user_id, original_content=original_content
+        )
         self._session.add(step)
         self._add_hashcat_steps(step, steps)
 
-    def _add_hashcat_steps(self, step: Step, steps_data: Steps):
+    def _add_hashcat_steps(self, step: models.Step, steps_data: Steps):
         for hashcat_task in steps_data.steps:
             hashcat_step_value = hashcat_task.model_dump_json()
+            logger.info("Check hashcat step: %s", hashcat_step_value)
             hashcat_step_model = (
                 self._session.query(HashcatStep)
                 .filter(HashcatStep.value == hashcat_step_value)
@@ -94,8 +97,10 @@ class StepFacade:
             DatabaseHelper(session), session, user_id
         )
 
-    def load_and_calculate_steps(self, steps_name: str, steps: Steps):
-        self._step_loader.load_steps(steps_name, steps)
+    def load_and_calculate_steps(
+        self, steps_name: str, steps: Steps, original_content: str
+    ):
+        self._step_loader.load_steps(steps_name, steps, original_content)
         self._keyspace_calculator.calculate_and_save_unknown_keyspaces(
             steps, steps_name
         )
