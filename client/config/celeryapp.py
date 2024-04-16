@@ -27,12 +27,12 @@ class CeleryApp:
         }
 
         self.app.conf.update(
-            broker_url=Config.celery_broker_url,
-            result_backend=Config.celery_broker_url,
+            broker_url=Config().celery_broker_url,
+            result_backend=Config().celery_broker_url,
             task_serializer="json",
             result_serializer="json",
             accept_content=["json"],
-            timezone=Config.timezone,
+            timezone=Config().timezone,
             enable_utc=True,
         )
 

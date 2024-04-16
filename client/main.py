@@ -18,5 +18,5 @@ def setup_essentials(*args, **kwargs):
 
 @worker_process_init.connect
 def setup_database(*args, **kwargs):
-    Database(Config.database_url)
+    Database(Config().database_url)
     logger.info("Database initialized.")

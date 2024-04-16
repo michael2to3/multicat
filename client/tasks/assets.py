@@ -8,7 +8,7 @@ from filemanager.assets_filemanager import AssetsFileManager
 from models import HashcatAsset
 
 logger = logging.getLogger(__name__)
-db = Database(Config.database_url)
+db = Database(Config().database_url)
 file_manager = AssetsFileManager()
 
 
@@ -39,5 +39,5 @@ def _refresh_assets(task_uuid: str, worker_id: str):
 
 @shared_task(name="b.get_assets", ignore_result=True)
 def get_assets(task_uuid: str):
-    worker_id = Config.worker_name
+    worker_id = Config().worker_name
     _refresh_assets(task_uuid, worker_id)
