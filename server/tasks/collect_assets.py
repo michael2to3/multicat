@@ -29,7 +29,7 @@ def fetch_assets_by_uuid(task_uuid: UUID):
 
 @shared_task(name="main.collect_assets")
 def collect_assets(owner_id: UUID):
-    task = current_app.send_task("b.get_assets", args=(str(task_uuid),))
+    task = current_app.send_task("b.get_assets", args=(str(owner_id),))
     task.forget()
     try:
         data = fetch_assets_by_uuid(owner_id)
