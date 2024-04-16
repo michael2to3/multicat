@@ -28,10 +28,6 @@ class BaseStep(BaseModel, ABC):
     def accept(self, visitor: IHashcatStepVisitor):
         pass
 
-    @classmethod
-    def get_subclasses(cls) -> tuple:
-        return tuple(cls.__subclasses__())
-
 
 class StraightStep(BaseStep):
     yaml_tag: ClassVar[str] = "!straight"
