@@ -9,7 +9,7 @@ from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 
 logger = logging.getLogger(__name__)
-db = Database(Config.get("DATABASE_URL"))
+db = Database(Config.database_url)
 
 
 def fetch_assets_by_uuid(task_uuid):

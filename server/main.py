@@ -11,5 +11,5 @@ logging.basicConfig(level=logging.INFO)
 
 @worker_process_init.connect
 def setup_database(*args, **kwargs):
-    Database(Config.get("DATABASE_URL"))
+    Database(Config.database_url)
     logger.info("Database initialized.")

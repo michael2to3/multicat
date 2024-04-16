@@ -10,7 +10,7 @@ from middleware import FetchedCommandMiddleware
 logging.basicConfig(level=logging.INFO)
 
 
-bot = Bot(Config.get("TELEGRAM_TOKEN"))
+bot = Bot(Config.telegram_token)
 app = CeleryApp("agent").get_app()
 
 

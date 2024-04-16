@@ -9,7 +9,7 @@ from hashcat.hashcat import Hashcat
 from schemas import HashcatDiscreteTask, KeyspaceBase, get_keyspace_adapter
 
 logger = logging.getLogger(__name__)
-db = Database(Config.get("DATABASE_URL"))
+db = Database(Config.database_url)
 file_manager = AssetsFileManager()
 hashcat = Hashcat()
 hashcat_keyspace = HashcatKeyspace(file_manager, hashcat)

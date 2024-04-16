@@ -4,12 +4,11 @@ from datetime import UTC, datetime
 from celery import shared_task
 
 from config import Config, Database
-from config.config import ConfigKey
 from filemanager.assets_filemanager import AssetsFileManager
 from models import HashcatAsset
 
 logger = logging.getLogger(__name__)
-db = Database(Config.get(ConfigKey.DATABASE_URL))
+db = Database(Config.database_url)
 file_manager = AssetsFileManager()
 
 
@@ -40,5 +39,5 @@ def _refresh_assets(task_uuid: str, worker_id: str):
 
 @shared_task(name="b.get_assets", ignore_result=True)
 def get_assets(task_uuid: str):
-    worker_id = Config.get("WORKER_NAME")
+    worker_id = Config.worker_name
     _refresh_assets(task_uuid, worker_id)

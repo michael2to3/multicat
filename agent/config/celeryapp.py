@@ -10,12 +10,12 @@ class CeleryApp:
 
     def configure_celery(self):
         self.app.conf.update(
-            broker_url=Config.get("CELERY_BROKER_URL"),
-            result_backend=Config.get("CELERY_RESULT_BACKEND"),
+            broker_url=Config.celery_broker_url,
+            result_backend=Config.celery_result_backend,
             task_serializer="json",
             result_serializer="json",
             accept_content=["json"],
-            timezone=Config.get("TIMEZONE"),
+            timezone=Config.timezone,
             enable_utc=True,
             task_routes={
                 "server.*": {"queue": "server"},
