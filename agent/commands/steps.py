@@ -3,7 +3,6 @@ from uuid import UUID
 
 from aiogram.types import ContentType, Message
 from aiogram.types.input_file import BufferedInputFile
-
 from commands import BaseCommand
 from commands.message_wrapper import MessageWrapper
 from config.uuid import UUIDGenerator
@@ -24,7 +23,7 @@ class Steps(BaseCommand):
     def description(self):
         return "Manage workflow steps with subcommands: /steps list (view all steps), /steps get (details of a step), /steps load (add/update steps via YAML file), /steps delete (remove a step)."
 
-    async def handle(self, message: Message | MessageWrapper | MessageWrapper):
+    async def handle(self, message: Message | MessageWrapper):
         subcommand = self._parse_command(message)
         userid = UUIDGenerator.generate(str(message.from_user.id))
         match subcommand:
@@ -39,13 +38,11 @@ class Steps(BaseCommand):
             case _:
                 return await message.answer(f"Unknown subcommand: {subcommand}")
 
-    def _get_message_text(
-        self, message: Message | MessageWrapper | MessageWrapper
-    ) -> str:
+    def _get_message_text(self, message: Message | MessageWrapper) -> str:
         text = message.text if message.text else message.caption
         return text if text else ""
 
-    def _parse_command(self, message: Message | MessageWrapper | MessageWrapper) -> str:
+    def _parse_command(self, message: Message | MessageWrapper) -> str:
         message_text = self._get_message_text(message)
         if not message_text:
             return ""
