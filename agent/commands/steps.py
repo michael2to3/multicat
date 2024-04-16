@@ -1,11 +1,12 @@
 import logging
 from uuid import UUID
 
+from aiogram.enums import ParseMode
 from aiogram.types import ContentType, Message
 from aiogram.types.input_file import BufferedInputFile
+
 from commands import BaseCommand
 from commands.message_wrapper import MessageWrapper
-
 from config.uuid import UUIDGenerator
 from schemas import CeleryResponse
 
@@ -34,6 +35,8 @@ class Steps(BaseCommand):
                 return await self._handle_get(userid, message)
             case "original" | "o":
                 return await self._handle_orig(userid, message)
+            case "print" | "p":
+                return await self._handle_print_orig(userid, message)
             case "load" | "lo":
                 return await self._handle_load(userid, message)
             case "delete" | "d":
@@ -138,6 +141,27 @@ class Steps(BaseCommand):
 
     async def _handle_orig(self, userid: UUID, message: Message | MessageWrapper):
         await self._common_handle(userid, message, "server.get_orig_steps")
+
+    async def _handle_print_orig(self, userid: UUID, message: Message | MessageWrapper):
+        step_name = self._parse_text(message)
+        if not step_name:
+            await message.answer("Please enter step name")
+            return
+
+        result = self.app.send_task("server.get_orig_steps", args=(userid, step_name))
+        celery_response = CeleryResponse(**result.get(timeout=10))
+
+        if celery_response.error:
+            await message.answer(f"Error: {celery_response.error}")
+            return
+        if celery_response.warning:
+            await message.answer(f"Warning: {celery_response.warning}")
+        if not celery_response.value:
+            await message.answer("Step not found.")
+            return
+
+        step_details = celery_response.value
+        await message.answer(f"```{step_details}```", parse_mode=ParseMode.MARKDOWN_V2)
 
     async def _handle_load(self, userid: UUID, message: Message | MessageWrapper):
         if message.content_type != ContentType.DOCUMENT:
