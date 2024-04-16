@@ -23,7 +23,7 @@ class Steps(BaseCommand):
 
     @property
     def description(self):
-        return "Manage workflow steps with subcommands: /steps list (view all steps), /steps get (details of a step), /steps load (add/update steps via YAML file), /steps delete (remove a step)."
+        return "Manage workflow steps with subcommands: /steps list (view all steps), /steps get (details of a step), /steps load (add/update steps via YAML file), /steps delete (remove a step), /steps original (view original step), /steps print (print steps)"
 
     async def handle(self, message: Message | MessageWrapper):
         subcommand = self._parse_command(message)
@@ -48,9 +48,9 @@ class Steps(BaseCommand):
         self, message: Message | MessageWrapper, subcommand: str
     ):
         text = (
-            "Unknown subcommand. Available subcommands: list, get, original, load, delete"
+            "Unknown subcommand. Available subcommands: list, get, original, load, delete, print"
             if subcommand
-            else "You can use subcommands: list, get, original, load, delete"
+            else "You can use subcommands: list, get, original, load, delete, print"
         )
         return await message.answer(text)
 
