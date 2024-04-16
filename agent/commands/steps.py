@@ -161,7 +161,7 @@ class Steps(BaseCommand):
             return
 
         step_details = celery_response.value
-        await message.answer(f"```{step_details}```", parse_mode=ParseMode.MARKDOWN_V2)
+        await message.answer(f"```yaml\n{step_details}```", parse_mode=ParseMode.MARKDOWN_V2)
 
     async def _handle_load(self, userid: UUID, message: Message | MessageWrapper):
         if message.content_type != ContentType.DOCUMENT:
