@@ -1,8 +1,9 @@
 import logging
 from datetime import timedelta
+from uuid import UUID
 
 from celery import current_app, shared_task
-from config import Config, Database, UUIDGenerator
+from config import Config, Database
 from models import HashcatAsset
 from schemas import CeleryResponse, HashcatAssetSchema
 from sqlalchemy import func
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 db = Database(Config().database_url)
 
 
-def fetch_assets_by_uuid(task_uuid):
+def fetch_assets_by_uuid(task_uuid: UUID):
     with db.session() as session:
         result = (
             session.query(HashcatAsset)
@@ -27,14 +28,11 @@ def fetch_assets_by_uuid(task_uuid):
 
 
 @shared_task(name="main.collect_assets")
-def collect_assets(owner_id: str):
-    task_uuid = UUIDGenerator.generate(owner_id)
-
-    task = current_app.send_task("b.get_assets", args=(str(task_uuid),))
+def collect_assets(owner_id: UUID):
+    task = current_app.send_task("b.get_assets", args=(str(owner_id),))
     task.forget()
-
     try:
-        data = fetch_assets_by_uuid(task_uuid)
+        data = fetch_assets_by_uuid(owner_id)
         if data:
             return CeleryResponse(value=data).model_dump()
 

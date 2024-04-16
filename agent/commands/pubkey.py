@@ -21,7 +21,7 @@ class PubKey(BaseCommand):
         return "Get my public GPG key"
 
     async def handle(self, message: Message):
-        result = self.app.send_task("main.get_pubkey", queue="server")
+        result = self.app.send_task("server.get_pubkey")
         processing_result = CeleryResponse(**result.get(timeout=60))
 
         if processing_result.error:

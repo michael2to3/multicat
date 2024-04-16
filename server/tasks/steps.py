@@ -1,11 +1,12 @@
 import logging
 from typing import List
+from uuid import UUID
 
 import yaml
 from celery import shared_task
 from pydantic import ValidationError
 
-from config import Database, UUIDGenerator
+from config import Database
 from db import DatabaseHelper
 from models.keyspaces import Keyspace
 from schemas import CeleryResponse, Steps, hashcat_step_loader
@@ -20,8 +21,7 @@ db = Database()
 
 
 @shared_task(name="server.delete_steps")
-def delete_steps(user_id: str, step_name: int):
-    user_id = str(UUIDGenerator.generate(user_id))
+def delete_steps(user_id: UUID, step_name: int):
     with db.session() as session:
         manager = StepDeleter(user_id, session)
         manager.delete_step(step_name)
@@ -30,8 +30,7 @@ def delete_steps(user_id: str, step_name: int):
 
 
 @shared_task(name="server.get_steps")
-def get_steps(user_id: str, step_name: str):
-    user_id = str(UUIDGenerator.generate(user_id))
+def get_steps(user_id: UUID, step_name: str):
     with db.session() as session:
         manager = StepRetriever(user_id, session)
         yaml_dump = manager.get_steps(step_name)
@@ -39,8 +38,7 @@ def get_steps(user_id: str, step_name: str):
 
 
 @shared_task(name="server.list_steps")
-def list_steps(user_id: str):
-    user_id = str(UUIDGenerator.generate(user_id))
+def list_steps(user_id: UUID):
     with db.session() as session:
         manager = StepRetriever(user_id, session)
         steps_name = manager.list_steps()
@@ -48,8 +46,7 @@ def list_steps(user_id: str):
 
 
 @shared_task(name="server.load_steps")
-def load_steps(user_id: str, steps_name: str, yaml_content: str):
-    user_uuid = UUIDGenerator.generate(user_id)
+def load_steps(user_id: UUID, steps_name: str, yaml_content: str):
     try:
         loader = hashcat_step_loader()
         data = loader.load(yaml_content)
@@ -63,7 +60,7 @@ def load_steps(user_id: str, steps_name: str, yaml_content: str):
         raise
 
     with db.session() as session:
-        facade = StepFacade(user_uuid, session)
+        facade = StepFacade(user_id, session)
         facade.load_and_calculate_steps(steps_name, steps)
         session.commit()
         return CeleryResponse(
@@ -72,7 +69,7 @@ def load_steps(user_id: str, steps_name: str, yaml_content: str):
 
 
 @shared_task(name="server.post_load_steps")
-def post_load_steps(keyspaces, unkown_keyspaces: List, user_id: str, steps_name: str):
+def post_load_steps(keyspaces, unkown_keyspaces: List, user_id: UUID, steps_name: str):
     with db.session() as session:
         for keyspace, value in zip(unkown_keyspaces, keyspaces):
             keyspace["value"] = value

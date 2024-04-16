@@ -26,12 +26,12 @@ class BaseCommand(ABC):
 
     @property
     @abstractmethod
-    def description(self):
+    def description(self) -> str:
         pass
 
     @property
     @abstractmethod
-    def command(self):
+    def command(self) -> str:
         pass
 
     @abstractmethod

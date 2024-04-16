@@ -1,5 +1,6 @@
 import json
 from typing import Dict, List
+from uuid import UUID
 
 from sqlalchemy.orm import Query
 
@@ -56,7 +57,7 @@ class DatabaseHelper:
             hashcat_type=hashtype.hashcat_type, human_readable=hashtype.human_readable
         )
 
-    def get_or_create_user(self, user_id: str) -> User:
+    def get_or_create_user(self, user_id: UUID) -> User:
         user = self.session.query(User).filter(User.id == user_id).first()
         if not user:
             user = User(id=user_id, role=UserRole.USER.value)
@@ -80,7 +81,7 @@ class DatabaseHelper:
 
         return unique_name
 
-    def get_steps(self, user_id: str, step_name: str) -> Step:
+    def get_steps(self, user_id: UUID, step_name: str) -> Step:
         step = (
             self.session.query(Step)
             .filter(Step.user_id == user_id, Step.name == step_name)
@@ -91,7 +92,7 @@ class DatabaseHelper:
 
         return step
 
-    def get_hashcat_steps(self, user_id: str, step_name: str) -> schemas.Steps:
+    def get_hashcat_steps(self, user_id: UUID, step_name: str) -> schemas.Steps:
         step = (
             self.session.query(Step)
             .filter(Step.user_id == user_id, Step.name == step_name)
