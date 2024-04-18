@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Callable, Dict
+from typing import TYPE_CHECKING, Callable
 
 from sqlalchemy.orm import Query, scoped_session
 
@@ -23,9 +23,9 @@ from .ikeyspace import IKeyspaceVisitor
 
 
 class BaseKeyspaceModelConverter(IKeyspaceVisitor):
-    _exclude_fields: Dict
+    _exclude_fields: dict | set
 
-    def _to_dict(self, schema: "KeyspaceBase") -> Dict:
+    def _to_dict(self, schema: "KeyspaceBase") -> dict:
         return {
             k: v for k, v in schema.model_dump(exclude=self._exclude_fields).items()
         }
@@ -39,7 +39,7 @@ class KeyspaceModelQueryExecutor(BaseKeyspaceModelConverter):
         self,
         session: scoped_session,
         callback: Callable[[Query], None],
-        exclude_fields: Dict,
+        exclude_fields: dict | set,
     ):
         self._session = session
         self._callback = callback
@@ -66,7 +66,9 @@ class KeyspaceModelQueryExecutor(BaseKeyspaceModelConverter):
 class KeyspaceModelCreator(BaseKeyspaceModelConverter):
     _callback: Callable[[Keyspace], None]
 
-    def __init__(self, callback: Callable[[Keyspace], None], exclude_fields: Dict):
+    def __init__(
+        self, callback: Callable[[Keyspace], None], exclude_fields: dict | set
+    ):
         self._callback = callback
         self._exclude_fields = exclude_fields
 

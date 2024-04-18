@@ -8,6 +8,8 @@ from aiogram.filters import Command
 from aiogram.types import Message
 from celery import Celery
 
+from schemas.celery_response import CeleryResponse
+
 from .message_wrapper import MessageWrapper
 
 logging.basicConfig(level=logging.INFO)
@@ -48,3 +50,15 @@ class BaseCommand(ABC):
                     "Error handling command %s: %s", self.command, e, exc_info=True
                 )
                 await message.reply("Something went wrong. Please try again later.")
+
+    async def _process_celery_response(
+        self, message: Message, celery_response: CeleryResponse
+    ):
+        if celery_response.error:
+            return await message.answer(f"Error: {celery_response.error}")
+        elif celery_response.warning:
+            await message.answer(f"Warning: {celery_response.warning}")
+        elif celery_response.value:
+            await message.answer(f"{celery_response.value}")
+        else:
+            await message.answer("Operation completed successfully.")

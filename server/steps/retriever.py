@@ -7,6 +7,7 @@ from sqlalchemy.orm import scoped_session
 
 from db import DatabaseHelper
 from models import Step
+from models.hashcat_request import StepStatus
 
 logger = logging.getLogger(__name__)
 
@@ -32,8 +33,26 @@ class StepRetriever:
 
     def get_steps_names(self) -> list[str]:
         user = self._dbh.get_or_create_user(self._user_id)
-        steps = self._session.query(Step.name).filter(Step.user_id == user.id).all()
-        return [step.name for step in steps] if steps else []
+        steps = self._session.query(Step.name, Step.status).filter(Step.user_id == user.id).all()
+        return (
+            [
+                f"{self._handle_steps_status(step.status)} - {step.name}"
+                for step in steps
+            ]
+            if steps
+            else []
+        )
+
+    def _handle_steps_status(self, step_status: int) -> str:
+        match step_status:
+            case StepStatus.SUCCESS.value:
+                return "✅"
+            case StepStatus.PROCESSING.value:
+                return "🔄"
+            case StepStatus.FAILED.value:
+                return "❌"
+            case _:
+                return "❓"
 
     def _get_step_with_keyspace(self, step_name):
         return (
@@ -41,7 +60,7 @@ class StepRetriever:
             .filter(
                 Step.user_id == self._user_id,
                 Step.name == step_name,
-                Step.is_keyspace_calculated,
+                Step.status == StepStatus.SUCCESS.value,
             )
             .first()
         )

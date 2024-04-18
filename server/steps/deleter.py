@@ -15,7 +15,7 @@ class StepDeleter:
         self._session = session
         self._user_id = user_id
 
-    def delete_step(self, step_name: int):
+    def delete_step(self, step_name: str):
         user = self._dbh.get_or_create_user(self._user_id)
         step = self._get_step(user.id, step_name)
         if not step:
