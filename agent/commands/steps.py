@@ -104,7 +104,9 @@ class StepsLoad(BaseCommand):
         result = self.app.send_task(
             "server.load_steps", args=(userid, file_name, content)
         )
-        await self._process_celery_response(message, CeleryResponse(**result.get(timeout=60)))
+        await self._process_celery_response(
+            message, CeleryResponse(**result.get(timeout=60))
+        )
 
 
 @register_command
@@ -126,7 +128,9 @@ class StepsDelete(BaseCommand):
         steps_name = text.split(maxsplit=1)[1]
 
         result = self.app.send_task("server.delete_steps", args=(userid, steps_name))
-        return await self._process_celery_response(message, CeleryResponse(**result.get(timeout=60)))
+        return await self._process_celery_response(
+            message, CeleryResponse(**result.get(timeout=60))
+        )
 
 
 @register_command

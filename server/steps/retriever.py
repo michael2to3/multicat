@@ -33,7 +33,11 @@ class StepRetriever:
 
     def get_steps_names(self) -> list[str]:
         user = self._dbh.get_or_create_user(self._user_id)
-        steps = self._session.query(Step.name, Step.status).filter(Step.user_id == user.id).all()
+        steps = (
+            self._session.query(Step.name, Step.status)
+            .filter(Step.user_id == user.id)
+            .all()
+        )
         return (
             [
                 f"{self._handle_steps_status(step.status)} - {step.name}"
