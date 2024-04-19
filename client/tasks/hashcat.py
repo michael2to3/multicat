@@ -29,11 +29,15 @@ def run_hashcat(discrete_task_as_dict):
 
 
 @shared_task(name="client.calc_keyspace", ignore_result=False)
-def calc_keyspace(keyspace_task):
-    keyspace_schema: KeyspaceBase = get_keyspace_adapter().validate_python(
-        keyspace_task
-    )
-    return hashcat_keyspace.calc_keyspace(keyspace_schema)
+def calc_keyspace(keyspace_task) -> int:
+    try:
+        keyspace_schema: KeyspaceBase = get_keyspace_adapter().validate_python(
+            keyspace_task
+        )
+        return hashcat_keyspace.calc_keyspace(keyspace_schema)
+    except Exception as e:
+        logger.error("Error in calc_keyspace: %s", e)
+        return -1
 
 
 @shared_task(name="b.benchmark", ignore_result=True)

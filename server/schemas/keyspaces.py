@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Annotated, List, Literal, Union
 
 from pydantic import BaseModel, Field, TypeAdapter, validator
+
 from schemas.hashcat_request import AttackMode, CustomCharset
 from visitor.ikeyspace import IKeyspaceVisitor
 

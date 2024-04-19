@@ -53,7 +53,7 @@ class Step(Base):
     name = Column(String, unique=True)
     timestamp = Column(DateTime, default=datetime.now(UTC))
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
-    is_keyspace_calculated = Column(Boolean)
+    status = Column(Integer)
     original_content = Column(String)
     hashcat_steps = relationship(
         "HashcatStep",

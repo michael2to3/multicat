@@ -27,7 +27,7 @@ def fetch_assets_by_uuid(task_uuid: UUID):
         return assets_data
 
 
-@shared_task(name="main.collect_assets")
+@shared_task(name="server.collect_assets")
 def collect_assets(owner_id: UUID):
     task = current_app.send_task("b.get_assets", args=(str(owner_id),))
     task.forget()

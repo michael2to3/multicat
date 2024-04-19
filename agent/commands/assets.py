@@ -32,7 +32,7 @@ class Assets(BaseCommand):
             return
 
         userid = UUIDGenerator.generate(str(message.from_user.id))
-        task = self.app.send_task("main.collect_assets", args=(userid,), queue="server")
+        task = self.app.send_task("server.collect_assets", args=(userid,))
         resp = CeleryResponse(**task.get(timeout=60))
 
         if resp.error:

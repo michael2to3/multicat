@@ -94,3 +94,16 @@ class HybridStep(BaseStep):
 
 class Steps(BaseModel):
     steps: List[BaseStep] = Field(default_factory=list)
+
+
+class StepStatus(Enum):
+    UNKNOWN = auto()
+    SUCCESS = auto()
+    FAILED = auto()
+    PROCESSING = auto()
+
+
+class StepsList(BaseModel):
+    name: str
+    status: StepStatus
+    timestamp: datetime
