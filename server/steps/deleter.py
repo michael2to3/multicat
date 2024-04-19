@@ -4,6 +4,7 @@ from uuid import UUID
 from sqlalchemy.orm import scoped_session
 
 from db import DatabaseHelper
+from exc.steps import StepNotFoundError
 from models import Step
 
 logger = logging.getLogger(__name__)
@@ -19,7 +20,7 @@ class StepDeleter:
         user = self._dbh.get_or_create_user(self._user_id)
         step = self._get_step(user.id, step_name)
         if not step:
-            raise ValueError("Step not found.")
+            raise StepNotFoundError("Step not found.")
         self._session.delete(step)
 
     def _get_step(self, user_id, step_name):

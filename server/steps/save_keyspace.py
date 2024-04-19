@@ -5,7 +5,8 @@ from uuid import UUID
 from sqlalchemy.orm import scoped_session
 
 from db import DatabaseHelper
-from models.hashcat_request import Step, StepStatus
+from models.hashcat_request import Step
+from schemas import StepStatus
 from schemas.keyspaces import get_keyspace_adapter
 from visitor.keyspace_to_model import KeyspaceModelCreator
 

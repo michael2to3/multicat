@@ -2,12 +2,10 @@ import logging
 from datetime import datetime, timedelta
 from uuid import UUID
 
-import yaml
-from pydantic import ValidationError
 
 from db import DatabaseHelper
-from models.hashcat_request import StepStatus
-from schemas import Steps, hashcat_step_loader
+from exc.steps import StepNotFoundError
+from schemas import Steps, StepStatus, hashcat_step_loader
 from steps import StepDeleter
 from steps.loader import KeyspaceCalculator, StepLoader
 
@@ -24,25 +22,16 @@ class StepLoadFacade:
         self._keyspace_calculator = KeyspaceCalculator(self._dbh, session, user_id)
 
     def process_steps(self, steps_name: str, yaml_content: str):
-        try:
-            data = hashcat_step_loader().load(yaml_content)
-            steps = Steps(**data)
-        except (yaml.YAMLError, ValidationError) as e:
-            logger.error(f"Error loading and validating steps: {str(e)}")
-            raise
-        except TypeError as e:
-            logger.error("Failed to instantiate steps: %s", str(e))
-            logger.debug("Data received: %s", yaml_content)
-            raise
-
+        data = hashcat_step_loader().load(yaml_content)
+        steps = Steps(**data)
         try:
             steps_last = self._dbh.get_steps(self._user_id, steps_name)
             if datetime.now() - steps_last.timestamp > timedelta(minutes=10):
                 self._step_deleter.delete_step(steps_name)
                 self._session.commit()
-                raise ValueError
+                raise StepNotFoundError
             return self.handle_existing_steps(steps_last)
-        except ValueError:
+        except StepNotFoundError:
             return self.load_new_steps(steps_name, steps, yaml_content)
 
     def handle_existing_steps(self, steps_last):

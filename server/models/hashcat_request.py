@@ -1,10 +1,11 @@
 from datetime import UTC, datetime
 from enum import Enum, auto
 
-from config import Base
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
+
+from config import Base
 
 
 class UserRole(Enum):
@@ -44,13 +45,6 @@ step_hashcat_step_association = Table(
         "hashcat_step_id", Integer, ForeignKey("hashcat_steps.id"), primary_key=True
     ),
 )
-
-
-class StepStatus(Enum):
-    UNKNOWN = auto()
-    SUCCESS = auto()
-    FAILED = auto()
-    PROCESSING = auto()
 
 
 class Step(Base):

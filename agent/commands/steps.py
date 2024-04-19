@@ -7,7 +7,7 @@ from aiogram.types.input_file import BufferedInputFile
 from commands import BaseCommand
 from commands.message_wrapper import MessageWrapper
 from config.uuid import UUIDGenerator
-from schemas import CeleryResponse
+from schemas import CeleryResponse, StepsList, StepStatus
 
 from .fetched_command import fetched
 from .register_command import register_command
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 @register_command
-class StepsList(BaseCommand):
+class StepsListCommand(BaseCommand):
     @property
     def command(self) -> str:
         return "sl"
@@ -34,8 +34,13 @@ class StepsList(BaseCommand):
             return await message.answer(f"Error: {celery_response.error}")
         response_message = "Your steps:\n"
         if celery_response.value:
-            steps_list = "\n".join(f"- {step}" for step in celery_response.value)
-            response_message += f"{steps_list}\n"
+            steps_list = sorted(
+                [StepsList(**i) for i in celery_response.value],
+                key=lambda x: x.timestamp,
+            )
+            response_message += "\n".join(
+                f"{self._handle_steps_status(i.status)} - {i.name}" for i in steps_list
+            )
         else:
             response_message += "No steps found."
 
@@ -44,9 +49,20 @@ class StepsList(BaseCommand):
 
         return await message.answer(response_message)
 
+    def _handle_steps_status(self, step_status: StepStatus) -> str:
+        match step_status:
+            case StepStatus.SUCCESS:
+                return "✅"
+            case StepStatus.PROCESSING:
+                return "🔄"
+            case StepStatus.FAILED:
+                return "❌"
+            case _:
+                return "❓"
+
 
 @register_command
-class StepsGet(BaseCommand):
+class StepsGetCommand(BaseCommand):
     @property
     def command(self) -> str:
         return "sg"
@@ -57,8 +73,9 @@ class StepsGet(BaseCommand):
 
     async def handle(self, message: Message | MessageWrapper):
         userid = UUIDGenerator.generate(str(message.from_user.id))
+        step_name = message.text.split(maxsplit=1)[1] if message.text else ""
 
-        result = self.app.send_task("server.get_steps", args=(userid,))
+        result = self.app.send_task("server.get_steps", args=(userid, step_name))
         celery_response = CeleryResponse(**result.get(timeout=10))
 
         if celery_response.error:
@@ -80,7 +97,7 @@ class StepsGet(BaseCommand):
 
 
 @register_command
-class StepsLoad(BaseCommand):
+class StepsLoadCommand(BaseCommand):
     @property
     def command(self) -> str:
         return "slo"
@@ -89,7 +106,7 @@ class StepsLoad(BaseCommand):
     def description(self) -> str:
         return "Add/update steps via YAML file"
 
-    @fetched(interval=6)
+    @fetched(interval=15)
     async def handle(self, message: Message | MessageWrapper):
         userid = UUIDGenerator.generate(str(message.from_user.id))
         if message.content_type != ContentType.DOCUMENT:
@@ -110,7 +127,7 @@ class StepsLoad(BaseCommand):
 
 
 @register_command
-class StepsDelete(BaseCommand):
+class StepsDeleteCommand(BaseCommand):
     @property
     def command(self) -> str:
         return "sd"
@@ -134,7 +151,7 @@ class StepsDelete(BaseCommand):
 
 
 @register_command
-class StepsCommandPrint(BaseCommand):
+class StepsPrintCommand(BaseCommand):
     @property
     def command(self) -> str:
         return "sp"
@@ -145,8 +162,9 @@ class StepsCommandPrint(BaseCommand):
 
     async def handle(self, message: Message | MessageWrapper):
         userid = UUIDGenerator.generate(str(message.from_user.id))
+        text = message.text.split(maxsplit=1)[1] if message.text else ""
 
-        result = self.app.send_task("server.get_steps", args=(userid,))
+        result = self.app.send_task("server.get_steps", args=(userid, text))
         celery_response = CeleryResponse(**result.get(timeout=10))
 
         if celery_response.error:
@@ -165,7 +183,7 @@ class StepsCommandPrint(BaseCommand):
 
 
 @register_command
-class StepsCommandOriginal(BaseCommand):
+class StepsOriginalCommand(BaseCommand):
     @property
     def command(self) -> str:
         return "so"
@@ -176,8 +194,9 @@ class StepsCommandOriginal(BaseCommand):
 
     async def handle(self, message: Message | MessageWrapper):
         userid = UUIDGenerator.generate(str(message.from_user.id))
+        step_name = message.text.split(maxsplit=1)[1] if message.text else ""
 
-        result = self.app.send_task("server.get_orig_steps", args=(userid,))
+        result = self.app.send_task("server.get_orig_steps", args=(userid, step_name))
         celery_response = CeleryResponse(**result.get(timeout=10))
 
         if celery_response.error:
@@ -190,6 +209,10 @@ class StepsCommandOriginal(BaseCommand):
             return
 
         step_details = celery_response.value
-        await message.answer(
-            f"```yaml\n{step_details}```", parse_mode=ParseMode.MARKDOWN_V2
+
+        document = BufferedInputFile(
+            bytes(step_details, encoding="UTF-8"), filename=step_name
+        )
+        await message.answer_document(
+            document=document, caption=f"Details for step '{step_name}':"
         )

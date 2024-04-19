@@ -7,7 +7,6 @@ from .hashcat_request import (
     HashType,
     Job,
     Step,
-    StepStatus,
     User,
     UserRole,
 )
@@ -21,7 +20,6 @@ from .keyspaces import (
 
 __all__ = [
     "Benchmark",
-    "StepStatus",
     "Devices",
     "Hash",
     "HashType",

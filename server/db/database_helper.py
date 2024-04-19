@@ -4,6 +4,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import Query
 
+from exc.steps import StepNotFoundError
 import models
 import schemas
 from models import HashType, Step, User, UserRole
@@ -88,7 +89,7 @@ class DatabaseHelper:
             .first()
         )
         if not step:
-            raise ValueError("Loaded steps not found")
+            raise StepNotFoundError("Loaded steps not found")
 
         return step
 
@@ -99,7 +100,7 @@ class DatabaseHelper:
             .first()
         )
         if not step:
-            raise ValueError("Loaded steps not found")
+            raise StepNotFoundError("Loaded steps not found")
 
         return self._convert_to_schema_steps(step)
 

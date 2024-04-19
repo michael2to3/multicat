@@ -1,13 +1,14 @@
 import logging
 from uuid import UUID
 
-import models
 from celery import chord, signature
-from db import DatabaseHelper
-from models.hashcat_request import HashcatStep, StepStatus
-from schemas import Steps
-from schemas.keyspaces import KeyspaceBase
 from sqlalchemy.orm import scoped_session
+
+import models
+from db import DatabaseHelper
+from models.hashcat_request import HashcatStep
+from schemas import Steps, StepStatus
+from schemas.keyspaces import KeyspaceBase
 from visitor.hashcatstep_keyspace_tasks import HashcatStepKeyspaceVisitor
 
 logger = logging.getLogger(__name__)
@@ -24,7 +25,7 @@ class StepLoader:
             name=steps_name,
             user_id=self._user_id,
             original_content=original_content,
-            status=StepStatus.UNKNOWN.value,
+            status=StepStatus.PROCESSING.value,
         )
         self._session.add(step)
         self._add_hashcat_steps(step, steps)

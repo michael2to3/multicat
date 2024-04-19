@@ -18,9 +18,11 @@ from .keyspaces import (
     KeyspaceMaskSchema,
     KeyspaceStraightSchema,
 )
+from .steps_dto import StepsList, StepStatus
 
 __all__ = [
     "AttackMode",
+    "StepStatus",
     "BaseStep",
     "CeleryResponse",
     "CombinatorStep",
@@ -37,4 +39,5 @@ __all__ = [
     "Steps",
     "StraightStep",
     "hashcat_step_loader",
+    "StepsList",
 ]
