@@ -69,7 +69,9 @@ def run_hashcat(discrete_task_as_dict, keyspace_as_dict):
     hashcat_bruteforce = HashcatBruteforce(
         file_manager, hashcat, discrete_task, keyspace_schema, hashes
     )
-    rc, results = hashcat_bruteforce.execute()
+
+    rc = hashcat_bruteforce.execute()
+    results = hashcat_bruteforce.read_results()
     if results:
         upload_results(uncracked, results)
 
