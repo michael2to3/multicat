@@ -74,12 +74,13 @@ class KeyspaceCalculator:
 
     def _process_keyspaces(self, steps) -> list[KeyspaceBase]:
         unknown_keyspaces: list[KeyspaceBase] = []
-        for keyspace_task in self._generate_keyspace_tasks(steps):
+        for keyspace_task in KeyspaceCalculator.generate_keyspace_tasks(steps):
             if not self._dbh.keyspace_exists(keyspace_task):
                 unknown_keyspaces.append(keyspace_task)
         return unknown_keyspaces
 
-    def _generate_keyspace_tasks(self, model: Steps) -> list[KeyspaceBase]:
+    @staticmethod
+    def generate_keyspace_tasks(model: Steps) -> list[KeyspaceBase]:
         tasks: list[KeyspaceBase] = []
 
         def callback(_tasks: list[KeyspaceBase]):
