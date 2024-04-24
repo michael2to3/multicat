@@ -9,7 +9,7 @@ from config import Config, Database
 from filemanager.assets_filemanager import AssetsFileManager
 from hashcat import HashcatBenchmark, HashcatKeyspace, HashcatBruteforce
 from hashcat.hashcat import Hashcat
-from schemas import HashcatDiscreteTask, KeyspaceBase, get_keyspace_adapter
+from schemas import HashcatDiscreteTask, KeyspaceBase, get_keyspace_adapter, HashIdMapping
 
 logger = logging.getLogger(__name__)
 db = Database(Config().database_url)
@@ -19,19 +19,20 @@ hashcat_keyspace = HashcatKeyspace(file_manager, hashcat)
 hashcat_benchmark = HashcatBenchmark(file_manager, hashcat)
 
 
-def fetch_uncracked_hashes(job_id: int) -> List[Tuple[int, str]]:
+def fetch_uncracked_hashes(job_id: int) -> List[HashIdMapping]:
     with db.session() as session:
-        return (
+        res = (
             session.query(models.Hash.id, models.Hash.value)
             .join(models.Hash.related_jobs)
             .filter(models.Job.id == job_id)
             .filter(models.Hash.is_cracked == False)
             .all()
         )
+        return [HashIdMapping(id=x[0], hash=x[1]) for x in res]
 
 
-def upload_results(uncracked: List[Tuple[int, str]], results: Dict[str, str]):
-    uncracked_map = {hash: id for id, hash in uncracked}
+def upload_results(uncracked: List[HashIdMapping], results: Dict[str, str]):
+    uncracked_map = {m.hash: m.id for m in uncracked}
     upresults = [
         {
             "id": uncracked_map[hash],
@@ -61,7 +62,7 @@ def run_hashcat(discrete_task_as_dict, keyspace_as_dict):
 
     worker_id = current_task.request.hostname
     uncracked = fetch_uncracked_hashes(discrete_task.job_id)
-    hashes = [h for _, h in uncracked]
+    hashes = [m.hash for m in uncracked]
 
     hashcat_bruteforce = HashcatBruteforce(
         file_manager, hashcat, discrete_task, keyspace_schema, hashes

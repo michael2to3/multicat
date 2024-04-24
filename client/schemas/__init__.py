@@ -8,6 +8,7 @@ from .hashcat_request import (
     HashcatStep,
     HashType,
     Steps,
+    HashIdMapping
 )
 from .keyspaces import (
     get_keyspace_adapter,

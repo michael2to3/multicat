@@ -65,3 +65,8 @@ class HashcatStep(BaseModel):
 
 class Steps(BaseModel):
     steps: List[HashcatStep] = Field(default_factory=list)
+
+
+class HashIdMapping(BaseModel):
+    id: int
+    hash: str
