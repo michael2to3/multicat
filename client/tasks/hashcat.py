@@ -31,10 +31,7 @@ def fetch_uncracked_hashes(job_id: int) -> List[Tuple[int, str]]:
 
 
 def upload_results(uncracked: List[Tuple[int, str]], results: Dict[str, str]):
-    uncracked_map = {}
-    for id, hash in uncracked:
-        uncracked_map[hash] = id
-
+    uncracked_map = {hash: id for id, hash in uncracked}
     upresults = [
         {
             "id": uncracked_map[hash],
