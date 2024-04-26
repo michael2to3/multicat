@@ -70,3 +70,8 @@ class Steps(BaseModel):
 class HashIdMapping(BaseModel):
     id: int
     hash: str
+
+
+class HashCrackedValueMapping(BaseModel):
+    hash: str
+    cracked_value: str

@@ -25,6 +25,11 @@ class NTLMStrategy(HashPreStrategy):
             hashes[i] = hash.split(sep)[sep_idx]
 
 
+class DummyStrategy(HashPreStrategy):
+    def do(self, hashes: List[str]):
+           pass
+
+
 class HashPreprocessorContext:
     _strategy: HashPreStrategy
 
@@ -46,11 +51,8 @@ class HashPreprocessor:
         self.hashtype = hashtype
 
     def preprocess(self, hashes) -> List[str]:
-        strategy = hash_processor_map.get(self.hashtype)
-        if strategy:
-            preprocessor= HashPreprocessorContext(strategy)
-            preprocessor.preprocess(hashes)
-        else:
-            raise NotImplemented(f"No strategy available for hashtype {self.hashtype}")
+        strategy = hash_processor_map.get(self.hashtype, DummyStrategy())
+        preprocessor= HashPreprocessorContext(strategy)
+        preprocessor.preprocess(hashes)
 
         return list(set(hashes))

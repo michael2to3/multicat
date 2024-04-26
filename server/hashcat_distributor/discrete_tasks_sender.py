@@ -13,7 +13,7 @@ from steps.loader import KeyspaceCalculator
 from steps.retriever import StepRetriever
 
 
-class DiscreteTasksSender:
+class BruteforceConfigurationManager:
     _owner_id: UUID
     _step_name: str
     _hashtype: str
@@ -102,7 +102,7 @@ class DiscreteTasksSender:
 
         chord(tasks)(callback)
 
-    def send_discrete_tasks(self):
+    def get_new_configuration(self) -> tuple[schemas.Steps, models.Job, models.HashType]:
         steps = self._load_steps()
         hash_type = self._get_hash_type()
         job = self._get_job()
@@ -111,6 +111,5 @@ class DiscreteTasksSender:
         self._bind_job_to_hashes(job, existing_set)
         new_hashes = [hash for hash in self._hashes if hash not in existing_set]
         self._upload_job_configuration(job, hash_type, new_hashes)
-        self._send_bruteforce_tasks(steps, job, hash_type)
 
-        return job.id
+        return steps, job, hash_type

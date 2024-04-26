@@ -1,5 +1,4 @@
 import logging
-from typing import Dict, List, Tuple
 
 from sqlalchemy import update, bindparam
 from celery import current_task, shared_task
@@ -9,7 +8,7 @@ from config import Config, Database
 from filemanager.assets_filemanager import AssetsFileManager
 from hashcat import HashcatBenchmark, HashcatKeyspace, HashcatBruteforce
 from hashcat.hashcat import Hashcat
-from schemas import HashcatDiscreteTask, KeyspaceBase, get_keyspace_adapter, HashIdMapping
+from schemas import HashcatDiscreteTask, KeyspaceBase, get_keyspace_adapter, HashIdMapping, HashCrackedValueMapping
 
 logger = logging.getLogger(__name__)
 db = Database(Config().database_url)
@@ -19,7 +18,7 @@ hashcat_keyspace = HashcatKeyspace(file_manager, hashcat)
 hashcat_benchmark = HashcatBenchmark(file_manager, hashcat)
 
 
-def fetch_uncracked_hashes(job_id: int) -> List[HashIdMapping]:
+def fetch_uncracked_hashes(job_id: int) -> list[HashIdMapping]:
     with db.session() as session:
         res = (
             session.query(models.Hash.id, models.Hash.value)
@@ -31,14 +30,14 @@ def fetch_uncracked_hashes(job_id: int) -> List[HashIdMapping]:
         return [HashIdMapping(id=x[0], hash=x[1]) for x in res]
 
 
-def upload_results(uncracked: List[HashIdMapping], results: Dict[str, str]):
+def upload_results(uncracked: list[HashIdMapping], results: list[HashCrackedValueMapping]):
     uncracked_map = {m.hash: m.id for m in uncracked}
     upresults = [
         {
-            "id": uncracked_map[hash],
-            "cracked_value": cracked_value,
+            "id": uncracked_map[res.hash],
+            "cracked_value": res.cracked_value,
         }
-        for hash, cracked_value in results.items()
+        for res in results
     ]
 
     with db.session() as session:

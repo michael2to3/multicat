@@ -1,13 +1,11 @@
-import os
 import tempfile
 import logging
 
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 from hashcat.executor_base import HashcatExecutorBase
 from hashcat.interface import HashcatInterface
-from schemas.hashcat_request import AttackMode, HashcatDiscreteTask
+from schemas import AttackMode, HashcatDiscreteTask, HashCrackedValueMapping
 
 from filemanager import FileManager
 from schemas.keyspaces import KeyspaceBase
@@ -19,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class HashcatBruteforce(HashcatExecutorBase):
     _results_file: Path
-    _hashes: List[str]
+    _hashes: list[str]
     _res_separator: str
 
     _bound_task: HashcatDiscreteTask
@@ -32,7 +30,7 @@ class HashcatBruteforce(HashcatExecutorBase):
         hashcat: HashcatInterface,
         bound_task: HashcatDiscreteTask,
         bound_keyspace: KeyspaceBase,
-        hashes: List[str],
+        hashes: list[str],
     ):
         super().__init__(file_manager, hashcat)
         self._bound_task = bound_task
@@ -86,14 +84,16 @@ class HashcatBruteforce(HashcatExecutorBase):
         hash_file.close()
         return Path(hash_file.name)
 
-    def read_results(self) -> Dict[str, str]:
-        results = {}
+    def read_results(self) -> list[HashCrackedValueMapping]:
+        results = []
         if not self._results_file.exists():
             return results
 
         for x in self._results_file.read_text().splitlines():
-            hash, value = x.split(self._res_separator)
-            results[hash] = value
+            hash, cracked_value = x.split(self._res_separator)
+            results.append(
+                HashCrackedValueMapping(hash=hash, cracked_value=cracked_value)
+            )
 
         self._results_file.unlink(missing_ok=True)
         return results
