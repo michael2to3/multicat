@@ -1,10 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import List
 
 
 class HashPreStrategy(ABC):
     @abstractmethod
-    def do(self, hashes: List[str]):
+    def do(self, hashes: list[str]) -> list[str]:
         pass
 
 
@@ -14,20 +13,25 @@ class NTLMStrategy(HashPreStrategy):
     def __init__(self, is_nt: bool):
         self.is_nt = is_nt
 
-    def do(self, hashes: List[str]):
+    def do(self, hashes: list[str]) -> list[str]:
         sample = hashes[0]
         sep = ":"
+        result = []
+
         if len(sample.split(sep)) != 7:
-            return
+            result.extend(hashes)
+            return result
 
         sep_idx = 3 if self.is_nt else 2
         for i, hash in enumerate(hashes):
-            hashes[i] = hash.split(sep)[sep_idx]
+            result.append(hash.split(sep)[sep_idx])
+
+        return result
 
 
 class DummyStrategy(HashPreStrategy):
-    def do(self, hashes: List[str]):
-           pass
+    def do(self, hashes: list[str]) -> list[str]:
+        return []
 
 
 class HashPreprocessorContext:
@@ -36,8 +40,8 @@ class HashPreprocessorContext:
     def __init__(self, strategy: HashPreStrategy):
         self._strategy = strategy
 
-    def preprocess(self, hashes: List[str]):
-        self._strategy.do(hashes)
+    def preprocess(self, hashes: list[str]) -> list[str]:
+        return self._strategy.do(hashes)
 
 
 hash_processor_map = {
@@ -50,9 +54,9 @@ class HashPreprocessor:
     def __init__(self, hashtype):
         self.hashtype = hashtype
 
-    def preprocess(self, hashes) -> List[str]:
+    def preprocess(self, hashes) -> list[str]:
         strategy = hash_processor_map.get(self.hashtype, DummyStrategy())
         preprocessor= HashPreprocessorContext(strategy)
-        preprocessor.preprocess(hashes)
+        result = preprocessor.preprocess(hashes)
 
-        return list(set(hashes))
+        return list(set(result))
