@@ -1,10 +1,9 @@
 from ruamel.yaml import YAML
 
+from schemas import CombinatorStep, HybridStep, MaskStep, StraightStep
 
-from .discrete_task import StraightStep, CombinatorStep, MaskStep, HybridStep
 
-
-def hashcat_step_loader():
+def yaml_step_loader():
     CLASSES = [
         StraightStep,
         CombinatorStep,

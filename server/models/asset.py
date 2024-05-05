@@ -14,4 +14,4 @@ class HashcatAsset(Base):
     task_uuid = Column(UUID(as_uuid=True))
     worker_id = Column(String, nullable=False)
     files = Column(ARRAY(String))
-    timestamp = Column(DateTime, default=datetime.now(UTC))
+    timestamp = Column(DateTime(timezone=True), default=datetime.now(UTC))

@@ -22,7 +22,11 @@ class Database:
 
             cls._instance = super(Database, cls).__new__(cls)
             try:
-                cls._instance.engine = create_engine(database_url, pool_pre_ping=True)
+                cls._instance.engine = create_engine(
+                    database_url,
+                    pool_pre_ping=True,
+                    connect_args={"options": "-c timezone=utc"},
+                )
                 with cls._instance.engine.connect() as connection:
                     connection.execute(text("SELECT 1"))
                 cls._instance.SessionLocal = sessionmaker(

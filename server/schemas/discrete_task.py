@@ -3,9 +3,9 @@ from typing import ClassVar, List
 
 from pydantic import BaseModel, Field, field_validator
 
-from visitor.ihashcatstep import IHashcatStepVisitor
+from visitor import IHashcatStepVisitor
 
-from .hashcat_request import AttackMode, CustomCharset, HashcatOptions, HashType
+from .codegen import AttackMode, CustomCharset, HashcatOptions, HashType
 
 
 class HashcatDiscreteTask(BaseModel, ABC):

@@ -7,7 +7,7 @@ from sqlalchemy.orm import scoped_session
 from db import DatabaseHelper
 from models.hashcat_request import Step
 from schemas import StepStatus
-from schemas.keyspaces import get_keyspace_adapter
+from keyspace import get_keyspace_adapter
 from visitor.keyspace_to_model import KeyspaceModelCreator
 
 logger = logging.getLogger(__name__)

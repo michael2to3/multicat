@@ -8,7 +8,8 @@ from config import Config, Database
 from filemanager.assets_filemanager import AssetsFileManager
 from hashcat import HashcatBenchmark, HashcatKeyspace, HashcatBruteforce
 from hashcat.hashcat import Hashcat
-from schemas import HashcatDiscreteTask, KeyspaceBase, get_keyspace_adapter, HashIdMapping, HashCrackedValueMapping
+from schemas import HashcatDiscreteTask, KeyspaceBase, HashIdMapping, HashCrackedValueMapping
+from keyspace import get_keyspace_adapter
 
 logger = logging.getLogger(__name__)
 db = Database(Config().database_url)
@@ -84,7 +85,7 @@ def calc_keyspace(keyspace_task) -> int:
         )
         return hashcat_keyspace.calc_keyspace(keyspace_schema)
     except Exception as e:
-        logger.error("Error in calc_keyspace: %s", e)
+        logger.error("Error in calc_keyspace: %s", e, exc_info=True)
         return -1
 
 

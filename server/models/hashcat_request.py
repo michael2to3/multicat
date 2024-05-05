@@ -9,21 +9,21 @@ from config import Base
 
 
 class UserRole(Enum):
-    ADMIN = auto()
-    USER = auto()
+    ADMIN = "ADMIN"
+    USER = "USER"
 
 
 class JobStatus(Enum):
-    CREATED = auto()
-    RUNNING = auto()
-    COMPLETED = auto()
-    FAILED = auto()
+    CREATED = "CREATED"
+    RUNNING = "RUNNING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
 
 
 class User(Base):
     __tablename__ = "users"
     id = Column(UUID(as_uuid=True), primary_key=True)
-    role = Column(Integer, default=UserRole.USER.value)
+    role = Column(String, default=UserRole.USER.value)
     assigned_jobs = relationship("Job", order_by="Job.id", back_populates="owning_user")
 
 
@@ -38,7 +38,7 @@ job_hash_association = Table(
 class Job(Base):
     __tablename__ = "jobs"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    status = Column(Integer, default=JobStatus.CREATED.value)
+    status = Column(String, default=JobStatus.CREATED.value)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     step_id = Column(Integer, ForeignKey("hashcat_steps.id"))
     owning_user = relationship("User", back_populates="assigned_jobs")
@@ -61,9 +61,9 @@ class Step(Base):
     __tablename__ = "steps"
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, unique=True)
-    timestamp = Column(DateTime, default=datetime.now(UTC))
+    timestamp = Column(DateTime(timezone=True), default=datetime.now(UTC))
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
-    status = Column(Integer)
+    status = Column(String)
     original_content = Column(String)
     hashcat_steps = relationship(
         "HashcatStep",

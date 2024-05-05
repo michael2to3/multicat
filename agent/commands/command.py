@@ -8,7 +8,7 @@ from aiogram.filters import Command
 from aiogram.types import Message
 from celery import Celery
 
-from schemas.celery_response import CeleryResponse
+from schemas import CeleryResponse
 
 from .message_wrapper import MessageWrapper
 

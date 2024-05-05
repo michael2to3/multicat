@@ -3,7 +3,7 @@ import logging
 from uuid import UUID
 
 import yaml
-from sqlalchemy.orm import scoped_session
+from sqlalchemy.orm import scoped_session, joinedload
 
 from db import DatabaseHelper
 from exc import StepNotFoundError
@@ -21,16 +21,17 @@ class StepRetriever:
 
     def get_steps(self, step_name: str) -> str:
         step = (
-            self._session.query(Step.hashcat_steps)
+            self._session.query(Step)
+            .options(joinedload(Step.hashcat_steps))
             .filter(
                 Step.user_id == self._user_id,
                 Step.name == step_name,
             )
-            .first()
+            .all()
         )
         if not step:
             raise StepNotFoundError("Step not found.")
-        hashcat_steps = [json.loads(s.value) for s in step.hashcat_steps]
+        hashcat_steps = [json.loads(hs.value) for s in step for hs in s.hashcat_steps]
         return yaml.dump(hashcat_steps, default_flow_style=False, allow_unicode=True)
 
     def get_orig_steps(self, step_name: str) -> str:

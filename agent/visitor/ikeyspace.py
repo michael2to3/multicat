@@ -12,17 +12,17 @@ if TYPE_CHECKING:
 
 class IKeyspaceVisitor(ABC):
     @abstractmethod
-    def process_straight(self, schema: "KeyspaceStraightSchema"):
+    def configure_straight(self, schema: "KeyspaceStraightSchema"):
         pass
 
     @abstractmethod
-    def process_combinator(self, schema: "KeyspaceCombinatorSchema"):
+    def configure_combinator(self, schema: "KeyspaceCombinatorSchema"):
         pass
 
     @abstractmethod
-    def process_mask(self, schema: "KeyspaceMaskSchema"):
+    def configure_mask(self, schema: "KeyspaceMaskSchema"):
         pass
 
     @abstractmethod
-    def process_hybrid(self, schema: "KeyspaceHybridSchema"):
+    def configure_hybrid(self, schema: "KeyspaceHybridSchema"):
         pass

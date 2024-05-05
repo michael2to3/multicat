@@ -2,7 +2,6 @@ from typing import Iterable, List, Set
 from uuid import UUID
 
 from celery import chord, signature
-from schemas.hashcat_helpers import hashcat_step_loader
 from sqlalchemy.orm import scoped_session
 from sqlalchemy import func, and_
 
@@ -37,7 +36,7 @@ class BruteforceConfigurationManager:
     def _load_steps(self) -> schemas.Steps:
         manager = StepRetriever(self._owner_id, self._session)
         yaml_content = manager.get_orig_steps(self._step_name)
-        data = hashcat_step_loader().load(yaml_content)
+        data = yaml_step_loader().load(yaml_content)
         steps = schemas.Steps(**data)
         return steps
 
