@@ -20,13 +20,14 @@ class BruteforceConfigurationManager:
     _hashes: List[str]
     _session: scoped_session
 
-    def __init__(self, 
+    def __init__(
+        self,
         owner_id: UUID,
         step_name: str,
         hashtype: str,
         hashes: List[str],
         session: scoped_session,
-     ):
+    ):
         self._owner_id = owner_id
         self._step_name = step_name
         self._hashtype = hashtype
@@ -42,7 +43,9 @@ class BruteforceConfigurationManager:
         return steps
 
     def _get_hash_type(self) -> models.HashType:
-        hash_type: schemas.HashType = self._db_helper.get_or_create_hashtype_as_schema(self._hashtype)
+        hash_type: schemas.HashType = self._db_helper.get_or_create_hashtype_as_schema(
+            self._hashtype
+        )
         self._session.commit()
         return hash_type
 
@@ -52,21 +55,27 @@ class BruteforceConfigurationManager:
         return job
 
     def _get_existing_hashes_set(self, hash_type) -> Set[str]:
-        unnested = func.unnest(self._hashes).alias("hash_view")
         existing_hashes: List[models.Hash] = (
             self._session.query(models.Hash)
-            .select_from(unnested)
-            .filter(and_(models.Hash.hash_type == hash_type, models.Hash.value == unnested.column))
+            .filter(
+                models.Hash.hash_type == hash_type, models.Hash.value.in_(self._hashes)
+            )
             .all()
         )
         existing_set = set(hash.value for hash in existing_hashes)
         return existing_set
 
     def _bind_job_to_hashes(self, job: models.Job, hash_set: Iterable[str]):
-        for hash_obj in self._session.query(models.Hash).filter(models.Hash.value.in_(hash_set)).all():
+        for hash_obj in (
+            self._session.query(models.Hash)
+            .filter(models.Hash.value.in_(hash_set))
+            .all()
+        ):
             hash_obj.related_jobs.append(job)
 
-    def _upload_job_configuration(self, job: models.Job, hash_type: models.HashType, new_hashes: Iterable[str]):
+    def _upload_job_configuration(
+        self, job: models.Job, hash_type: models.HashType, new_hashes: Iterable[str]
+    ):
         new_hash_objects = [
             models.Hash(hash_type=hash_type, related_jobs=[job], value=hash_value)
             for hash_value in new_hashes
@@ -75,34 +84,9 @@ class BruteforceConfigurationManager:
         self._session.add(job)
         self._session.flush()
 
-    def _send_bruteforce_tasks(self, steps: schemas.Steps, job: models.Job, hash_type: models.HashType):
-        tasks = []
-        for keyspace in KeyspaceCalculator.generate_keyspace_tasks(steps):
-            task_data = schemas.HashcatDiscreteTask(
-                job_id=job.id,
-                hash_type=schemas.HashType(
-                    hashcat_type=hash_type.hashcat_type,
-                    human_readable=hash_type.human_readable,
-                ),
-            )
-            tasks.append(
-                signature(
-                    "client.run_hashcat",
-                    args=(task_data.model_dump(), keyspace.model_dump()),
-                )
-            )
-
-        callback = signature(
-            "server.bruteforce_finished",
-            queue="server",
-            kwargs={
-                "job_id": job.id,
-            },
-        )
-
-        chord(tasks)(callback)
-
-    def get_new_configuration(self) -> tuple[schemas.Steps, models.Job, models.HashType]:
+    def get_new_configuration(
+        self,
+    ) -> tuple[schemas.Steps, models.Job, models.HashType]:
         steps = self._load_steps()
         hash_type = self._get_hash_type()
         job = self._get_job()

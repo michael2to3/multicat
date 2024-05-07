@@ -8,7 +8,11 @@ from celery import shared_task
 
 import schemas
 from config import Database
-from hashcat_distributor import HashPreprocessor, BruteforceConfigurationManager, BruteforceTasksGenerator
+from hashcat_distributor import (
+    HashPreprocessor,
+    BruteforceConfigurationManager,
+    BruteforceTasksGenerator,
+)
 
 db = Database()
 logger = logging.getLogger(__name__)
@@ -49,7 +53,9 @@ def run_hashcat(
 
     with db.session() as session:
         try:
-            dts = BruteforceConfigurationManager(owner_id, step_name, hashtype, hashes, session)
+            dts = BruteforceConfigurationManager(
+                owner_id, step_name, hashtype, hashes, session
+            )
             steps, job, hash_type = dts.get_new_configuration()
 
             BruteforceTasksGenerator.send_bruteforce_tasks(steps, job, hash_type)

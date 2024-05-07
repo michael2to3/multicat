@@ -7,7 +7,9 @@ from steps import KeyspaceCalculator
 
 class BruteforceTasksGenerator:
     @staticmethod
-    def send_bruteforce_tasks(steps: schemas.Steps, job: models.Job, hash_type: models.HashType):
+    def send_bruteforce_tasks(
+        steps: schemas.Steps, job: models.Job, hash_type: models.HashType
+    ):
         tasks = []
         for keyspace in KeyspaceCalculator.generate_keyspace_tasks(steps):
             task_data = schemas.HashcatDiscreteTask(

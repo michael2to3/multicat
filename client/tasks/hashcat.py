@@ -8,7 +8,13 @@ from config import Config, Database
 from filemanager.assets_filemanager import AssetsFileManager
 from hashcat import HashcatBenchmark, HashcatKeyspace, HashcatBruteforce
 from hashcat.hashcat import Hashcat
-from schemas import HashcatDiscreteTask, KeyspaceBase, get_keyspace_adapter, HashIdMapping, HashCrackedValueMapping
+from schemas import (
+    HashcatDiscreteTask,
+    KeyspaceBase,
+    get_keyspace_adapter,
+    HashIdMapping,
+    HashCrackedValueMapping,
+)
 
 logger = logging.getLogger(__name__)
 db = Database(Config().database_url)
@@ -30,7 +36,9 @@ def fetch_uncracked_hashes(job_id: int) -> list[HashIdMapping]:
         return [HashIdMapping(id=x[0], hash=x[1]) for x in res]
 
 
-def upload_results(uncracked: list[HashIdMapping], results: list[HashCrackedValueMapping]):
+def upload_results(
+    uncracked: list[HashIdMapping], results: list[HashCrackedValueMapping]
+):
     uncracked_map = {m.hash: m.id for m in uncracked}
     upresults = [
         {
