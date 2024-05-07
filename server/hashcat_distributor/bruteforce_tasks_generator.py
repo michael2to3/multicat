@@ -2,7 +2,8 @@ from celery import signature, chord
 
 import schemas
 import models
-from steps import KeyspaceCalculator
+
+from hashcat_distributor.keyspace_tasks_generator import KeyspaceTasksGenerator
 
 
 class BruteforceTasksGenerator:
@@ -11,7 +12,7 @@ class BruteforceTasksGenerator:
         steps: schemas.Steps, job: models.Job, hash_type: models.HashType
     ):
         tasks = []
-        for keyspace in KeyspaceCalculator.generate_keyspace_tasks(steps):
+        for keyspace in KeyspaceTasksGenerator.generate_keyspace_tasks(steps):
             task_data = schemas.HashcatDiscreteTask(
                 job_id=job.id,
                 hash_type=schemas.HashType(
