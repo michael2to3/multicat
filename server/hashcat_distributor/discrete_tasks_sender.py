@@ -1,15 +1,12 @@
-from typing import Iterable, List, Set
+from typing import Iterable, Set
 from uuid import UUID
 
-from celery import chord, signature
 from schemas.hashcat_helpers import hashcat_step_loader
 from sqlalchemy.orm import scoped_session
-from sqlalchemy import func, and_
 
 import models
 import schemas
 from db import DatabaseHelper
-from steps.loader import KeyspaceCalculator
 from steps.retriever import StepRetriever
 
 
@@ -17,7 +14,7 @@ class BruteforceConfigurationManager:
     _owner_id: UUID
     _step_name: str
     _hashtype: str
-    _hashes: List[str]
+    _hashes: list[str]
     _session: scoped_session
 
     def __init__(
@@ -25,7 +22,7 @@ class BruteforceConfigurationManager:
         owner_id: UUID,
         step_name: str,
         hashtype: str,
-        hashes: List[str],
+        hashes: list[str],
         session: scoped_session,
     ):
         self._owner_id = owner_id
@@ -34,6 +31,20 @@ class BruteforceConfigurationManager:
         self._hashes = hashes
         self._session = session
         self._db_helper = DatabaseHelper(self._session)
+
+    def get_new_configuration(
+        self,
+    ) -> tuple[schemas.Steps, models.Job, models.HashType]:
+        steps = self._load_steps()
+        hash_type = self._get_hash_type()
+        job = self._get_job()
+        existing_set = self._get_existing_hashes_set(hash_type)
+
+        self._bind_job_to_hashes(job, existing_set)
+        new_hashes = [hash for hash in self._hashes if hash not in existing_set]
+        self._upload_job_configuration(job, hash_type, new_hashes)
+
+        return steps, job, hash_type
 
     def _load_steps(self) -> schemas.Steps:
         manager = StepRetriever(self._owner_id, self._session)
@@ -55,7 +66,7 @@ class BruteforceConfigurationManager:
         return job
 
     def _get_existing_hashes_set(self, hash_type) -> Set[str]:
-        existing_hashes: List[models.Hash] = (
+        existing_hashes: list[models.Hash] = (
             self._session.query(models.Hash)
             .filter(
                 models.Hash.hash_type == hash_type, models.Hash.value.in_(self._hashes)
@@ -83,17 +94,3 @@ class BruteforceConfigurationManager:
         self._session.add_all(new_hash_objects)
         self._session.add(job)
         self._session.flush()
-
-    def get_new_configuration(
-        self,
-    ) -> tuple[schemas.Steps, models.Job, models.HashType]:
-        steps = self._load_steps()
-        hash_type = self._get_hash_type()
-        job = self._get_job()
-        existing_set = self._get_existing_hashes_set(hash_type)
-
-        self._bind_job_to_hashes(job, existing_set)
-        new_hashes = [hash for hash in self._hashes if hash not in existing_set]
-        self._upload_job_configuration(job, hash_type, new_hashes)
-
-        return steps, job, hash_type
