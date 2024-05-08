@@ -95,6 +95,11 @@ class HashcatBruteforce(HashcatExecutorBase):
             self._hashcat.event_connect(self.error_callback, "EVENT_LOG_ERROR")
             self._hashcat.event_connect(self.warning_callback, "EVENT_LOG_WARNING")
 
-            rc = self._hashcat.hashcat_session_execute()
-            hash_file_path.unlink(missing_ok=True)
+            try:
+                rc = self._hashcat.hashcat_session_execute()
+            except Exception:
+                raise
+            finally:
+                hash_file_path.unlink(missing_ok=True)
+
             return rc
