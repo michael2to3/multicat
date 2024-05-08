@@ -21,7 +21,7 @@ class StepRetriever:
 
     def get_steps(self, step_name: str) -> str:
         step = (
-            self._session.query(Step.hashcat_steps)
+            self._session.query(Step)
             .filter(
                 Step.user_id == self._user_id,
                 Step.name == step_name,
