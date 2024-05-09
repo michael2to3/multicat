@@ -164,7 +164,7 @@ class StepsPrintCommand(BaseCommand):
         userid = UUIDGenerator.generate(str(message.from_user.id))
         text = message.text.split(maxsplit=1)[1] if message.text else ""
 
-        result = self.app.send_task("server.get_steps", args=(userid, text))
+        result = self.app.send_task("server.get_orig_steps", args=(userid, text))
         celery_response = CeleryResponse(**result.get(timeout=10))
 
         if celery_response.error:
