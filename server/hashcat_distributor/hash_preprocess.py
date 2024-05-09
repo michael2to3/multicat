@@ -14,24 +14,22 @@ class NTLMStrategy(HashPreStrategy):
         self.is_nt = is_nt
 
     def do(self, hashes: list[str]) -> list[str]:
-        sample = hashes[0]
         sep = ":"
         result = []
 
-        if len(sample.split(sep)) != 7:
-            result.extend(hashes)
-            return result
-
         sep_idx = 3 if self.is_nt else 2
-        for i, hash in enumerate(hashes):
-            result.append(hash.split(sep)[sep_idx])
+        for hash in hashes:
+            if len(hash.split(sep)) != 7:
+                result.append(hash)
+            else:
+                result.append(hash.split(sep)[sep_idx])
 
         return result
 
 
 class DummyStrategy(HashPreStrategy):
     def do(self, hashes: list[str]) -> list[str]:
-        return []
+        return hashes.copy()
 
 
 class HashPreprocessorContext:
@@ -56,7 +54,7 @@ class HashPreprocessor:
 
     def preprocess(self, hashes) -> list[str]:
         strategy = hash_processor_map.get(self.hashtype, DummyStrategy())
-        preprocessor= HashPreprocessorContext(strategy)
+        preprocessor = HashPreprocessorContext(strategy)
         result = preprocessor.preprocess(hashes)
 
         return list(set(result))

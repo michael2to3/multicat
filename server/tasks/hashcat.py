@@ -8,7 +8,11 @@ from celery import shared_task
 
 import schemas
 from config import Database
-from hashcat_distributor import HashPreprocessor, BruteforceConfigurationManager, BruteforceTasksGenerator
+from hashcat_distributor import (
+    HashPreprocessor,
+    BruteforceConfigurationManager,
+    BruteforceTasksGenerator,
+)
 
 db = Database()
 logger = logging.getLogger(__name__)
@@ -49,14 +53,17 @@ def run_hashcat(
 
     with db.session() as session:
         try:
-            dts = BruteforceConfigurationManager(owner_id, step_name, hashtype, hashes, session)
+            dts = BruteforceConfigurationManager(
+                owner_id, step_name, hashtype, hashes, session
+            )
             steps, job, hash_type = dts.get_new_configuration()
 
             BruteforceTasksGenerator.send_bruteforce_tasks(steps, job, hash_type)
+            job_id = job.id
         except ValueError as e:
             return schemas.CeleryResponse(error=str(e)).model_dump()
 
     # TODO: messages about write commands in the agent, the server does not known about it
-    message = f"Your task has been queued and will start as soon as a server becomes available. You can check the progress of your task using the command /status {job.id}. Thank you for your patience."
+    message = f"Your task has been queued and will start as soon as a server becomes available. You can check the progress of your task using the command /status {job_id}. Thank you for your patience."
 
     return schemas.CeleryResponse(value=message).model_dump()

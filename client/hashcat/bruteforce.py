@@ -56,15 +56,6 @@ class HashcatBruteforce(HashcatExecutorBase):
             self._hashcat.hashcat_status_get_log(),
         )
 
-    # TODO: reimplement for new discrete tasks
-    def cracked_callback(self, hashcat: HashcatInterface):
-        logger.info("Hashcat cracked another hash (%d)", self._bound_task.job_id)
-
-    # TODO: reimplement for new discrete tasks
-    def finished_callback(self, hashcat: HashcatInterface):
-        logger.info("Hashcat finished job (%d)", self._bound_task.job_id)
-
-    # TODO: reimplement for new discrete tasks
     def _reset_execute(self, attack_mode: AttackMode, hash_file: Path):
         self._hashcat.reset()
 
@@ -77,12 +68,6 @@ class HashcatBruteforce(HashcatExecutorBase):
         self._hashcat.quiet = True
         self._hashcat.no_threading = True
         self._hashcat.attack_mode = attack_mode.value
-
-    def _init_hashfile(self) -> Path:
-        hash_file = tempfile.NamedTemporaryFile(mode="w+", delete=False)
-        hash_file.write("\n".join(self._hashes))
-        hash_file.close()
-        return Path(hash_file.name)
 
     def read_results(self) -> list[HashCrackedValueMapping]:
         results = []
@@ -98,17 +83,23 @@ class HashcatBruteforce(HashcatExecutorBase):
         self._results_file.unlink(missing_ok=True)
         return results
 
-    # TODO: reimplement for new discrete tasks
     def execute(self) -> int:
-        hash_file_path = self._init_hashfile()
-        self._reset_execute(self._bound_keyspace.attack_mode, hash_file_path)
-        self._bound_keyspace.accept(self._configurer)
+        with tempfile.NamedTemporaryFile(mode="w+", delete=False) as hash_file:
+            hash_file.write("\n".join(self._hashes))
+            hash_file.close()
+            hash_file_path = Path(hash_file.name)
 
-        self._hashcat.event_connect(self.error_callback, "EVENT_LOG_ERROR")
-        self._hashcat.event_connect(self.warning_callback, "EVENT_LOG_WARNING")
-        # self._hashcat.event_connect(self.cracked_callback, "EVENT_CRACKER_HASH_CRACKED")
-        # self._hashcat.event_connect(self.finished_callback, "EVENT_CRACKER_FINISHED")
+            self._reset_execute(self._bound_keyspace.attack_mode, hash_file_path)
+            self._bound_keyspace.accept(self._configurer)
 
-        rc = self._hashcat.hashcat_session_execute()
-        hash_file_path.unlink(missing_ok=True)
-        return rc
+            self._hashcat.event_connect(self.error_callback, "EVENT_LOG_ERROR")
+            self._hashcat.event_connect(self.warning_callback, "EVENT_LOG_WARNING")
+
+            try:
+                rc = self._hashcat.hashcat_session_execute()
+            except Exception:
+                raise
+            finally:
+                hash_file_path.unlink(missing_ok=True)
+
+            return rc
