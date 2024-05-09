@@ -1,6 +1,5 @@
-from abc import ABC
 from enum import Enum
-from typing import List, Literal
+from typing import List
 
 from pydantic import BaseModel, Field, field_validator, validator
 
@@ -53,10 +52,8 @@ class HashcatOptions(BaseModel):
 class HashcatDiscreteTask(BaseModel):
     job_id: int
     hash_type: HashType
-    hashes: List[str]
     keyspace_skip: int = 0
     keyspace_work: int = 0
-    type: Literal["HashcatDiscreteTask"]
 
 
 class HashcatStep(BaseModel):
@@ -68,3 +65,13 @@ class HashcatStep(BaseModel):
 
 class Steps(BaseModel):
     steps: List[HashcatStep] = Field(default_factory=list)
+
+
+class HashIdMapping(BaseModel):
+    id: int
+    hash: str
+
+
+class HashCrackedValueMapping(BaseModel):
+    hash: str
+    cracked_value: str

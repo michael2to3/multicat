@@ -1,53 +1,31 @@
 import base64
 import io
-from typing import List
+import logging
 from uuid import UUID
 
-from celery import current_app, shared_task
-from sqlalchemy.orm import scoped_session
-
 import gnupg
-import models
+from celery import shared_task
+
 import schemas
 from config import Database
-from db import DatabaseHelper
+from hashcat_distributor import (
+    HashPreprocessor,
+    BruteforceConfigurationManager,
+    BruteforceTasksGenerator,
+)
 
 db = Database()
+logger = logging.getLogger(__name__)
 
 
-def send_discrete_task(
-    owner_id: UUID,
-    step_name: str,
-    hashtype: str,
-    hashes: List[str],
-    session: scoped_session,
+@shared_task(name="server.bruteforce_finished")
+def bruteforce_finished(
+    rcs,
+    job_id: int,
 ):
-    db_helper = DatabaseHelper(session)
-    step = db_helper.get_hashcat_steps(owner_id, step_name)
-    hash_type: schemas.HashType = db_helper.get_or_create_hashtype_as_schema(hashtype)
-    user: models.User = db_helper.get_or_create_user(owner_id)
-    job = models.Job(owning_user=user)
-    for i in hashes:
-        models.Hash(hash_type=hash_type, parent_job=job, value=i)
-
-    session.add(job)
-    session.flush()
-    for step in step.steps:
-        task_data = schemas.HashcatDiscreteTask(
-            job_id=job.id,
-            step=step,
-            hash_type=schemas.HashType(
-                hashcat_type=hash_type.hashcat_type,
-                human_readable=hash_type.human_readable,
-            ),
-            hashes=hashes,
-        )
-        task = current_app.send_task(
-            "client.run_hashcat", args=(task_data.model_dump(),)
-        )
-        task.forget()
-
-    return job.id
+    # TODO: Schedule loopback
+    # TODO: Send results to the user
+    logger.info("%d job has been finished", job_id)
 
 
 @shared_task(name="server.run_hashcat")
@@ -69,9 +47,19 @@ def run_hashcat(
         return schemas.CeleryResponse(error="Hashes are empty").model_dump()
 
     hashes = [i for i in hashes.decode("utf-8").split("\n") if i]
+
+    hp = HashPreprocessor(hashtype)
+    hashes = hp.preprocess(hashes)
+
     with db.session() as session:
         try:
-            job_id = send_discrete_task(owner_id, step_name, hashtype, hashes, session)
+            dts = BruteforceConfigurationManager(
+                owner_id, step_name, hashtype, hashes, session
+            )
+            steps, job, hash_type = dts.get_new_configuration()
+
+            BruteforceTasksGenerator.send_bruteforce_tasks(steps, job, hash_type)
+            job_id = job.id
         except ValueError as e:
             return schemas.CeleryResponse(error=str(e)).model_dump()
 

@@ -1,10 +1,11 @@
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from enum import Enum, auto
 
-from config import Base
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
+
+from config import Base
 
 
 class UserRole(Enum):
@@ -26,6 +27,14 @@ class User(Base):
     assigned_jobs = relationship("Job", order_by="Job.id", back_populates="owning_user")
 
 
+job_hash_association = Table(
+    "job_hash_association",
+    Base.metadata,
+    Column("job_id", Integer, ForeignKey("jobs.id"), primary_key=True),
+    Column("hash_id", Integer, ForeignKey("hashes.id"), primary_key=True),
+)
+
+
 class Job(Base):
     __tablename__ = "jobs"
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -33,7 +42,9 @@ class Job(Base):
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     step_id = Column(Integer, ForeignKey("hashcat_steps.id"))
     owning_user = relationship("User", back_populates="assigned_jobs")
-    associated_hashes = relationship("Hash", back_populates="parent_job")
+    associated_hashes = relationship(
+        "Hash", secondary=job_hash_association, back_populates="related_jobs"
+    )
 
 
 step_hashcat_step_association = Table(
@@ -52,7 +63,8 @@ class Step(Base):
     name = Column(String, unique=True)
     timestamp = Column(DateTime, default=datetime.now(UTC))
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
-    is_keyspace_calculated = Column(Boolean)
+    status = Column(Integer)
+    original_content = Column(String)
     hashcat_steps = relationship(
         "HashcatStep",
         secondary=step_hashcat_step_association,
@@ -63,7 +75,7 @@ class Step(Base):
 class HashcatStep(Base):
     __tablename__ = "hashcat_steps"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    value = Column(String)
+    value = Column(JSONB)
     related_steps = relationship(
         "Step", secondary=step_hashcat_step_association, back_populates="hashcat_steps"
     )
@@ -75,8 +87,9 @@ class Hash(Base):
     value = Column(String)
     cracked_value = Column(String, nullable=True, default=None)
     is_cracked = Column(Boolean, default=False)
-    parent_job = relationship("Job", back_populates="associated_hashes")
-    job_id = Column(Integer, ForeignKey("jobs.id"))
+    related_jobs = relationship(
+        "Job", secondary=job_hash_association, back_populates="associated_hashes"
+    )
     hash_type = relationship("HashType")
     type_id = Column(Integer, ForeignKey("hash_types.id"))
 

@@ -8,6 +8,8 @@ from .hashcat_request import (
     HashcatStep,
     HashType,
     Steps,
+    HashIdMapping,
+    HashCrackedValueMapping,
 )
 from .keyspaces import (
     get_keyspace_adapter,
@@ -35,4 +37,6 @@ __all__ = [
     "KeyspaceMaskSchema",
     "KeyspaceStraightSchema",
     "get_keyspace_adapter",
+    "HashIdMapping",
+    "HashCrackedValueMapping",
 ]

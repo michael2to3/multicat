@@ -13,7 +13,6 @@ from .hashcat_request import AttackMode, CustomCharset, HashcatOptions, HashType
 class HashcatDiscreteTask(BaseModel, ABC):
     job_id: int
     hash_type: HashType
-    hashes: List[str]
     keyspace_skip: int = 0
     keyspace_work: int = 0
 

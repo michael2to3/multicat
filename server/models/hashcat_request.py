@@ -27,6 +27,14 @@ class User(Base):
     assigned_jobs = relationship("Job", order_by="Job.id", back_populates="owning_user")
 
 
+job_hash_association = Table(
+    "job_hash_association",
+    Base.metadata,
+    Column("job_id", Integer, ForeignKey("jobs.id"), primary_key=True),
+    Column("hash_id", Integer, ForeignKey("hashes.id"), primary_key=True),
+)
+
+
 class Job(Base):
     __tablename__ = "jobs"
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -34,7 +42,9 @@ class Job(Base):
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     step_id = Column(Integer, ForeignKey("hashcat_steps.id"))
     owning_user = relationship("User", back_populates="assigned_jobs")
-    associated_hashes = relationship("Hash", back_populates="parent_job")
+    associated_hashes = relationship(
+        "Hash", secondary=job_hash_association, back_populates="related_jobs"
+    )
 
 
 step_hashcat_step_association = Table(
@@ -77,8 +87,9 @@ class Hash(Base):
     value = Column(String)
     cracked_value = Column(String, nullable=True, default=None)
     is_cracked = Column(Boolean, default=False)
-    parent_job = relationship("Job", back_populates="associated_hashes")
-    job_id = Column(Integer, ForeignKey("jobs.id"))
+    related_jobs = relationship(
+        "Job", secondary=job_hash_association, back_populates="associated_hashes"
+    )
     hash_type = relationship("HashType")
     type_id = Column(Integer, ForeignKey("hash_types.id"))
 

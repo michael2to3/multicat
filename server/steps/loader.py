@@ -2,6 +2,7 @@ import logging
 from uuid import UUID
 
 from celery import chord, signature
+from hashcat_distributor.keyspace_tasks_generator import KeyspaceTasksGenerator
 from sqlalchemy.orm import scoped_session
 
 import models
@@ -74,18 +75,7 @@ class KeyspaceCalculator:
 
     def _process_keyspaces(self, steps) -> list[KeyspaceBase]:
         unknown_keyspaces: list[KeyspaceBase] = []
-        for keyspace_task in self._generate_keyspace_tasks(steps):
+        for keyspace_task in KeyspaceTasksGenerator.generate_keyspace_tasks(steps):
             if not self._dbh.keyspace_exists(keyspace_task):
                 unknown_keyspaces.append(keyspace_task)
         return unknown_keyspaces
-
-    def _generate_keyspace_tasks(self, model: Steps) -> list[KeyspaceBase]:
-        tasks: list[KeyspaceBase] = []
-
-        def callback(_tasks: list[KeyspaceBase]):
-            tasks.extend(_tasks)
-
-        generator = HashcatStepKeyspaceVisitor(callback)
-        for step in model.steps:
-            step.accept(generator)
-        return tasks
