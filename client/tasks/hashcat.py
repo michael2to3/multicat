@@ -92,7 +92,7 @@ def calc_keyspace(keyspace_task) -> int:
         )
         return hashcat_keyspace.calc_keyspace(keyspace_schema)
     except Exception as e:
-        logger.error("Error in calc_keyspace: %s", e)
+        logger.error("Error in calc_keyspace: %s", e, exc_info=True)
         return -1
 
 

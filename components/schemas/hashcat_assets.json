@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "HashcatAssetSchema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "title": "id",
+      "type": "integer"
+    },
+    "task_uuid": {
+      "title": "task_uuid",
+      "type": "string",
+      "format": "uuid"
+    },
+    "worker_id": {
+      "title": "worker_id",
+      "type": "string",
+      "minLength": 3
+    },
+    "files": {
+      "title": "files",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "timestamp": {
+      "title": "timestamp",
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "id",
+    "task_uuid",
+    "worker_id",
+    "files",
+    "timestamp"
+  ]
+}

@@ -8,7 +8,7 @@ from config import Base
 class Keyspace(Base):
     __tablename__ = "keyspaces"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    attack_mode = Column(Integer)
+    attack_mode = Column(String)
     type = Column(String)
     value = Column(Integer)
 
@@ -21,7 +21,7 @@ class Keyspace(Base):
 class KeyspaceStraight(Keyspace):
     __mapper_args__ = {"polymorphic_identity": "keyspacestraight"}
     wordlist1: Mapped[str] = mapped_column(use_existing_column=True, nullable=True)
-    rule = Column(String, use_existing_column=True, nullable=True)
+    rule = Column(String, nullable=True)
 
 
 class KeyspaceCombinator(Keyspace):

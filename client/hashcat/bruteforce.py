@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 
 from hashcat.executor_base import HashcatExecutorBase
+from hashcat.attackmode_mapper import AttackModeMapper
 from hashcat.interface import HashcatInterface
 from schemas import AttackMode, HashcatDiscreteTask, HashCrackedValueMapping
 
@@ -67,7 +68,7 @@ class HashcatBruteforce(HashcatExecutorBase):
         self._hashcat.username = False
         self._hashcat.quiet = True
         self._hashcat.no_threading = True
-        self._hashcat.attack_mode = attack_mode.value
+        self._hashcat.attack_mode = AttackModeMapper.to_int(attack_mode)
 
     def read_results(self) -> list[HashCrackedValueMapping]:
         results = []

@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "CeleryResponse": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string",
+          "description": "Error message, if any",
+          "default": ""
+        },
+        "warning": {
+          "type": "string",
+          "description": "Warning message, if any",
+          "default": ""
+        },
+        "value": {
+          "description": "The response value from the task, can be of any type",
+          "nullable": true,
+          "default": null
+        }
+      },
+      "required": [
+        "error",
+        "warning",
+        "value"
+      ]
+    },
+    "StepStatus": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN",
+        "SUCCESS",
+        "FAILED",
+        "PROCESSING"
+      ],
+      "description": "Enumeration of possible statuses for a step in a process."
+    },
+    "StepsList": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the list of steps."
+        },
+        "status": {
+          "$ref": "#/definitions/StepStatus",
+          "description": "The current status of the steps list as defined by the StepStatus enum."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The time at which the last update was made to the status of the steps list."
+        }
+      },
+      "required": [
+        "name",
+        "status",
+        "timestamp"
+      ]
+    }
+  }
+}

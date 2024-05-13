@@ -1,13 +1,14 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 
 from db import DatabaseHelper
 from exc.steps import StepNotFoundError
-from schemas import Steps, StepStatus, hashcat_step_loader
+from schemas import Steps, StepStatus
 from steps import StepDeleter
 from steps.loader import KeyspaceCalculator, StepLoader
+from yamlutils import yaml_step_loader
 
 logger = logging.getLogger(__name__)
 
@@ -22,11 +23,11 @@ class StepLoadFacade:
         self._keyspace_calculator = KeyspaceCalculator(self._dbh, session, user_id)
 
     def process_steps(self, steps_name: str, yaml_content: str):
-        data = hashcat_step_loader().load(yaml_content)
+        data = yaml_step_loader().load(yaml_content)
         steps = Steps(**data)
         try:
             steps_last = self._dbh.get_steps(self._user_id, steps_name)
-            if datetime.now() - steps_last.timestamp > timedelta(minutes=10):
+            if datetime.now(UTC) - steps_last.timestamp > timedelta(minutes=10):
                 self._step_deleter.delete_step(steps_name)
                 self._session.commit()
                 raise StepNotFoundError

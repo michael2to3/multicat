@@ -13,4 +13,4 @@ class Benchmark(Base):
     worker_name = Column(String, nullable=False)
     hash_type_id = Column(Integer, ForeignKey("hash_types.id"))
     value = Column(Integer)
-    timestamp = Column(DateTime, default=datetime.now(UTC))
+    timestamp = Column(DateTime(timezone=True), default=datetime.now(UTC))

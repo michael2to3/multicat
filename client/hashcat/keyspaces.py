@@ -2,6 +2,7 @@ import logging
 
 from hashcat import HashcatInterface
 from filemanager import FileManager
+from hashcat.attackmode_mapper import AttackModeMapper
 from schemas import AttackMode, KeyspaceBase
 from visitor.ikeyspace import IKeyspaceVisitor
 from visitor.keyspace_hashcat import KeyspaceHashcatConfigurerVisitor
@@ -29,7 +30,7 @@ class HashcatKeyspace(HashcatExecutorBase):
         self._hashcat.keyspace = True
         self._hashcat.no_threading = True
         self._hashcat.quiet = True
-        self._hashcat.attack_mode = attack_mode.value
+        self._hashcat.attack_mode = AttackModeMapper.to_int(attack_mode.value)
 
     def calc_keyspace(
         self,

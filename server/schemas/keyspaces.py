@@ -2,10 +2,10 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Annotated, List, Literal, Union
 
-from pydantic import BaseModel, Field, TypeAdapter, validator
-
-from schemas.hashcat_request import AttackMode, CustomCharset
+from pydantic import BaseModel, Field, TypeAdapter, field_validator
 from visitor.ikeyspace import IKeyspaceVisitor
+
+from .codegen import AttackMode, CustomCharset
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +69,7 @@ class KeyspaceHybridSchema(KeyspaceBase):
     def accept(self, configurer: IKeyspaceVisitor):
         configurer.process_hybrid(self)
 
-    @validator("attack_mode", pre=True, always=True)
+    @field_validator("attack_mode")
     @classmethod
     def change_attack_mode(cls, v, values) -> AttackMode:
         if v is not None:

@@ -1,13 +1,13 @@
 from typing import Iterable, Set
 from uuid import UUID
 
-from schemas.hashcat_helpers import hashcat_step_loader
 from sqlalchemy.orm import scoped_session
 
 import models
 import schemas
 from db import DatabaseHelper
 from steps.retriever import StepRetriever
+from yamlutils import yaml_step_loader
 
 
 class BruteforceConfigurationManager:
@@ -49,7 +49,7 @@ class BruteforceConfigurationManager:
     def _load_steps(self) -> schemas.Steps:
         manager = StepRetriever(self._owner_id, self._session)
         yaml_content = manager.get_orig_steps(self._step_name)
-        data = hashcat_step_loader().load(yaml_content)
+        data = yaml_step_loader().load(yaml_content)
         steps = schemas.Steps(**data)
         return steps
 
