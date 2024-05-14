@@ -9,6 +9,7 @@ services:
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
       DATABASE_URL: ${DATABASE_URL}
       TIMEZONE: ${TIMEZONE}
+      LOGGER_LEVEL: ${LOGGER_LEVEL}
     networks:
       - multicat
 networks:

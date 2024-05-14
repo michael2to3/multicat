@@ -4,7 +4,6 @@ from filemanager import FileManager
 from hashcat.interface import HashcatInterface
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
 
 
 class HashcatExecutorBase:

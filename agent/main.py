@@ -7,12 +7,13 @@ from commands import command_registry
 from config import CeleryApp, Config
 from middleware import FetchedCommandMiddleware
 
-logging.basicConfig(level=logging.INFO)
-
-
-bot = Bot(Config().telegram_token)
+config = Config()
+bot = Bot(config.telegram_token)
 app = CeleryApp("agent").get_app()
 
+def logger_setup() -> None:
+    logger_level = getattr(logging, config.logger_level.upper(), logging.INFO)
+    logging.basicConfig(level=logger_level)
 
 async def main() -> None:
     dispatcher = Dispatcher()
@@ -28,5 +29,5 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+    logger_setup()
     asyncio.run(main())

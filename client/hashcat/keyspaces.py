@@ -1,7 +1,7 @@
 import logging
 
-from hashcat import HashcatInterface
 from filemanager import FileManager
+from hashcat import HashcatInterface
 from hashcat.attackmode_mapper import AttackModeMapper
 from schemas import AttackMode, KeyspaceBase
 from visitor.ikeyspace import IKeyspaceVisitor
@@ -10,7 +10,6 @@ from visitor.keyspace_hashcat import KeyspaceHashcatConfigurerVisitor
 from .executor_base import HashcatExecutorBase
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
 
 
 class HashcatKeyspaceCalculationException(Exception):

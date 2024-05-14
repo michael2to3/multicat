@@ -7,7 +7,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
 Base = declarative_base()
 
 
