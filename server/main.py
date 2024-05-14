@@ -1,4 +1,5 @@
 import logging
+import sys
 
 from celery.signals import worker_process_init
 
@@ -11,7 +12,7 @@ app.autodiscover_tasks(["tasks"], force=True)
 
 def logger_setup() -> None:
     logger_level = getattr(logging, config.logger_level.upper(), logging.INFO)
-    logging.basicConfig(level=logger_level)
+    logging.basicConfig(level=logger_level, stream=sys.stdout)
 
 
 @worker_process_init.connect
@@ -19,5 +20,5 @@ def setup_database(*args, **kwargs):
     Database(config.database_url)
 
 
-if __name__ == "__main__":
+if __name__ == "main":
     logger_setup()

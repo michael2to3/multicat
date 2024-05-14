@@ -7,12 +7,10 @@ from aiogram.dispatcher.router import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 from celery import Celery
-
 from schemas import CeleryResponse
 
 from .message_wrapper import MessageWrapper
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 

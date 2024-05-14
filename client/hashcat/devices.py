@@ -4,7 +4,6 @@ from typing import Dict
 from .executor_base import HashcatExecutorBase
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
 
 
 class HashcatDevicesInfoException(Exception):

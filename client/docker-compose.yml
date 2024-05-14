@@ -13,6 +13,7 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       ASSETS_DIR: ${ASSETS_DIR}
       HC_PATH: ${HC_PATH}
+      LOGGER_LEVEL: ${LOGGER_LEVEL}
     devices:
       - "/dev/dri:/dev/dri"
     networks:

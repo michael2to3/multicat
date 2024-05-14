@@ -12,6 +12,7 @@ services:
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
       TIMEZONE: ${TIMEZONE}
       DATABASE_URL: ${DATABASE_URL}
+      LOGGER_LEVEL: ${LOGGER_LEVEL}
     volumes:
       - server_data:/app/gnupg
       - .:/app
@@ -29,6 +30,7 @@ services:
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
       TIMEZONE: ${TIMEZONE}
       DATABASE_URL: ${DATABASE_URL}
+      LOGGER_LEVEL: ${LOGGER_LEVEL}
     volumes:
       - .:/app
     networks:
