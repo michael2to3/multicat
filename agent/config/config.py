@@ -8,3 +8,4 @@ class Config(BaseSettings):
     celery_result_backend: str = Field(alias="CELERY_RESULT_BACKEND")
     timezone: str = Field(alias="TIMEZONE")
     telegram_token: str = Field(alias="TELEGRAM_TOKEN")
+    logger_level: str = Field(alias="LOGGER_LEVEL")

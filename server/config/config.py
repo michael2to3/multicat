@@ -7,3 +7,4 @@ class Config(BaseSettings):
     celery_broker_url: str = Field(alias="CELERY_BROKER_URL")
     celery_result_backend: str = Field(alias="CELERY_RESULT_BACKEND")
     timezone: str = Field(alias="TIMEZONE")
+    logger_level: str = Field(alias="LOGGER_LEVEL")
