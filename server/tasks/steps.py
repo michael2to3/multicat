@@ -64,7 +64,7 @@ def load_steps(user_id: UUID, steps_name: str, yaml_content: str):
 
 @shared_task(name="server.save_keyspaces")
 @init_user(db.session)
-def save_keyspaces(user_id: UUID, keyspaces, unknown_keyspaces: list, steps_name: str):
+def save_keyspaces(keyspaces, user_id: UUID, unknown_keyspaces: list, steps_name: str):
     with db.session() as session:
         dbh = DatabaseHelper(session)
         task = SaveKeyspacesTask(session, dbh)
