@@ -4,6 +4,7 @@ from uuid import UUID
 
 from celery import current_app, shared_task
 from config import Config, Database
+from dec import init_user
 from models import HashcatAsset
 from schemas import CeleryResponse, HashcatAssetSchema
 from sqlalchemy import func
@@ -28,6 +29,7 @@ def fetch_assets_by_uuid(task_uuid: UUID):
 
 
 @shared_task(name="server.collect_assets")
+@init_user(db.session)
 def collect_assets(owner_id: UUID):
     task = current_app.send_task("b.get_assets", args=(str(owner_id),))
     task.forget()

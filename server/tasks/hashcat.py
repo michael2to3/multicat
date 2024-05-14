@@ -3,15 +3,16 @@ import io
 import logging
 from uuid import UUID
 
-import gnupg
 from celery import shared_task
 
+import gnupg
 import schemas
 from config import Database
+from dec import init_user
 from hashcat_distributor import (
-    HashPreprocessor,
     BruteforceConfigurationManager,
     BruteforceTasksGenerator,
+    HashPreprocessor,
 )
 
 db = Database()
@@ -29,6 +30,7 @@ def bruteforce_finished(
 
 
 @shared_task(name="server.run_hashcat")
+@init_user(db.session)
 def run_hashcat(
     owner_id: UUID, hashtype: str, step_name: str, base64_encrypt_hashes: str
 ):

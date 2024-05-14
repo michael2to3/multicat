@@ -2,15 +2,14 @@ import logging
 from uuid import UUID
 
 from celery import chord, signature
-from hashcat_distributor.keyspace_tasks_generator import KeyspaceTasksGenerator
 from sqlalchemy.orm import scoped_session
 
 import models
 from db import DatabaseHelper
+from hashcat_distributor.keyspace_tasks_generator import KeyspaceTasksGenerator
 from models.hashcat_request import HashcatStep
 from schemas import Steps, StepStatus
 from schemas.keyspaces import KeyspaceBase
-from visitor.hashcatstep_keyspace_tasks import HashcatStepKeyspaceVisitor
 
 logger = logging.getLogger(__name__)
 
@@ -66,8 +65,8 @@ class KeyspaceCalculator:
             "server.save_keyspaces",
             queue="server",
             kwargs={
-                "unknown_keyspaces": [x.model_dump() for x in unknown_keyspaces],
                 "user_id": self._user_id,
+                "unknown_keyspaces": [x.model_dump() for x in unknown_keyspaces],
                 "steps_name": steps_name,
             },
         )

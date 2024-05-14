@@ -1,11 +1,10 @@
 import logging
-from typing import List
 from uuid import UUID
 
 from celery import shared_task
-
 from config import Database
 from db import DatabaseHelper
+from dec import init_user
 from schemas import CeleryResponse
 from steps import StepDeleter, StepLoadFacade, StepRetriever
 from steps.save_keyspace import SaveKeyspacesTask
@@ -17,6 +16,7 @@ db = Database()
 
 
 @shared_task(name="server.delete_steps")
+@init_user(db.session)
 def delete_steps(user_id: UUID, step_name: str):
     with db.session() as session:
         manager = StepDeleter(user_id, session)
@@ -26,6 +26,7 @@ def delete_steps(user_id: UUID, step_name: str):
 
 
 @shared_task(name="server.get_steps")
+@init_user(db.session)
 def get_steps(user_id: UUID, step_name: str):
     with db.session() as session:
         manager = StepRetriever(user_id, session)
@@ -34,6 +35,7 @@ def get_steps(user_id: UUID, step_name: str):
 
 
 @shared_task(name="server.get_orig_steps")
+@init_user(db.session)
 def get_orig_steps(user_id: UUID, step_name: str):
     with db.session() as session:
         manager = StepRetriever(user_id, session)
@@ -42,6 +44,7 @@ def get_orig_steps(user_id: UUID, step_name: str):
 
 
 @shared_task(name="server.list_steps")
+@init_user(db.session)
 def list_steps(user_id: UUID):
     with db.session() as session:
         manager = StepRetriever(user_id, session)
@@ -50,6 +53,7 @@ def list_steps(user_id: UUID):
 
 
 @shared_task(name="server.load_steps")
+@init_user(db.session)
 def load_steps(user_id: UUID, steps_name: str, yaml_content: str):
     message = "Processing..."
     with db.session() as session:
@@ -59,7 +63,8 @@ def load_steps(user_id: UUID, steps_name: str, yaml_content: str):
 
 
 @shared_task(name="server.save_keyspaces")
-def save_keyspaces(keyspaces, unknown_keyspaces: List, user_id: UUID, steps_name: str):
+@init_user(db.session)
+def save_keyspaces(user_id: UUID, keyspaces, unknown_keyspaces: list, steps_name: str):
     with db.session() as session:
         dbh = DatabaseHelper(session)
         task = SaveKeyspacesTask(session, dbh)
@@ -68,8 +73,9 @@ def save_keyspaces(keyspaces, unknown_keyspaces: List, user_id: UUID, steps_name
 
 
 @shared_task(name="server.clenaup_on_error")
-def clenaup_on_error(userid: UUID, steps_name: str):
+@init_user(db.session)
+def clenaup_on_error(user_id: UUID, steps_name: str):
     with db.session() as session:
-        deleter = StepDeleter(userid, session)
+        deleter = StepDeleter(user_id, session)
         deleter.delete_step(steps_name)
         session.commit()
