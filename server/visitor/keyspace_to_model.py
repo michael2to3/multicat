@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, Callable
 
 from sqlalchemy.orm import Query, scoped_session
 
-from models import (
+from models.keyspaces import (
     Keyspace,
     KeyspaceCombinator,
     KeyspaceHybrid,

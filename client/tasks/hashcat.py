@@ -1,19 +1,20 @@
 import logging
+from uuid import UUID
 
-from sqlalchemy import update, bindparam
 from celery import current_task, shared_task
+from sqlalchemy import bindparam, update
 
 import models
 from config import Config, Database
 from filemanager.assets_filemanager import AssetsFileManager
-from hashcat import HashcatBenchmark, HashcatKeyspace, HashcatBruteforce
+from hashcat import HashcatBenchmark, HashcatBruteforce, HashcatKeyspace
 from hashcat.hashcat import Hashcat
 from schemas import (
     HashcatDiscreteTask,
+    HashCrackedValueMapping,
+    HashIdMapping,
     KeyspaceBase,
     get_keyspace_adapter,
-    HashIdMapping,
-    HashCrackedValueMapping,
 )
 
 logger = logging.getLogger(__name__)
@@ -24,7 +25,7 @@ hashcat_keyspace = HashcatKeyspace(file_manager, hashcat)
 hashcat_benchmark = HashcatBenchmark(file_manager, hashcat)
 
 
-def fetch_uncracked_hashes(job_id: int) -> list[HashIdMapping]:
+def fetch_uncracked_hashes(job_id: UUID) -> list[HashIdMapping]:
     with db.session() as session:
         res = (
             session.query(models.Hash.id, models.Hash.value)

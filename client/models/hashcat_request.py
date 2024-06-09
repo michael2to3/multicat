@@ -30,7 +30,7 @@ class User(Base):
 job_hash_association = Table(
     "job_hash_association",
     Base.metadata,
-    Column("job_id", Integer, ForeignKey("jobs.id"), primary_key=True),
+    Column("job_id", UUID, ForeignKey("jobs.id"), primary_key=True),
     Column("hash_id", Integer, ForeignKey("hashes.id"), primary_key=True),
 )
 

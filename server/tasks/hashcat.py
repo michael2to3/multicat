@@ -14,6 +14,7 @@ from hashcat_distributor import (
     BruteforceTasksGenerator,
     HashPreprocessor,
 )
+from models.hashcat_request import Job, JobStatus
 
 db = Database()
 logger = logging.getLogger(__name__)
@@ -22,8 +23,15 @@ logger = logging.getLogger(__name__)
 @shared_task(name="server.bruteforce_finished")
 def bruteforce_finished(
     rcs,
-    job_id: int,
+    job_id: UUID,
 ):
+    with db.session() as session:
+        job: Job = session.query(Job).filter(Job.id == job_id).first()
+        if job is None:
+            logger.error("Job %s not found", job_id)
+
+        job.status = JobStatus.COMPLETED.value
+
     # TODO: Schedule loopback
     # TODO: Send results to the user
     logger.info("%d job has been finished", job_id)
@@ -42,11 +50,15 @@ def run_hashcat(
     decrypted_data = gpg.decrypt_file(hashes_in_memory)
 
     if not decrypted_data.ok:
-        return schemas.CeleryResponse(error="Failed to decrypt the file").model_dump()
+        return schemas.CeleryResponse(
+            error="Failed to decrypt the file", warning="", value=None
+        ).model_dump()
 
     hashes = decrypted_data.data
     if not hashes:
-        return schemas.CeleryResponse(error="Hashes are empty").model_dump()
+        return schemas.CeleryResponse(
+            error="Hashes are empty", warning="", value=None
+        ).model_dump()
 
     hashes = [i for i in hashes.decode("utf-8").split("\n") if i]
 
@@ -61,11 +73,12 @@ def run_hashcat(
             steps, job, hash_type = dts.get_new_configuration()
 
             BruteforceTasksGenerator.send_bruteforce_tasks(steps, job, hash_type)
-            job_id = job.id
+
+            return schemas.CeleryResponse(
+                value=job.id, error="", warning=""
+            ).model_dump()
         except ValueError as e:
-            return schemas.CeleryResponse(error=str(e)).model_dump()
-
-    # TODO: messages about write commands in the agent, the server does not known about it
-    message = f"Your task has been queued and will start as soon as a server becomes available. You can check the progress of your task using the command /status {job_id}. Thank you for your patience."
-
-    return schemas.CeleryResponse(value=message).model_dump()
+            logger.error(e, exc_info=True)
+            return schemas.CeleryResponse(
+                error=str(e), warning="", value=None
+            ).model_dump()

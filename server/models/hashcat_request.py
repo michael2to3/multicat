@@ -1,23 +1,12 @@
 from datetime import UTC, datetime
-from enum import Enum, auto
+from uuid import uuid4
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 
 from config import Base
-
-
-class UserRole(Enum):
-    ADMIN = "ADMIN"
-    USER = "USER"
-
-
-class JobStatus(Enum):
-    CREATED = "CREATED"
-    RUNNING = "RUNNING"
-    COMPLETED = "COMPLETED"
-    FAILED = "FAILED"
+from schemas import JobStatus, UserRole
 
 
 class User(Base):
@@ -30,14 +19,14 @@ class User(Base):
 job_hash_association = Table(
     "job_hash_association",
     Base.metadata,
-    Column("job_id", Integer, ForeignKey("jobs.id"), primary_key=True),
+    Column("job_id", UUID(as_uuid=True), ForeignKey("jobs.id"), primary_key=True),
     Column("hash_id", Integer, ForeignKey("hashes.id"), primary_key=True),
 )
 
 
 class Job(Base):
     __tablename__ = "jobs"
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     status = Column(String, default=JobStatus.CREATED.value)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     step_id = Column(Integer, ForeignKey("hashcat_steps.id"))
