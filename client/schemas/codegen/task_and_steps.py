@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from enum import Enum
 from typing import Any, Optional
+from uuid import UUID
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, RootModel
 
@@ -51,3 +52,21 @@ class StepsList(BaseModel):
         ...,
         description="The time at which the last update was made to the status of the steps list.",
     )
+
+
+class JobStatus(str, Enum):
+    CREATED = "CREATED"
+    RUNNING = "RUNNING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+
+
+class JobProgress(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
+    id: UUID
+    progress: int
+    status: JobStatus
+    timestamp_start: AwareDatetime
+    timestamp_end: AwareDatetime

@@ -1,4 +1,4 @@
-.PHONY: update_schemas server_schemas agent_schemas client_schemas clean_schemas
+.PHONY: update_schemas server_schemas agent_schemas client_schemas clean_schemas agent_init_commands
 
 GENERATE_MODELS = @for file in ./schemas/*.json; do \
                     datamodel-codegen \
@@ -15,11 +15,22 @@ GENERATE_MODELS = @for file in ./schemas/*.json; do \
 				--extra-template-data ./template/extra.json \
 				--input-file-type jsonschema \
 				--input "$$file" \
-				--output "$(1)/$$(basename "$$file" .json).py"; \
+				--output "$(1)/codegen/$$(basename "$$file" .json).py"; \
 		done;
 
-COPY_INIT = @cp ./schemas/__init__.py $(1)/__init__.py; \
-            cp ./schemas/__init__.py $(1)/codegen/__init__.py;
+GENERATE_INIT = mkinit "$(1)/codegen/" --recursive -w --black --relative && \
+	mkinit "$(1)" --recursive -w --black --relative;
+
+COPY_MODELS = cp ./schemas/*.py "$(1)" && \
+	      cp ./schemas/__init__.py "$(1)/codegen/";
+
+GENERATE_ALL = $(call GENERATE_MODELS,$(1)) \
+	$(call COPY_MODELS,$(1)) \
+	$(call GENERATE_INIT,$(1))
+
+GENERATE_INIT_COMMANDS = @mkinit "../agent/commands/" --recursive -w --black --relative --nomods;
+
+all: update_schemas agent_init_commands
 
 update_schemas: clean_schemas server_schemas agent_schemas client_schemas
 
@@ -30,18 +41,16 @@ clean_schemas:
 
 server_schemas:
 	@echo "Updating Python models for server..."
-	$(call GENERATE_MODELS,../server/schemas/codegen/)
-	$(call COPY_INIT,../server/schemas)
-	@cp ./schemas/*.py ../server/schemas/
+	$(call GENERATE_ALL,../server/schemas/)
 
 agent_schemas:
 	@echo "Updating Python models for agent..."
-	$(call GENERATE_MODELS,../agent/schemas/codegen/)
-	$(call COPY_INIT,../agent/schemas)
-	@cp ./schemas/*.py ../agent/schemas/
+	$(call GENERATE_ALL,../agent/schemas/)
+
+agent_init_commands:
+	@echo "Updating Init for commands bot"
+	$(call GENERATE_INIT_COMMANDS)
 
 client_schemas:
 	@echo "Updating Python models for client..."
-	$(call GENERATE_MODELS,../client/schemas/codegen/)
-	$(call COPY_INIT,../client/schemas)
-	@cp ./schemas/*.py ../client/schemas/
+	$(call GENERATE_ALL,../client/schemas/)

@@ -1,15 +1,14 @@
 from abc import ABC, abstractmethod
 from typing import ClassVar, List
 
-from pydantic import BaseModel, Field, field_validator
-
+from pydantic import UUID4, BaseModel, Field, field_validator
 from visitor import IHashcatStepVisitor
 
 from .codegen import AttackMode, CustomCharset, HashcatOptions, HashType
 
 
 class HashcatDiscreteTask(BaseModel, ABC):
-    job_id: int
+    job_id: UUID4
     hash_type: HashType
     keyspace_skip: int = 0
     keyspace_work: int = 0

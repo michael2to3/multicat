@@ -58,6 +58,46 @@
         "status",
         "timestamp"
       ]
+    },
+    "JobStatus": {
+      "type": "string",
+      "enum": [
+        "CREATED",
+        "RUNNING",
+        "COMPLETED",
+        "FAILED"
+      ]
+    },
+    "JobProgress": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "progress": {
+          "type": "integer"
+        },
+        "status": {
+          "$ref": "#/definitions/JobStatus"
+        },
+        "timestamp_start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "timestamp_end": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "progress",
+        "status",
+        "userRole",
+        "timestamp_start",
+        "timestamp_end"
+      ]
     }
   }
 }
