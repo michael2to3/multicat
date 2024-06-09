@@ -10,8 +10,8 @@ class CommandRegistry:
         return self._commands
 
 
-command_registry = CommandRegistry()
+command_manager = CommandRegistry()
 
 
 def register_command(cls):
-    return command_registry.register(cls)
+    return command_manager.register(cls)

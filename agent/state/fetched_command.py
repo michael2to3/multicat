@@ -15,7 +15,11 @@ def fetched(interval: int = 3, timeout: int = 6 * 60 * 60, cool_down: int = 10):
     def decorator(func):
         @wraps(func)
         async def wrapper(self, message: types.Message, *args, **kwargs) -> None:
-            user_id = message.from_user.id
+            if message.from_user is None:
+                await message.reply("You are not authorized.")
+                return
+
+            user_id: int = message.from_user.id
             now = datetime.now()
             last_execution = StateManager.get_last_execution(user_id)
 

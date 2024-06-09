@@ -4,7 +4,7 @@ from typing import Any, Awaitable, Callable, Dict
 from aiogram import BaseMiddleware
 from aiogram.types import Message
 
-from commands import StateManager
+from state import StateManager
 
 logger = logging.getLogger(__name__)
 
