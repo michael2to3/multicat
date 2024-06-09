@@ -1,6 +1,6 @@
 import base64
 
-from aiogram.types import ContentType, Message
+from aiogram.types import Message
 
 from commands import BaseCommand
 from config.uuid import UUIDGenerator
@@ -24,12 +24,6 @@ class Hashcat(BaseCommand):
             await self._handle_document(message)
         else:
             await message.answer("Please send a GPG-encrypted YAML file.")
-
-    def _is_document_message(self, message: Message | MessageWrapper) -> bool:
-        return (
-            message.content_type == ContentType.DOCUMENT
-            and message.document is not None
-        )
 
     async def _handle_document(self, message: Message | MessageWrapper) -> None:
         if not message.caption:
@@ -88,7 +82,10 @@ class Hashcat(BaseCommand):
         )
         resp = CeleryResponse(**result.get(timeout=10))
 
-        def resp_message(x):
-            return f"Hey there! Just kicked off your hashcat attack 🐱💻. Track it with `/status {x}` or peek at all ongoing shenanigans with `/status`."
+        async def resp_message(message: Message | MessageWrapper, x: int):
+            await message.answer(
+                f"Hey there! Just kicked off your hashcat attack 🐱💻. Track it with `/status {x}` or peek at all ongoing shenanigans with `/status`.",
+                parse_mode="Markdown",
+            )
 
         await self._process_celery_response(message, resp, resp_message)

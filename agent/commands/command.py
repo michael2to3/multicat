@@ -1,11 +1,11 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Callable
+from typing import Any, Awaitable, Callable
 
 from aiogram import Bot
 from aiogram.dispatcher.router import Router
 from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.types import ContentType, Message
 from celery import Celery
 
 from schemas import CeleryResponse
@@ -53,14 +53,29 @@ class BaseCommand(ABC):
         self,
         message: Message | MessageWrapper,
         celery_response: CeleryResponse,
-        format_value: Callable[[Any], str] = str,
+        send_response: (
+            Callable[[Message | MessageWrapper, Any], Awaitable] | None
+        ) = None,
     ):
+        if send_response is None:
+            send_response = self._default_send_response
+
         if celery_response.error:
             return await message.answer(f"Error: {celery_response.error}")
         elif celery_response.warning:
             await message.answer(f"Warning: {celery_response.warning}")
         elif celery_response.value:
-            formatted_value = format_value(celery_response.value)
-            await message.answer(formatted_value, parse_mode="Markdown")
+            await send_response(message, celery_response.value)
         else:
             await message.answer("Operation completed successfully.")
+
+    async def _default_send_response(
+        self, message: Message | MessageWrapper, text: str
+    ):
+        await message.answer(text, parse_mode="Markdown")
+
+    def _is_document_message(self, message: Message | MessageWrapper) -> bool:
+        return (
+            message.content_type == ContentType.DOCUMENT
+            and message.document is not None
+        )

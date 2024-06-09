@@ -19,6 +19,10 @@ from .pubkey import (
     PubKey,
     logger,
 )
+from .result import (
+    Result,
+    logger,
+)
 from .start import (
     Start,
 )
@@ -43,6 +47,7 @@ __all__ = [
     "Hashcat",
     "Help",
     "PubKey",
+    "Result",
     "Start",
     "Status",
     "StepsDeleteCommand",

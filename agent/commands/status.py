@@ -44,34 +44,39 @@ class Status(BaseCommand):
         task = self.app.send_task("server.get_status_by_jobid", args=(userid, jobid))
         resp = CeleryResponse(**task.get(timeout=60))
         await self._process_celery_response(
-            message, resp, self._format_detailed_job_progress
+            message, resp, send_response=self._format_detailed_job_progress
         )
 
     async def _handle_summary(self, message: Message | MessageWrapper, userid: UUID):
         task = self.app.send_task("server.get_status_by_userid", args=(userid,))
         resp = CeleryResponse(**task.get(timeout=60))
         await self._process_celery_response(
-            message, resp, self._format_summary_response
+            message, resp, send_response=self._format_summary_response
         )
 
-    def _format_detailed_job_progress(self, value: dict) -> str:
+    async def _format_detailed_job_progress(
+        self, message: Message | MessageWrapper, value: dict
+    ):
         job_progress = JobProgress(**value)
         time_frame = f"{job_progress.timestamp_start:%Y-%m-%d %H:%M} - {job_progress.timestamp_end:%H:%M %Z}"
         progress_bar = self._create_progress_bar(job_progress.progress)
-        message = (
+        resp_message = (
             f"{job_progress.id}  | {job_progress.status.value}\n"
             f"**Time:** {time_frame}\n"
             f"{job_progress.progress}% [{progress_bar}]\n"
             f"{self._status_specific_message(job_progress.status)}"
         )
-        return message
+        await message.answer(resp_message, parse_mode="Markdown")
 
-    def _format_summary_response(self, value: list) -> str:
+    async def _format_summary_response(
+        self, message: Message | MessageWrapper, value: list
+    ):
         job_progress_list = [JobProgress(**jp) for jp in value]
         jobs_sorted = sorted(
             job_progress_list, key=lambda x: x.timestamp_start, reverse=True
         )[:10]
-        return "\n".join(self._format_job_summary(jp) for jp in jobs_sorted)
+        resp_message = "\n".join(self._format_job_summary(jp) for jp in jobs_sorted)
+        await message.answer(resp_message, parse_mode="Markdown")
 
     def _format_job_summary(self, job_progress: JobProgress) -> str:
         progress_bar = self._create_progress_bar(job_progress.progress)
