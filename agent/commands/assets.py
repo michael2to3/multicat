@@ -4,13 +4,12 @@ from typing import Dict, List
 import yaml
 from aiogram.types import Message
 
-from commands.message_wrapper import MessageWrapper
 from config.uuid import UUIDGenerator
+from dec import register_command
 from schemas import CeleryResponse, HashcatAssetSchema
+from state import MessageWrapper, fetched
 
 from .command import BaseCommand
-from .fetched_command import fetched
-from .register_command import register_command
 
 logger = logging.getLogger(__name__)
 

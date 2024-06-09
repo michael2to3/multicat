@@ -1,8 +1,9 @@
 from aiogram.types import Message
-from commands import BaseCommand
-from schemas import CeleryResponse
 
-from .register_command import register_command
+from commands import BaseCommand
+from dec import register_command
+from schemas import CeleryResponse
+from state import MessageWrapper
 
 
 @register_command
@@ -15,18 +16,7 @@ class Devices(BaseCommand):
     def description(self):
         return "Get devices info from workers"
 
-    async def _process_celery_response(self, message: Message, response):
-        celery_response = CeleryResponse(**response.get(timeout=10))
-
-        if celery_response.error:
-            await message.answer(f"Error: {celery_response.error}")
-        elif celery_response.warning:
-            await message.answer(f"Warning: {celery_response.warning}")
-        elif celery_response.value:
-            await message.answer(f"{celery_response.value}")
-        else:
-            await message.answer("Operation completed successfully.")
-
-    async def handle(self, message: Message):
+    async def handle(self, message: Message | MessageWrapper):
         result = self.app.send_task("server.get_devices")
-        await self._process_celery_response(message, result)
+        celery_response = CeleryResponse(**result.get(timeout=10))
+        await self._process_celery_response(message, celery_response)

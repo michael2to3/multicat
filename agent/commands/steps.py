@@ -5,12 +5,10 @@ from aiogram.types import ContentType, Message
 from aiogram.types.input_file import BufferedInputFile
 
 from commands import BaseCommand
-from commands.message_wrapper import MessageWrapper
 from config.uuid import UUIDGenerator
+from dec import register_command
 from schemas import CeleryResponse, StepsList, StepStatus
-
-from .fetched_command import fetched
-from .register_command import register_command
+from state import MessageWrapper, fetched
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +29,8 @@ class StepsListCommand(BaseCommand):
         celery_response = CeleryResponse(**result.get(timeout=10))
 
         if celery_response.error:
-            return await message.answer(f"Error: {celery_response.error}")
+            await message.answer(f"Error: {celery_response.error}")
+            return
         response_message = "Your steps:\n"
         if celery_response.value:
             steps_list = sorted(
@@ -47,7 +46,8 @@ class StepsListCommand(BaseCommand):
         if celery_response.warning:
             response_message += f"\nWarning: {celery_response.warning}"
 
-        return await message.answer(response_message)
+        await message.answer(response_message)
+        return
 
     def _handle_steps_status(self, step_status: StepStatus) -> str:
         match step_status:

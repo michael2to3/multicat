@@ -2,10 +2,11 @@ import logging
 
 from aiogram.types import Message
 from aiogram.types.input_file import BufferedInputFile
-from commands import BaseCommand
-from schemas import CeleryResponse
 
-from .register_command import register_command
+from commands import BaseCommand
+from dec import register_command
+from schemas import CeleryResponse
+from state import MessageWrapper
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,7 @@ class PubKey(BaseCommand):
     def description(self):
         return "Get my public GPG key"
 
-    async def handle(self, message: Message):
+    async def handle(self, message: Message | MessageWrapper):
         result = self.app.send_task("server.get_pubkey")
         processing_result = CeleryResponse(**result.get(timeout=60))
 
