@@ -19,7 +19,7 @@ def fetch_assets_by_uuid(task_uuid: UUID):
         result = (
             session.query(HashcatAsset)
             .filter(HashcatAsset.task_uuid == task_uuid)
-            .filter(HashcatAsset.timestamp >= (func.now() - timedelta(minutes=2)))
+            .filter(HashcatAsset.created_at >= (func.now() - timedelta(minutes=2)))
             .all()
         )
         assets_data = [

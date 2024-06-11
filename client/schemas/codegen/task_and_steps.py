@@ -48,7 +48,7 @@ class StepsList(BaseModel):
         ...,
         description="The current status of the steps list as defined by the StepStatus enum.",
     )
-    timestamp: AwareDatetime = Field(
+    created_at: AwareDatetime = Field(
         ...,
         description="The time at which the last update was made to the status of the steps list.",
     )
@@ -68,5 +68,5 @@ class JobProgress(BaseModel):
     id: UUID
     progress: int
     status: JobStatus
-    timestamp_start: AwareDatetime
-    timestamp_end: AwareDatetime
+    start_at: AwareDatetime
+    end_at: AwareDatetime

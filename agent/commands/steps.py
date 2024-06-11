@@ -35,7 +35,7 @@ class StepsListCommand(BaseCommand):
         if celery_response.value:
             steps_list = sorted(
                 [StepsList(**i) for i in celery_response.value],
-                key=lambda x: x.timestamp,
+                key=lambda x: x.created_at,
             )
             response_message += "\n".join(
                 f"{self._handle_steps_status(i.status)} - {i.name}" for i in steps_list

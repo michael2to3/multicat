@@ -24,8 +24,8 @@
         "type": "string"
       }
     },
-    "timestamp": {
-      "title": "timestamp",
+    "created_at": {
+      "title": "created_at",
       "type": "string",
       "format": "date-time"
     }
@@ -35,6 +35,6 @@
     "task_uuid",
     "worker_id",
     "files",
-    "timestamp"
+    "created_at"
   ]
 }

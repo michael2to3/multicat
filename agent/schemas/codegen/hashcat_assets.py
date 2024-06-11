@@ -17,4 +17,4 @@ class HashcatAssetSchema(BaseModel):
     task_uuid: UUID = Field(..., title="task_uuid")
     worker_id: str = Field(..., min_length=3, title="worker_id")
     files: List[str] = Field(..., title="files")
-    timestamp: AwareDatetime = Field(..., title="timestamp")
+    created_at: AwareDatetime = Field(..., title="created_at")

@@ -50,13 +50,13 @@ class StepRetriever:
     def get_steps_names(self) -> list[StepsList]:
         user = self._dbh.get_or_create_user(self._user_id)
         steps = (
-            self._session.query(Step.name, Step.status, Step.timestamp)
+            self._session.query(Step.name, Step.status, Step.created_at)
             .filter(Step.user_id == user.id)
             .all()
         )
         return (
             [
-                StepsList(name=step.name, status=step.status, timestamp=step.timestamp)
+                StepsList(name=step.name, status=step.status, created_at=step.created_at)
                 for step in steps
             ]
             if steps
