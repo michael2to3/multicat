@@ -1,7 +1,7 @@
 import logging
 from datetime import UTC, datetime, timedelta
+from typing import cast
 from uuid import UUID
-
 
 from db import DatabaseHelper
 from exc.steps import StepNotFoundError
@@ -27,7 +27,9 @@ class StepLoadFacade:
         steps = Steps(**data)
         try:
             steps_last = self._dbh.get_steps(self._user_id, steps_name)
-            if datetime.now(UTC) - steps_last.timestamp > timedelta(minutes=10):
+            if datetime.now(UTC) - cast(datetime, steps_last.created_at) > timedelta(
+                minutes=10
+            ):
                 self._step_deleter.delete_step(steps_name)
                 self._session.commit()
                 raise StepNotFoundError

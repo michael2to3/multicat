@@ -13,4 +13,4 @@ class Devices(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     worker_name = Column(String, nullable=False)
     value = Column(JSONB, nullable=False)
-    timestamp = Column(DateTime(timezone=True), default=datetime.now(UTC))
+    created_at = Column(DateTime(timezone=True), default=datetime.now(UTC))

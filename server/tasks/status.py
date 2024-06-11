@@ -26,8 +26,8 @@ def create_job_progress(job: Job) -> JobProgress:
         id=cast(UUID, job.id),
         progress=42,
         status=status,
-        timestamp_start=datetime.min.replace(tzinfo=ZoneInfo("UTC")),
-        timestamp_end=datetime.min.replace(tzinfo=ZoneInfo("UTC")),
+        start_at=datetime.min.replace(tzinfo=ZoneInfo("UTC")),
+        end_at=datetime.min.replace(tzinfo=ZoneInfo("UTC")),
     )
 
 

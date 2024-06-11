@@ -56,7 +56,7 @@ class Status(BaseCommand):
 
     def _format_detailed_job_progress(self, value: dict) -> str:
         job_progress = JobProgress(**value)
-        time_frame = f"{job_progress.timestamp_start:%Y-%m-%d %H:%M} - {job_progress.timestamp_end:%H:%M %Z}"
+        time_frame = f"{job_progress.start_at:%Y-%m-%d %H:%M} - {job_progress.end_at:%H:%M %Z}"
         progress_bar = self._create_progress_bar(job_progress.progress)
         message = (
             f"{job_progress.id}  | {job_progress.status.value}\n"
@@ -69,7 +69,7 @@ class Status(BaseCommand):
     def _format_summary_response(self, value: list) -> str:
         job_progress_list = [JobProgress(**jp) for jp in value]
         jobs_sorted = sorted(
-            job_progress_list, key=lambda x: x.timestamp_start, reverse=True
+            job_progress_list, key=lambda x: x.start_at, reverse=True
         )[:10]
         return "\n".join(self._format_job_summary(jp) for jp in jobs_sorted)
 

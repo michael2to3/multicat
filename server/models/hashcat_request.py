@@ -31,6 +31,7 @@ class Job(Base):
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     step_id = Column(Integer, ForeignKey("hashcat_steps.id"))
     owning_user = relationship("User", back_populates="assigned_jobs")
+    created_at = Column(DateTime(timezone=True), default=datetime.now(UTC))
     associated_hashes = relationship(
         "Hash", secondary=job_hash_association, back_populates="related_jobs"
     )
@@ -50,7 +51,7 @@ class Step(Base):
     __tablename__ = "steps"
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, unique=True)
-    timestamp = Column(DateTime(timezone=True), default=datetime.now(UTC))
+    created_at = Column(DateTime(timezone=True), default=datetime.now(UTC))
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     status = Column(String)
     original_content = Column(String)

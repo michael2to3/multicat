@@ -42,7 +42,7 @@ def update_devices_info(worker_name: str, devices_new_dict: Dict):
             logger.info("Device info for worker %s has been updated", worker_name)
             devices.value = devices_new_dict
 
-        devices.timestamp = datetime.now(UTC)
+        devices.created_at = datetime.now(UTC)
         session.commit()
 
 
