@@ -1,27 +1,26 @@
-from typing import Iterable, Set
+from typing import Iterable, cast
 from uuid import UUID
 
+from sqlalchemy import and_, exists, not_, or_
 from sqlalchemy.orm import scoped_session
 
 import models
-import schemas
 from db import DatabaseHelper
-from steps.retriever import StepRetriever
-from yamlutils import yaml_step_loader
 
 
 class BruteforceConfigurationManager:
     _owner_id: UUID
     _step_name: str
-    _hashtype: str
+    _hashtype: models.HashType
     _hashes: list[str]
     _session: scoped_session
+    _dbh: DatabaseHelper
 
     def __init__(
         self,
         owner_id: UUID,
         step_name: str,
-        hashtype: str,
+        hashtype: models.HashType,
         hashes: list[str],
         session: scoped_session,
     ):
@@ -30,65 +29,53 @@ class BruteforceConfigurationManager:
         self._hashtype = hashtype
         self._hashes = hashes
         self._session = session
-        self._db_helper = DatabaseHelper(self._session)
+        self._dbh = DatabaseHelper(self._session)
 
     def get_new_configuration(
         self,
-    ) -> tuple[schemas.Steps, models.Job, models.HashType]:
-        steps = self._load_steps()
-        hash_type = self._get_hash_type()
-        job = self._get_job()
-        existing_set = self._get_existing_hashes_set(hash_type)
+    ) -> models.Job:
 
-        self._bind_job_to_hashes(job, existing_set)
-        new_hashes = [hash for hash in self._hashes if hash not in existing_set]
-        self._upload_job_configuration(job, hash_type, new_hashes)
+        hashes = self._get_missing_or_uncracked_hashes()
+        job = self._create_job()
+        self._bind_job_to_hashes(job, hashes)
 
-        return steps, job, hash_type
+        self._upload_job_configuration(job, [cast(str, i.value) for i in hashes])
 
-    def _load_steps(self) -> schemas.Steps:
-        manager = StepRetriever(self._owner_id, self._session)
-        yaml_content = manager.get_orig_steps(self._step_name)
-        data = yaml_step_loader().load(yaml_content)
-        steps = schemas.Steps(**data)
-        return steps
+        return job
 
-    def _get_hash_type(self) -> models.HashType:
-        hash_type: schemas.HashType = self._db_helper.get_or_create_hashtype_as_schema(
-            self._hashtype
-        )
-        self._session.commit()
-        return hash_type
-
-    def _get_job(self) -> models.Job:
-        user: models.User = self._db_helper.get_or_create_user(self._owner_id)
+    def _create_job(self) -> models.Job:
+        user: models.User = self._dbh.get_or_create_user(self._owner_id)
         job = models.Job(owning_user=user)
         return job
 
-    def _get_existing_hashes_set(self, hash_type) -> Set[str]:
-        existing_hashes: list[models.Hash] = (
+    def _get_missing_or_uncracked_hashes(self) -> list[models.Hash]:
+        return (
             self._session.query(models.Hash)
             .filter(
-                models.Hash.hash_type == hash_type, models.Hash.value.in_(self._hashes)
+                models.Hash.hash_type == self._hashtype,
+                models.Hash.value.in_(self._hashes),
+                or_(
+                    not_(
+                        exists().where(
+                            and_(
+                                models.Hash.hash_type == self._hashtype,
+                                models.Hash.value == models.Hash.value,
+                            )
+                        )
+                    ),
+                    models.Hash.is_cracked == False,
+                ),
             )
             .all()
         )
-        existing_set = set(hash.value for hash in existing_hashes)
-        return existing_set
 
-    def _bind_job_to_hashes(self, job: models.Job, hash_set: Iterable[str]):
-        for hash_obj in (
-            self._session.query(models.Hash)
-            .filter(models.Hash.value.in_(hash_set))
-            .all()
-        ):
+    def _bind_job_to_hashes(self, job: models.Job, hash_set: list[models.Hash]):
+        for hash_obj in hash_set:
             hash_obj.related_jobs.append(job)
 
-    def _upload_job_configuration(
-        self, job: models.Job, hash_type: models.HashType, new_hashes: Iterable[str]
-    ):
+    def _upload_job_configuration(self, job: models.Job, new_hashes: Iterable[str]):
         new_hash_objects = [
-            models.Hash(hash_type=hash_type, related_jobs=[job], value=hash_value)
+            models.Hash(hash_type=self._hashtype, related_jobs=[job], value=hash_value)
             for hash_value in new_hashes
         ]
         self._session.add_all(new_hash_objects)

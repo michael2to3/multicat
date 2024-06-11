@@ -4,8 +4,10 @@ import logging
 from uuid import UUID
 
 from celery import shared_task
+from sqlalchemy.orm import scoped_session
 
 import gnupg
+from db.database_helper import DatabaseHelper
 import schemas
 from config import Database
 from dec import init_user
@@ -15,6 +17,9 @@ from hashcat_distributor import (
     HashPreprocessor,
 )
 from models.hashcat_request import Job, JobStatus
+from schemas.discrete_task import Steps
+from steps.retriever import StepRetriever
+from yamlutils import yaml_step_loader
 
 db = Database()
 logger = logging.getLogger(__name__)
@@ -66,13 +71,18 @@ def run_hashcat(
     hashes = hp.preprocess(hashes)
 
     with db.session() as session:
+        dbh = DatabaseHelper(session)
         try:
+            steps = _load_steps(owner_id, session, step_name)
+            hashtype = dbh.get_or_create_hashtype_as_model(hashtype)
+
             dts = BruteforceConfigurationManager(
                 owner_id, step_name, hashtype, hashes, session
             )
-            steps, job, hash_type = dts.get_new_configuration()
 
-            BruteforceTasksGenerator.send_bruteforce_tasks(steps, job, hash_type)
+            job = dts.get_new_configuration()
+
+            BruteforceTasksGenerator.send_bruteforce_tasks(steps, job, hashtype)
 
             return schemas.CeleryResponse(
                 value=job.id, error="", warning=""
@@ -82,3 +92,11 @@ def run_hashcat(
             return schemas.CeleryResponse(
                 error=str(e), warning="", value=None
             ).model_dump()
+
+
+def _load_steps(owner_id: UUID, session: scoped_session, step_name: str) -> Steps:
+    manager = StepRetriever(owner_id, session)
+    yaml_content = manager.get_orig_steps(step_name)
+    data = yaml_step_loader().load(yaml_content)
+    steps = schemas.Steps(**data)
+    return steps
