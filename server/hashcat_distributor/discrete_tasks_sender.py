@@ -12,8 +12,7 @@ logger = getLogger(__name__)
 
 
 class BruteforceConfigurationManager:
-    _owner_id: UUID
-    _step_name: str
+    _job : models.Job
     _hashtype: models.HashType
     _hashes: list[str]
     _session: scoped_session
@@ -21,14 +20,12 @@ class BruteforceConfigurationManager:
 
     def __init__(
         self,
-        owner_id: UUID,
-        step_name: str,
+        job: models.Job,
         hashtype: models.HashType,
         hashes: list[str],
         session: scoped_session,
     ):
-        self._owner_id = owner_id
-        self._step_name = step_name
+        self._job = job
         self._hashtype = hashtype
         self._hashes = hashes
         self._session = session
@@ -37,19 +34,10 @@ class BruteforceConfigurationManager:
     def get_new_configuration(
         self,
     ) -> models.Job:
-
         hashes = self._get_missing_or_uncracked_hashes()
-        job = self._create_job()
-        self._bind_job_to_hashes(job, hashes)
-
-        self._upload_job_configuration(job, [cast(str, i.value) for i in hashes])
-
-        return job
-
-    def _create_job(self) -> models.Job:
-        user: models.User = self._dbh.get_or_create_user(self._owner_id)
-        job = models.Job(owning_user=user)
-        return job
+        self._bind_job_to_hashes(self._job, hashes)
+        self._upload_job_configuration(self._job, [cast(str, i.value) for i in hashes])
+        return self._job
 
     def _get_missing_or_uncracked_hashes(self) -> list[models.Hash]:
         exist_hashes = (
