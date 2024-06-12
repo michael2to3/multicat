@@ -96,6 +96,7 @@ def run_hashcat(
 def _load_steps(
     session: scoped_session, owner_id: UUID, step_name: str
 ) -> schemas.Steps:
+    # @fixme https://git.t00x.com/Tools/multicat/issues/59
     manager = StepRetriever(owner_id, session)
     yaml_content = manager.get_orig_dump(step_name)
     data = yaml_step_loader().load(yaml_content)
