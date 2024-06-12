@@ -30,7 +30,7 @@ def delete_steps(user_id: UUID, step_name: str):
 def get_steps(user_id: UUID, step_name: str):
     with db.session() as session:
         manager = StepRetriever(user_id, session)
-        hashcat_steps = manager.get_steps(step_name)
+        hashcat_steps = manager.get_dump(step_name)
         return CeleryResponse(value=hashcat_steps).model_dump()
 
 
@@ -39,7 +39,7 @@ def get_steps(user_id: UUID, step_name: str):
 def get_orig_steps(user_id: UUID, step_name: str):
     with db.session() as session:
         manager = StepRetriever(user_id, session)
-        original_content = manager.get_orig_steps(step_name)
+        original_content = manager.get_orig_dump(step_name)
         return CeleryResponse(value=original_content).model_dump()
 
 
