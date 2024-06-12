@@ -1,13 +1,13 @@
 import json
-from typing import Dict, List
+from typing import Dict, List, cast
 from uuid import UUID
 
 from sqlalchemy.orm import Query
 
-from exc.steps import StepNotFoundError
 import models
 import schemas
-from models import HashType, Step, User, UserRole
+from exc.steps import StepNotFoundError
+from models import Step, User, UserRole
 from visitor import KeyspaceModelQueryExecutor
 
 
@@ -19,15 +19,16 @@ class DatabaseHelper:
     def __init__(self, session):
         self.session = session
 
-    def get_or_create_hashtype_as_model(self, identifier: str) -> schemas.HashType:
-        hashtype = self.get_or_create_hashtype_as_schema(identifier)
-        return self._convert_to_schema_hashtype(hashtype)
+    def get_or_create_hashtype_as_schema(self, identifier: str) -> schemas.HashType:
+        hashtype = self.get_or_create_hashtype_as_model(identifier)
+        return schemas.HashType(
+            hashcat_type=cast(int, hashtype.hashcat_type),
+            human_readable=cast(str, hashtype.human_readable),
+        )
 
-    def get_or_create_hashtype_as_schema(self, identifier: str) -> HashType:
+    def get_or_create_hashtype_as_model(self, identifier: str) -> models.HashType:
         identifier_normalized = identifier.lower().strip()
-        hashtype_query = self._build_hashtype_query(identifier_normalized)
-
-        hashtype = hashtype_query.first()
+        hashtype = self._get_hashtype(identifier_normalized)
         if hashtype is None and identifier_normalized.isdigit():
             hashtype = self._create_unnamed_hashtype(int(identifier_normalized))
 
@@ -36,26 +37,32 @@ class DatabaseHelper:
 
         return hashtype
 
-    def _build_hashtype_query(self, identifier: str):
+    def _get_hashtype(self, identifier: str) -> models.HashType:
         if identifier.isdigit():
-            return self.session.query(HashType).filter(
-                HashType.hashcat_type == int(identifier)
+            return (
+                self.session.query(models.HashType)
+                .filter(models.HashType.hashcat_type == int(identifier))
+                .first()
             )
         else:
-            return self.session.query(HashType).filter(
-                HashType.human_readable == identifier
+            return (
+                self.session.query(models.HashType)
+                .filter(models.HashType.human_readable == identifier)
+                .first()
             )
 
-    def _create_unnamed_hashtype(self, hashcat_type: int) -> HashType:
-        hashtype = HashType(human_readable="unnamed", hashcat_type=hashcat_type)
+    def _create_unnamed_hashtype(self, hashcat_type: int) -> models.HashType:
+        hashtype = models.HashType(human_readable="unnamed", hashcat_type=hashcat_type)
         self.session.add(hashtype)
+        self.session.flush()
         return hashtype
 
     def _convert_to_schema_hashtype(
         self, hashtype: models.HashType
     ) -> schemas.HashType:
         return schemas.HashType(
-            hashcat_type=hashtype.hashcat_type, human_readable=hashtype.human_readable
+            hashcat_type=cast(int, hashtype.hashcat_type),
+            human_readable=cast(str, hashtype.human_readable),
         )
 
     def get_or_create_user(self, user_id: UUID) -> User:
