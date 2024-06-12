@@ -1,8 +1,10 @@
-from celery import signature, chord
+from typing import cast
+from uuid import UUID
 
-import schemas
+from celery import chord, signature
+
 import models
-
+import schemas
 from hashcat_distributor.keyspace_tasks_generator import KeyspaceTasksGenerator
 
 
@@ -14,10 +16,10 @@ class BruteforceTasksGenerator:
         tasks = []
         for keyspace in KeyspaceTasksGenerator.generate_keyspace_tasks(steps):
             task_data = schemas.HashcatDiscreteTask(
-                job_id=job.id,
+                job_id=cast(UUID, job.id),
                 hash_type=schemas.HashType(
-                    hashcat_type=hash_type.hashcat_type,
-                    human_readable=hash_type.human_readable,
+                    hashcat_type=cast(int, hash_type.hashcat_type),
+                    human_readable=cast(str, hash_type.human_readable),
                 ),
             )
             tasks.append(

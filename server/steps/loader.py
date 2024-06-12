@@ -21,14 +21,14 @@ class StepLoader:
         self._user_id = user_id
 
     def load_steps(self, steps_name: str, steps: Steps, original_content: str):
-        step = models.Step(
+        stepinfo = models.Step(
             name=steps_name,
             user_id=self._user_id,
             original_content=original_content,
             status=StepStatus.PROCESSING.value,
         )
-        self._session.add(step)
-        self._add_hashcat_steps(step, steps)
+        self._session.add(stepinfo)
+        self._add_hashcat_steps(stepinfo, steps)
 
     def _add_hashcat_steps(self, step: models.Step, steps_data: Steps):
         for hashcat_task in steps_data.steps:

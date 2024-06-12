@@ -7,9 +7,10 @@ from celery import shared_task
 from sqlalchemy.orm import scoped_session
 
 import gnupg
-from db.database_helper import DatabaseHelper
+import models
 import schemas
 from config import Database
+from db.database_helper import DatabaseHelper
 from dec import init_user
 from hashcat_distributor import (
     BruteforceConfigurationManager,
@@ -17,9 +18,8 @@ from hashcat_distributor import (
     HashPreprocessor,
 )
 from models.hashcat_request import Job, JobStatus
-from schemas.discrete_task import Steps
 from steps.retriever import StepRetriever
-from yamlutils import yaml_step_loader
+from yamlutils.yaml_step_loader import yaml_step_loader
 
 db = Database()
 logger = logging.getLogger(__name__)
@@ -73,12 +73,11 @@ def run_hashcat(
     with db.session() as session:
         dbh = DatabaseHelper(session)
         try:
-            steps = _load_steps(owner_id, session, step_name)
+            steps = _load_steps(session, owner_id, step_name)
             hashtype = dbh.get_or_create_hashtype_as_model(hashtype)
 
-            dts = BruteforceConfigurationManager(
-                owner_id, step_name, hashtype, hashes, session
-            )
+            job = _create_job(session, owner_id)
+            dts = BruteforceConfigurationManager(job, hashtype, hashes, session)
 
             job = dts.get_new_configuration()
 
@@ -90,13 +89,21 @@ def run_hashcat(
         except ValueError as e:
             logger.error(e, exc_info=True)
             return schemas.CeleryResponse(
-                error=str(e), warning="", value=None
+                error="Failed to load steps", warning="", value=None
             ).model_dump()
 
 
-def _load_steps(owner_id: UUID, session: scoped_session, step_name: str) -> Steps:
+def _load_steps(
+    session: scoped_session, owner_id: UUID, step_name: str
+) -> schemas.Steps:
     manager = StepRetriever(owner_id, session)
-    yaml_content = manager.get_orig_steps(step_name)
+    yaml_content = manager.get_orig_dump(step_name)
     data = yaml_step_loader().load(yaml_content)
     steps = schemas.Steps(**data)
     return steps
+
+
+def _create_job(session: scoped_session, owner_id: UUID) -> models.Job:
+    dbh = DatabaseHelper(session)
+    user: models.User = dbh.get_or_create_user(owner_id)
+    return models.Job(owning_user=user)

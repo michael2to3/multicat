@@ -3,18 +3,47 @@ from datetime import timedelta
 from uuid import UUID
 
 from celery import current_app, shared_task
+from sqlalchemy import func
+from sqlalchemy.exc import SQLAlchemyError
+
 from config import Config, Database
 from dec import init_user
 from models import HashcatAsset
 from schemas import CeleryResponse, HashcatAssetSchema
-from sqlalchemy import func
-from sqlalchemy.exc import SQLAlchemyError
 
 logger = logging.getLogger(__name__)
 db = Database(Config().database_url)
 
 
-def fetch_assets_by_uuid(task_uuid: UUID):
+@shared_task(name="server.collect_assets")
+@init_user(db.session)
+def collect_assets(owner_id: UUID):
+    task = current_app.send_task("b.get_assets", args=(str(owner_id),))
+    task.forget()
+    try:
+        data = _fetch_assets_by_uuid(owner_id)
+        if data:
+            return CeleryResponse(value=data, error="", warning="").model_dump()
+
+    except SQLAlchemyError as e:
+        logging.error(f"Database error occurred: {e}")
+        return CeleryResponse(
+            value=None, error="Database error occurred", warning=""
+        ).model_dump()
+    except Exception as e:
+        logging.error(f"An unexpected error occurred: {e}")
+        return CeleryResponse(
+            value=None, error="An unexpected error occurred", warning=""
+        ).model_dump()
+
+    return CeleryResponse(
+        value=None,
+        error="",
+        warning="No assets found within the time limit, initiated broadcast task",
+    ).model_dump()
+
+
+def _fetch_assets_by_uuid(task_uuid: UUID):
     with db.session() as session:
         result = (
             session.query(HashcatAsset)
@@ -26,25 +55,3 @@ def fetch_assets_by_uuid(task_uuid: UUID):
             HashcatAssetSchema.model_validate(asset).model_dump() for asset in result
         ]
         return assets_data
-
-
-@shared_task(name="server.collect_assets")
-@init_user(db.session)
-def collect_assets(owner_id: UUID):
-    task = current_app.send_task("b.get_assets", args=(str(owner_id),))
-    task.forget()
-    try:
-        data = fetch_assets_by_uuid(owner_id)
-        if data:
-            return CeleryResponse(value=data).model_dump()
-
-    except SQLAlchemyError as e:
-        logging.error(f"Database error occurred: {e}")
-        return CeleryResponse(error="Database error occurred").model_dump()
-    except Exception as e:
-        logging.error(f"An unexpected error occurred: {e}")
-        return CeleryResponse(error="An unexpected error occurred").model_dump()
-
-    return CeleryResponse(
-        warning="No assets found within the time limit, initiated broadcast task"
-    ).model_dump()

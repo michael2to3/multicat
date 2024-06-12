@@ -7,7 +7,7 @@ from celery import shared_task
 from config import Database
 from db.database_helper import DatabaseHelper
 from dec import init_user
-from gnupg import GPG, Verify
+from gnupg import GPG
 from models.hashcat_request import Hash, Job
 from schemas.codegen.task_and_steps import CeleryResponse
 
@@ -40,7 +40,7 @@ def get_result(owner_id: UUID, job_id: UUID):
         fingerprint = import_result.fingerprints[0]
         logger.info("Using fingerprint for encryption: %s", fingerprint)
 
-        trust_result = gpg.trust_keys(fingerprint, 'TRUST_ULTIMATE')
+        trust_result = gpg.trust_keys(fingerprint, "TRUST_ULTIMATE")
         logger.info("GPG trust result: %s", trust_result)
 
         job = session.query(Job).filter(Job.id == job_id).first()
