@@ -1,11 +1,14 @@
+from logging import getLogger
 from typing import Iterable, cast
 from uuid import UUID
 
-from sqlalchemy import and_, exists, not_, or_
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import scoped_session
 
 import models
 from db import DatabaseHelper
+
+logger = getLogger(__name__)
 
 
 class BruteforceConfigurationManager:
@@ -49,25 +52,31 @@ class BruteforceConfigurationManager:
         return job
 
     def _get_missing_or_uncracked_hashes(self) -> list[models.Hash]:
-        return (
+        exist_hashes = (
             self._session.query(models.Hash)
             .filter(
                 models.Hash.hash_type == self._hashtype,
                 models.Hash.value.in_(self._hashes),
-                or_(
-                    not_(
-                        exists().where(
-                            and_(
-                                models.Hash.hash_type == self._hashtype,
-                                models.Hash.value == models.Hash.value,
-                            )
-                        )
-                    ),
-                    models.Hash.is_cracked == False,
-                ),
             )
             .all()
         )
+        exist_hashes_value = {cast(str, h.value) for h in exist_hashes}
+        non_exist_hashes = set(self._hashes) - exist_hashes_value
+
+        new_hashes = [
+            models.Hash(hash_type=self._hashtype, value=hash_value, is_cracked=False)
+            for hash_value in non_exist_hashes
+        ]
+        if new_hashes:
+            try:
+                self._session.bulk_save_objects(new_hashes)
+                self._session.commit()
+            except IntegrityError:
+                self._session.rollback()
+
+        non_cracked_hashes = [h for h in exist_hashes if cast(bool, h.is_cracked)]
+
+        return new_hashes + non_cracked_hashes
 
     def _bind_job_to_hashes(self, job: models.Job, hash_set: list[models.Hash]):
         for hash_obj in hash_set:
